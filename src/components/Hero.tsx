@@ -1,4 +1,4 @@
-const SKILLS = ["UX/UI Design", "InteligÃªncia Artificial", "Realidade Virtual", "Realidade Aumentada", "ImpressÃ£o 3D", "Design & Tecnologia", "Pesquisa AcadÃªmica", "InovaÃ§Ã£o", "Prototipagem", "Design de InteraÃ§Ã£o"];
+const SKILLS = ["UX/UI Design", "Inteligência Artificial", "Realidade Virtual", "Realidade Aumentada", "Impressão 3D", "Design & Tecnologia", "Pesquisa Acadêmica", "Inovação", "Prototipagem", "Design de Interação"];
 
 function AnimatedWord({ text, delay, className }: { text: string; delay: number; className?: string }) {
   return (
@@ -26,7 +26,7 @@ export default function Hero() {
         <div className="flex items-center gap-2.5 mb-8 opacity-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
           <span className="w-[7px] h-[7px] rounded-full bg-neon shadow-[0_0_8px_rgba(0,255,135,0.5)]" />
           <span className="font-mono text-[12px] font-medium text-neon uppercase tracking-[0.12em]">
-            CriaLab â Tecnopuc / PUC-RS
+            CriaLab — Tecnopuc / PUC-RS
           </span>
         </div>
 
@@ -37,7 +37,7 @@ export default function Hero() {
             className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-neon/30"
           />
           <div>
-            <span className="font-sans text-muted-foreground text-sm">ð Porto Alegre - RS, Brasil</span>
+            <span className="font-sans text-muted-foreground text-sm">📍 Porto Alegre - RS, Brasil</span>
           </div>
         </div>
 
@@ -52,16 +52,16 @@ export default function Hero() {
         </h1>
 
         <p className="font-display text-electric font-semibold text-lg md:text-xl uppercase tracking-wide mb-4 opacity-0 animate-fade-up" style={{ animationDelay: "1.3s" }}>
-          Designer de InovaÃ§Ã£o e Tecnologias Emergentes
+          Designer de Inovação e Tecnologias Emergentes
         </p>
 
         <p className="text-muted-foreground max-w-xl leading-relaxed mb-8 opacity-0 animate-fade-up" style={{ animationDelay: "1.5s", fontSize: "clamp(15px, 1.6vw, 18px)" }}>
-          Trabalho na interseÃ§Ã£o entre design, inteligÃªncia artificial e tecnologias emergentes, explorando novas formas de criaÃ§Ã£o, prototipagem e inovaÃ§Ã£o aplicada em educaÃ§Ã£o, cultura e organizaÃ§Ãµes.
+          Trabalho na interseção entre design, inteligência artificial e tecnologias emergentes, explorando novas formas de criação, prototipagem e inovação aplicada em educação, cultura e organizações.
         </p>
 
         <div className="flex flex-wrap items-center gap-4 mb-4 opacity-0 animate-fade-up" style={{ animationDelay: "1.7s" }}>
           <a href="#projetos" className="inline-flex items-center gap-2.5 font-sans text-[14px] font-bold uppercase tracking-[0.06em] bg-neon text-background px-8 py-4 hover:shadow-neon-strong transition-shadow animate-neon-pulse">
-            Ver Projetos <span>â</span>
+            Ver Projetos <span>→</span>
           </a>
           <a href="https://chatgpt.com/g/g-68654885f5c88191b5d2df8265320cce-guilherme-resende-gpt" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-sans text-[14px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-dim px-7 py-4 hover:border-electric hover:text-electric hover:bg-electric/5 transition-all">
@@ -77,7 +77,7 @@ export default function Hero() {
             { label: "LinkedIn", href: "https://www.linkedin.com/in/guiresende/" },
             { label: "E-mail", href: "mailto:guiresende20@gmail.com" },
             { label: "WhatsApp", href: "https://wa.me/5551997925092" },
-            { label: "Lattes", href: "http://lattes.cnpq.br/1234567890" },
+            { label: "Lattes", href: "http://lattes.cnpq.br/5709726694301047" },
           ].map((l) => (
             <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
               className="font-mono text-[11px] font-medium text-muted-foreground border border-dim px-4 py-2 uppercase tracking-[0.06em] hover:border-neon/50 hover:text-foreground transition-all">
@@ -100,7 +100,7 @@ export default function Hero() {
               {SKILLS.map((s, i) => (
                 <span key={`${r}-${i}`} className="font-mono text-[12px] uppercase tracking-[0.06em] whitespace-nowrap px-3">
                   <span className={i % 3 === 0 ? "text-neon font-medium" : "text-muted-foreground"}>{s}</span>
-                  <span className="text-dim mx-3">â¢</span>
+                  <span className="text-dim mx-3">•</span>
                 </span>
               ))}
             </span>
