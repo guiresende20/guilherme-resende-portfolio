@@ -1,0 +1,54 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@200,300,400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 10% 4%;
+    --foreground: 240 3% 91%;
+    --primary: 150 100% 50%;
+    --primary-foreground: 240 10% 4%;
+    --secondary: 220 100% 65%;
+    --secondary-foreground: 240 3% 91%;
+    --muted: 240 8% 11%;
+    --muted-foreground: 240 10% 45%;
+    --accent: 240 12% 12%;
+    --accent-foreground: 150 100% 50%;
+    --card: 240 10% 7%;
+    --card-foreground: 240 3% 91%;
+    --border: 240 10% 18%;
+    --input: 240 10% 18%;
+    --ring: 150 100% 50%;
+    --radius: 0.375rem;
+  }
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Satoshi', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(0,255,135,0.2); color: #e8e8e8; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #0a0a0f; }
+  ::-webkit-scrollbar-thumb { background: #2a2a35; border-radius: 3px; }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .neon-line {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #2a2a35 15%, #00ff87 50%, #2a2a35 85%, transparent);
+  }
+  .text-outline {
+    -webkit-text-stroke: 1.5px #666680;
+    color: transparent;
+  }
+}
