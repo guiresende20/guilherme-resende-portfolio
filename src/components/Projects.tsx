@@ -2,15 +2,24 @@ import { useState } from "react";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
-const PROJECTS = [
-  { title: "MuseuVR", type: "Pesquisa", desc: "Projeto de doutorado focado em interação natural em ambientes culturais virtuais, desenvolvendo novas formas de experiência imersiva em museus.", tags: ["Unity", "VR", "Interação Natural"], link: "https://youtu.be/JV1fSU26OI8" },
-  { title: "Semear AgroHUB", type: "Profissional", desc: "Desenvolvimento de estratégia, UX e governança para hub de inovação no agronegócio, conectando produtores com tecnologias sustentáveis.", tags: ["UX Strategy", "Service Design", "Governança", "Inovação"], link: "https://acrobat.adobe.com/link/review?uri=urn:aaid:scds:US:4887118c-3eca-3a20-ba15-09492d48bd71" },
-  { title: "Projeto Aula 360º", type: "Educacional", desc: "Iniciativa educacional utilizando tecnologias imersivas para criar experiências de aprendizado em realidade virtual.", tags: ["VR", "Educação", "Unity", "Design Educacional"], link: "https://player.vimeo.com/video/53293573" },
-  { title: "Avaliação do App Mobiteste", type: "Pesquisa", desc: "Pesquisa e avaliação de usabilidade do aplicativo educacional Mobiteste, focando na experiência do usuário estudante.", tags: ["UX Research", "Usabilidade", "Mobile UX", "Educação"], link: "https://lume.ufrgs.br/handle/10183/159288" },
-  { title: "Ebook Leituras Obrigatórias UFRGS", type: "Editorial", desc: "Desenvolvimento de material educacional digital para auxiliar estudantes com as leituras obrigatórias do vestibular.", tags: ["Design Editorial", "UX", "Educação", "Digital Publishing"], link: null },
-  { title: "Digitalização 3D: Preservação Patrimonial", type: "Pesquisa", desc: "Desenvolvimento de repositório 3D de digitalizações de prédios históricos voltado à preservação e difusão do patrimônio cultural. O projeto foi um dos resultados do meu mestrado.", tags: ["AR", "Patrimônio Cultural", "Preservação", "Research"], link: "https://www.ufrgs.br/ldsm/3d/" },
-  { title: "MataArte", type: "Arte", desc: "Exposição envolvendo imagem generativa a partir de fotos analógicas para exposição numa sala 360°.", tags: ["IA Generativa", "Arte Digital", "Fotografia Analógica", "Exposição 360°"], link: "https://youtu.be/-djac5g7_QE" },
-  { title: "IASPI AR - 3D", type: "Profissional", desc: "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos.", tags: ["AR", "3D", "Design", "Cartão Postal"], link: "https://youtu.be/D8rCRnvKOtg" },
+interface Project {
+  title: string;
+  type: string;
+  desc: string;
+  tags: string[];
+  link: string | null;
+  linkType: "youtube" | "vimeo" | "iframe" | "none";
+}
+
+const PROJECTS: Project[] = [
+  { title: "MuseuVR", type: "Pesquisa", desc: "Projeto de doutorado focado em interação natural em ambientes culturais virtuais, desenvolvendo novas formas de experiência imersiva em museus.", tags: ["Unity", "VR", "Interação Natural"], link: "https://www.youtube.com/embed/JV1fSU26OI8", linkType: "youtube" },
+  { title: "Semear AgroHUB", type: "Profissional", desc: "Desenvolvimento de estratégia, UX e governança para hub de inovação no agronegócio, conectando produtores com tecnologias sustentáveis.", tags: ["UX Strategy", "Service Design", "Governança", "Inovação"], link: "https://acrobat.adobe.com/link/review?uri=urn:aaid:scds:US:4887118c-3eca-3a20-ba15-09492d48bd71", linkType: "iframe" },
+  { title: "Projeto Aula 360º", type: "Educacional", desc: "Iniciativa educacional utilizando tecnologias imersivas para criar experiências de aprendizado em realidade virtual.", tags: ["VR", "Educação", "Unity", "Design Educacional"], link: "https://player.vimeo.com/video/53293573", linkType: "vimeo" },
+  { title: "Avaliação do App Mobiteste", type: "Pesquisa", desc: "Pesquisa e avaliação de usabilidade do aplicativo educacional Mobiteste, focando na experiência do usuário estudante.", tags: ["UX Research", "Usabilidade", "Mobile UX", "Educação"], link: "https://lume.ufrgs.br/handle/10183/159288", linkType: "iframe" },
+  { title: "Ebook Leituras Obrigatórias UFRGS", type: "Editorial", desc: "Desenvolvimento de material educacional digital para auxiliar estudantes com as leituras obrigatórias do vestibular.", tags: ["Design Editorial", "UX", "Educação", "Digital Publishing"], link: null, linkType: "none" },
+  { title: "Digitalização 3D: Preservação Patrimonial", type: "Pesquisa", desc: "Desenvolvimento de repositório 3D de digitalizações de prédios históricos voltado à preservação e difusão do patrimônio cultural. O projeto foi um dos resultados do meu mestrado.", tags: ["AR", "Patrimônio Cultural", "Preservação", "Research"], link: "https://www.ufrgs.br/ldsm/3d/", linkType: "iframe" },
+  { title: "MataArte", type: "Arte", desc: "Exposição envolvendo imagem generativa a partir de fotos analógicas para exposição numa sala 360°.", tags: ["IA Generativa", "Arte Digital", "Fotografia Analógica", "Exposição 360°"], link: "https://www.youtube.com/embed/-djac5g7_QE", linkType: "youtube" },
+  { title: "IASPI AR - 3D", type: "Profissional", desc: "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos.", tags: ["AR", "3D", "Design", "Cartão Postal"], link: "https://www.youtube.com/embed/D8rCRnvKOtg", linkType: "youtube" },
 ];
 
 const VIDEOS = [
@@ -22,8 +31,51 @@ const VIDEOS = [
   { id: "dbQSeUF8NOQ", title: "GRAFITTI VR", desc: "Experiência de grafitti em realidade virtual" },
 ];
 
+function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const getEmbedUrl = (p: Project) => {
+    if (!p.link) return "";
+    if (p.linkType === "youtube") return p.link + "?rel=0&autoplay=1";
+    if (p.linkType === "vimeo") return p.link + "?autoplay=1";
+    return p.link;
+  };
+
+  return (
+    <>
+      <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose} style={{ animation: "fadeIn 0.2s ease-out" }} />
+      <div className="fixed inset-4 md:inset-8 lg:inset-12 z-50 flex flex-col bg-card border border-border rounded-md overflow-hidden" style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.16,1,0.3,1)" }}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em] border border-neon/25 px-2.5 py-1">{project.type}</span>
+            <h3 className="font-display font-semibold text-foreground text-[16px] uppercase tracking-tight">{project.title}</h3>
+          </div>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
+        </div>
+        <div className="flex-1 relative bg-background">
+          {project.link ? (
+            <iframe src={getEmbedUrl(project)} className="absolute inset-0 w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowFullScreen title={project.title} />
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground text-[14px]">Conteúdo em breve</div>
+          )}
+        </div>
+        <div className="flex items-center justify-between px-6 py-3 border-t border-border flex-shrink-0 bg-card">
+          <p className="text-[12px] text-muted-foreground max-w-lg leading-relaxed truncate">{project.desc}</p>
+          {project.link && (
+            <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-[10px] text-electric uppercase tracking-[0.06em] hover:text-neon transition-colors flex-shrink-0 ml-4">
+              Abrir externo <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+            </a>
+          )}
+        </div>
+      </div>
+      <style>{`@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } } @keyframes modalSlideUp { from { opacity: 0; transform: translateY(20px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
+    </>
+  );
+}
+
 export default function Projects() {
   const [activeVideo, setActiveVideo] = useState(0);
+  const [modalProject, setModalProject] = useState<Project | null>(null);
 
   return (
     <section className="relative py-24 md:py-32">
@@ -31,7 +83,6 @@ export default function Projects() {
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader id="projetos" label="Projetos & Publicações" title="Seleção de" titleOutline="projetos" subtitle="Seleção de projetos que demonstram minha expertise em design, tecnologia e inovação." />
 
-        {/* ═══ Project Cards ═══ */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {PROJECTS.map((p, i) => (
             <Reveal key={p.title} delay={i * 0.07}>
@@ -47,13 +98,10 @@ export default function Projects() {
                   ))}
                 </div>
                 {p.link ? (
-                  <a href={p.link} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 font-sans text-[12px] font-semibold uppercase tracking-[0.06em] text-neon border border-neon/30 px-4 py-2.5 mt-auto w-fit hover:bg-neon/10 hover:border-neon/60 hover:shadow-neon transition-all duration-300 group/btn">
+                  <button onClick={() => setModalProject(p)} className="inline-flex items-center gap-2 font-sans text-[12px] font-semibold uppercase tracking-[0.06em] text-neon border border-neon/30 px-4 py-2.5 mt-auto w-fit hover:bg-neon/10 hover:border-neon/60 hover:shadow-neon transition-all duration-300 group/btn cursor-pointer bg-transparent">
                     Saiba Mais
-                    <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
-                    </svg>
-                  </a>
+                    <svg className="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
+                  </button>
                 ) : (
                   <span className="inline-flex items-center gap-2 font-sans text-[12px] font-medium uppercase tracking-[0.06em] text-muted-foreground/50 border border-dim/50 px-4 py-2.5 mt-auto w-fit cursor-default">Em breve</span>
                 )}
@@ -62,39 +110,27 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* ═══ Video Section ═══ */}
         <Reveal delay={0.15}>
           <div className="mt-20">
             <div className="flex items-center gap-3 mb-8">
               <span className="w-8 h-px bg-neon" />
-              <span className="font-mono text-[11px] font-medium text-neon uppercase tracking-[0.12em]">🎥 Vídeos dos Projetos</span>
+              <span className="font-mono text-[11px] font-medium text-neon uppercase tracking-[0.12em]">🎬 Vídeos dos Projetos</span>
             </div>
-
             <div className="grid lg:grid-cols-[1fr_320px] gap-5">
-              {/* Player */}
               <div className="bg-card border border-border rounded-md overflow-hidden">
                 <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                  <iframe
-                    className="absolute inset-0 w-full h-full"
-                    src={`https://www.youtube.com/embed/${VIDEOS[activeVideo].id}?rel=0`}
-                    title={VIDEOS[activeVideo].title}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${VIDEOS[activeVideo].id}?rel=0`} title={VIDEOS[activeVideo].title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
                 </div>
                 <div className="p-5">
                   <h4 className="font-display font-semibold text-foreground text-[15px] uppercase tracking-tight">{VIDEOS[activeVideo].title}</h4>
                   <p className="text-[13px] text-muted-foreground mt-1 leading-relaxed">{VIDEOS[activeVideo].desc}</p>
                 </div>
               </div>
-
-              {/* Video list */}
               <div className="bg-card border border-border rounded-md p-4 flex flex-col">
                 <h4 className="font-display font-semibold text-foreground text-[13px] uppercase tracking-tight mb-4 pb-3 border-b border-border">Lista de Vídeos</h4>
                 <div className="flex flex-col gap-2 overflow-y-auto flex-1" style={{ maxHeight: "420px" }}>
                   {VIDEOS.map((v, i) => (
-                    <button key={v.id} onClick={() => setActiveVideo(i)}
-                      className={`flex items-center gap-3 p-3 rounded-md text-left transition-all duration-300 ${i === activeVideo ? "bg-neon/10 border border-neon/30" : "bg-muted/30 border border-transparent hover:bg-muted/60 hover:border-dim"}`}>
+                    <button key={v.id} onClick={() => setActiveVideo(i)} className={`flex items-center gap-3 p-3 rounded-md text-left transition-all duration-300 ${i === activeVideo ? "bg-neon/10 border border-neon/30" : "bg-muted/30 border border-transparent hover:bg-muted/60 hover:border-dim"}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${i === activeVideo ? "bg-neon text-background" : "bg-dim text-muted-foreground"}`}>
                         <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><polygon points="2,0 12,6 2,12" /></svg>
                       </div>
@@ -107,7 +143,6 @@ export default function Projects() {
           </div>
         </Reveal>
 
-        {/* ═══ Patent + Awards ═══ */}
         <div className="grid md:grid-cols-2 gap-5 mt-16">
           <Reveal>
             <div className="bg-card border border-neon/20 rounded-md p-6">
@@ -126,16 +161,14 @@ export default function Projects() {
                 <div>
                   <p className="text-[13px] text-foreground font-medium">Prêmio Bornancini 2024</p>
                   <p className="text-[12px] text-muted-foreground">Categoria Design Digital - Realidade Aumentada e Realidades Extendidas</p>
-                  <a href="https://drive.google.com/file/d/1ls8JBOotSEa8f7nBAFqPVHz0d7_P59E5/view?usp=drive_link" target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 font-mono text-[10px] text-electric uppercase tracking-[0.06em] mt-1.5 hover:text-neon transition-colors">
+                  <a href="https://drive.google.com/file/d/1ls8JBOotSEa8f7nBAFqPVHz0d7_P59E5/view?usp=drive_link" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-[10px] text-electric uppercase tracking-[0.06em] mt-1.5 hover:text-neon transition-colors">
                     visualizar projeto <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
                   </a>
                 </div>
                 <div>
                   <p className="text-[13px] text-foreground font-medium">39º Prêmio Direitos Humanos de Jornalismo 2022</p>
                   <p className="text-[12px] text-muted-foreground">Menção honrosa - projeto Revista Ceos</p>
-                  <a href="https://www.coletiva.net/noticias/gauchos-se-destacam-no-39-premio-direitos-humanos-de-jornalismo-,421812.jhtml" target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 font-mono text-[10px] text-electric uppercase tracking-[0.06em] mt-1.5 hover:text-neon transition-colors">
+                  <a href="https://www.coletiva.net/noticias/gauchos-se-destacam-no-39-premio-direitos-humanos-de-jornalismo-,421812.jhtml" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-[10px] text-electric uppercase tracking-[0.06em] mt-1.5 hover:text-neon transition-colors">
                     visualizar projeto <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
                   </a>
                 </div>
@@ -144,6 +177,7 @@ export default function Projects() {
           </Reveal>
         </div>
       </div>
+      {modalProject && <ProjectModal project={modalProject} onClose={() => setModalProject(null)} />}
     </section>
   );
 }
