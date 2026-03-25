@@ -32,7 +32,7 @@ export default function Hero() {
 
         <div className="mb-4 flex items-center gap-4 opacity-0 animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <img
-            src="https://gui-resende-showcase-site.lovable.app/lovable-uploads/c44d1a1e-de30-4921-bfc7-6f0b98c61e63.png"
+            src="/guilherme-foto.png"
             alt="Guilherme Resende"
             className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-neon/30"
           />
