@@ -170,6 +170,12 @@ export default function ChatWidget() {
   }, []);
 
   useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener("open-chat", handleOpen);
+    return () => window.removeEventListener("open-chat", handleOpen);
+  }, []);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 

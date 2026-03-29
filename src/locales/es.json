@@ -16,8 +16,8 @@
     "role": "Diseñador de Innovación y Tecnologías Emergentes",
     "description": "Trabajo en la intersección entre el diseño, la inteligencia artificial y las tecnologías emergentes, explorando nuevas formas de creación, prototipado e innovación aplicada en educación, cultura y organizaciones.",
     "btn_projects": "Ver Proyectos",
-    "btn_ai": "Mi I.A.",
-    "btn_contact": "Habla conmigo",
+    "btn_ai": "Habla con mi IA",
+    "btn_contact": "Contáctame",
     "stats": [
       { "num": "12+", "label": "Publicaciones" },
       { "num": "01", "label": "Patente" },

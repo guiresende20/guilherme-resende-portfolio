@@ -68,10 +68,14 @@ export default function Hero() {
           <a href="#projetos" className="inline-flex items-center gap-2.5 font-sans text-[14px] font-bold uppercase tracking-[0.06em] bg-neon text-background px-8 py-4 hover:shadow-neon-strong transition-shadow animate-neon-pulse">
             {t('hero.btn_projects')} <span>→</span>
           </a>
-          <a href="https://chatgpt.com/g/g-68654885f5c88191b5d2df8265320cce-guilherme-resende-gpt" target="_blank" rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-sans text-[14px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-dim px-7 py-4 hover:border-electric hover:text-electric hover:bg-electric/5 transition-all">
-            {t('hero.btn_ai')}
-          </a>
+          <button onClick={() => window.dispatchEvent(new Event("open-chat"))}
+            className="relative inline-flex items-center justify-center gap-2 font-sans text-[14px] font-bold uppercase tracking-[0.06em] bg-neon text-background px-7 py-4 hover:shadow-neon-strong transition-all duration-300 hover:scale-105 animate-neon-pulse group">
+            <span className="absolute inset-0 border-2 border-neon/40 animate-ping rounded-sm" style={{ animationDuration: "2.5s" }} />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="z-10 relative">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+            <span className="relative z-10">{t('hero.btn_ai')}</span>
+          </button>
           <a href="#contato" className="inline-flex items-center gap-2 font-sans text-[14px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-dim px-7 py-4 hover:border-neon hover:text-neon transition-all">
             {t('hero.btn_contact')}
           </a>
