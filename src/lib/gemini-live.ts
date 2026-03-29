@@ -47,11 +47,11 @@ export class GeminiLiveChat {
             model: "models/gemini-3.1-flash-live-preview",
             generationConfig: {
               responseModalities: ["AUDIO"],
-            },
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: "Umbriel", // Voz masculina confirmada
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: {
+                    voiceName: "Puck", // Puck costuma ser a voz masculina padrão mais suportada nos models experimentais
+                  }
                 }
               }
             },
