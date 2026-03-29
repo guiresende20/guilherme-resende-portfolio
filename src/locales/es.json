@@ -1,0 +1,218 @@
+{
+  "navbar": {
+    "links": {
+      "inicio": "Inicio",
+      "sobre": "Sobre mí",
+      "experiencia": "Experiencia",
+      "projetos": "Proyectos",
+      "formacao": "Formación",
+      "contato": "Contacto"
+    },
+    "chatBtn": "Mi IA personalizada GPT"
+  },
+  "hero": {
+    "org": "CriaLab — Tecnopuc / PUC-RS",
+    "location": "📍 Porto Alegre - RS, Brasil",
+    "role": "Diseñador de Innovación y Tecnologías Emergentes",
+    "description": "Trabajo en la intersección entre el diseño, la inteligencia artificial y las tecnologías emergentes, explorando nuevas formas de creación, prototipado e innovación aplicada en educación, cultura y organizaciones.",
+    "btn_projects": "Ver Proyectos",
+    "btn_ai": "Mi I.A.",
+    "btn_contact": "Habla conmigo",
+    "stats": [
+      { "num": "12+", "label": "Publicaciones" },
+      { "num": "01", "label": "Patente" },
+      { "num": "20+", "label": "Proyectos" },
+      { "num": "08+", "label": "Años exp." }
+    ]
+  },
+  "about": {
+    "header_label": "Sobre mí",
+    "header_title": "Trayectoria",
+    "header_outline": "académica y profesional",
+    "p1": "Diseñador e investigador con máster en Diseño y Tecnología y grado en Comunicación Social de la UFRGS. Trabajo en CreaLab - Tecnopuc dirigiendo proyectos de innovación y tecnología, incluidas tecnologías inmersivas (VR/AR), desarrollando soluciones estratégicas para empresas como HP y entidades públicas.",
+    "p2": "Tengo experiencia práctica en prototipado rápido, impresión 3D y facilitación de talleres. Como entusiasta de la tecnología, uso IA para generar análisis estratégicos, insights accionables y diseño de servicios avanzados.",
+    "p3": "Mi trayectoria incluye experiencia como profesor en la universidad ESPM, responsable de marketing en Anglo Vestibulares, y el trabajo en la startup BSMotion, operando siempre en el cruce de tecnología, diseño e innovación.",
+    "areas": [
+      { "icon": "UX", "title": "Diseño UX/UI", "desc": "Desarrollo de soluciones de valor y de interfaces enfocadas 100% al usuario.", "color": "neon" },
+      { "icon": "VR", "title": "VR/AR", "desc": "Investigación activa para el desarrollo de interacciones naturales inmersivas.", "color": "electric" },
+      { "icon": "AI", "title": "IA en Diseño", "desc": "Sistemas modernos para optimización productiva usando prompts y lenguajes generativos.", "color": "neon" }
+    ]
+  },
+  "experience": {
+    "header_label": "Experiencia Profesional",
+    "header_title": "Trayectoria",
+    "header_outline": "profesional",
+    "jobs": [
+      {
+        "role": "Diseñador e Investigador de Innovación", "type": "Actual", "org": "CriaLab - Tecnopuc", "period": "2021 - Presente", "loc": "Porto Alegre, Brasil",
+        "items": ["Desarrollo empírico de proyectos de UX/UI, Inteligencia Artificial y realidades VR/AR", "Consultoría y despliegue para corporaciones de clase mundial como Hewlett-Packard", "Planificación técnica con prototipado de alta resolución, facilitación y dinámicas ágiles"]
+      },
+      {
+        "role": "Investigador Académico y Doctorando", "type": "Académico", "org": "UFRGS - LdSM", "period": "2017 - Presente", "loc": "Porto Alegre, Brasil",
+        "items": ["Estudio focal en digitalización de objetos físicos y la virtualización interactiva", "Mantenimiento tecnológico del sistema open-source MuseuVR de accesibilidad cultural", "Estructuración de ponencias internacionales y papers arbitrados en journals líderes"]
+      },
+      {
+        "role": "Profesor Universitario", "type": "Profesional", "org": "ESPM", "period": "2018 - 2022", "loc": "Porto Alegre, Brasil",
+        "items": ["Docencia en facultades de Publicidad, Diseño Industrial, Negocios y Periodismo Multimedia", "Módulos de especialidad impartidos: Diseño Web moderno, Innovación de Impacto, UX, Cibercultura"]
+      },
+      {
+        "role": "Head de Marketing Regional", "type": "Profesional", "org": "BSMotion", "period": "2017", "loc": "Porto Alegre, Brasil",
+        "items": ["Validación de producto (Hardware + Software) en startups de tecnología inmersiva simulada", "Creación de toda la narrativa estratégica en rondas B2B de escalamiento empresarial"]
+      },
+      {
+        "role": "Gerente de Marketing", "type": "Profesional", "org": "Anglo Vestibulares", "period": "2012-2013 / 2008", "loc": "Porto Alegre, Brasil",
+        "items": ["Supervisión end-to-end de la nueva identidad web e infraestructura educativa escalable", "Dirección de los equipos operativos con foco absoluto en expansión orgánica", "Defensa de presupuestos para campañas publicitarias de gran tracción"]
+      },
+      {
+        "role": "Ejecutivo de Cuentas / Curador Experiencial", "type": "Profesional", "org": "Campus Party Brasil", "period": "2010-2011", "loc": "São Paulo, Brasil",
+        "items": ["Selección curatorial de tecnología Gaming e Interactiva proyectada a más de 10 mil asistentes", "Fomento corporativo B2B negociando la entrada de patrocinadores globales tecnológicos"]
+      }
+    ]
+  },
+  "projects": {
+    "header_label": "Proyectos y Publicaciones",
+    "header_title": "Selección de",
+    "header_outline": "proyectos",
+    "header_subtitle": "Una antología destacando la intersección y expertise forjado en diseño de interfaces y programación.",
+    "btn_more": "Más info",
+    "btn_soon": "Próximamente",
+    "btn_external": "Abrir sitio web",
+    "items": [
+      { "title": "Plataforma MuseuVR", "type": "Investigación", "desc": "Mi tesis principal redefiniendo motores de captura gestual en simulaciones 3D históricas.", "tags": ["Motor Unity", "Accesibilidad", "VR Gestual"], "link": "https://www.youtube.com/embed/JV1fSU26OI8", "linkType": "youtube" },
+      { "title": "Agronegocio Semear", "type": "Profesional", "desc": "Elaboración de manuales UI y UX estratégicos vinculando ecosistemas de tecnología verde en campos.", "tags": ["UX Agritech", "Inclusión", "Research"], "link": "https://acrobat.adobe.com/link/review?uri=urn:aaid:scds:US:4887118c-3eca-3a20-ba15-09492d48bd71", "linkType": "iframe" },
+      { "title": "Pedagogía 360º", "type": "Educativo", "desc": "Un entorno de inmersión total acoplando mallas educativas con sistemas dinámicos VR remotos.", "tags": ["Hardware VR", "EdTech", "Despliegue C#"], "link": "https://player.vimeo.com/video/53293573", "linkType": "vimeo" },
+      { "title": "Mobiteste App UX Audit", "type": "Investigación", "desc": "Estudios empíricos profundos modelando flujos de usuario orientados hacia la retención digital de jóvenes.", "tags": ["Analytics", "HCI", "Mapas Térmicos", "UI/UX"], "link": "https://lume.ufrgs.br/handle/10183/159288", "linkType": "iframe" },
+      { "title": "E-Book Editorial Lecturas UFRGS", "type": "Editorial", "desc": "Adaptación móvil 100% responsiva diagramada para estudiantes procesando literatura exigente obligatoria.", "tags": ["Diagramación", "Diseño Gráfico PDF", "Móviles"], "link": null, "linkType": "none" },
+      { "title": "Archivo Abierto 3D Heritage", "type": "Investigación", "desc": "Implementación técnica publicando docenas de escaneos LiDAR detallados renderizables en plataformas WebGL.", "tags": ["LiDAR Web", "WebGL", "TypeScript"], "link": "https://www.ufrgs.br/ldsm/3d/", "linkType": "iframe" },
+      { "title": "Proyecto Artístico 'MataArte'", "type": "Arte", "desc": "Curaduría digital y upscaling a través de redes neuronales aplicadas a cintas rotas de 35mm clásicas.", "tags": ["Midjourney/Dall-E", "Arte Híbrido", "Composición Visual"], "link": "https://www.youtube.com/embed/-djac5g7_QE", "linkType": "youtube" },
+      { "title": "Postal Híbrida Inteligente IASPI", "type": "Profesional", "desc": "Marcador visual impreso diseñado especialmente para el montaje volumétrico con realidad aumentada óptica.", "tags": ["Reconocimiento", "Optica AR", "Marketing BTL"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" }
+    ],
+    "videos_title": "🎬 Grabaciones del Portafolio",
+    "videos_list": "Archivo Multimedia",
+    "videos": [
+      { "id": "MfF3DtRcPt8", "title": "MUSEU VR - ESPECIAL TELEVISIVO", "desc": "Entrevista de formato largo narrando nuestro impacto académico local." },
+      { "id": "PnA-OM2vmQ4", "title": "POLO TECNOPUC HUB 3D", "desc": "Una mirada interna a las instalaciones de hardware dedicadas." },
+      { "id": "JV1fSU26OI8", "title": "INTERACCIONES VR MUSEO", "desc": "Test de movimiento fluido procesado sin controladores externos." },
+      { "id": "cnu7cPUpoUw", "title": "DIGITALIZACIÓN INSTITUTO QUÍMICA", "desc": "Procedimientos para escanear y convertir edificios universitarios 1:1." },
+      { "id": "D8rCRnvKOtg", "title": "PROTOTIPO REALIDAD AUMENTADA MÓVIL", "desc": "Evaluación final de texturas implementadas al renderizar un tracker estático." },
+      { "id": "dbQSeUF8NOQ", "title": "CULTURA VR: GRAFFITI MULTIPLAYER", "desc": "Prueba de concepto evaluando latencia usando pintura dinámica hiperrealista." }
+    ],
+    "patent_title": "Patente de Invento Registrada",
+    "patent_desc": "Procesamiento geométrico de asientos antropométricos — Innovación registrada estatal y federalmente.",
+    "awards_title": "Honores Académicos e Industria",
+    "awards_bornancini": "Premios Bornancini de Diseño 2024",
+    "awards_bornancini_desc": "Galardonado como mejor Proyecto Multidisciplinario Interactivo (Extendido).",
+    "awards_dh": "Medalla Oro Periodismo Derechos Humanos 2022",
+    "awards_dh_desc": "Gran Premio Excepcional - Diagramación e impacto social (Revista Ceos digital).",
+    "view_project": "ver detalle"
+  },
+  "skills": {
+    "header_label": "Habilidades Lógicas y de Software",
+    "header_title": "Gráfica",
+    "header_outline": "Técnica",
+    "languages_title": "Idiomas Nativos",
+    "groups": [
+      {
+        "title": "Investigación & Interfaces UX",
+        "skills": [
+          { "name": "Entorno Figma", "pct": 95 },
+          { "name": "Encuestas Conductuales", "pct": 90 },
+          { "name": "Balsamiq/Wireframes", "pct": 95 },
+          { "name": "Arquitectura Conceptual", "pct": 90 },
+          { "name": "Ecosistema de Servicios", "pct": 85 },
+          { "name": "Tests A/B Ergonomía", "pct": 90 }
+        ]
+      },
+      {
+        "title": "IA Adaptativa y Big Data",
+        "skills": [
+          { "name": "Stable Diffusion & UI", "pct": 85 },
+          { "name": "Reportes Estratégicos", "pct": 80 },
+          { "name": "Estructuras de Prompts", "pct": 85 },
+          { "name": "K-Means Data Science", "pct": 75 },
+          { "name": "Parámetros Eticos ESG", "pct": 80 }
+        ]
+      },
+      {
+        "title": "Sistemas Tridimensionales Interactivos",
+        "skills": [
+          { "name": "C# / Motor Unity 3D", "pct": 90 },
+          { "name": "Shaders y Blender", "pct": 85 },
+          { "name": "Sistemas Hápticos VR", "pct": 95 },
+          { "name": "Cámaras Estereoscópicas", "pct": 85 },
+          { "name": "Fotogrametría Aérea", "pct": 90 },
+          { "name": "Impresoras FDM Industriales", "pct": 85 }
+        ]
+      },
+      {
+        "title": "Sintaxis, Bases y Backend",
+        "skills": [
+          { "name": "Frameworks JSX / CSS3", "pct": 85 },
+          { "name": "V8 JavaScript / DOM", "pct": 75 },
+          { "name": "SciKit Python Modules", "pct": 50 },
+          { "name": "Metodologías Ágiles", "pct": 90 }
+        ]
+      }
+    ],
+    "languages": [
+      { "name": "Portugués Mixto", "level": "Nativo" },
+      { "name": "Inglés Comercial", "level": "Fluido Bilingüe" },
+      { "name": "Español Corporativo", "level": "Competencia Alta" }
+    ]
+  },
+  "education": {
+    "header_label": "Hojas de Resumen Educativo",
+    "header_title": "Instrucción",
+    "header_outline": "Formal",
+    "highlights": "Puntos clave:",
+    "items": [
+      {
+        "degree": "Candidatura PhD Cum Laude en Diseño", "period": "2017 - Presente", "org": "UFRGS - Campus General Central (Acreditada Federal)",
+        "desc": "Profundizando modelos de interacción kinestésica espacial sin aparatos exógenos físicos, reduciendo costos de los ecosistemas museológicos digitales en la región sudamericana.",
+        "highlights": ["Beca Doctorado CAPES", "Lead Scientist", "Peer-Reviewer Pubs"]
+      },
+      {
+        "degree": "Maestría de Ciencias Tecnológicas", "period": "2013 - 2015", "org": "UFRGS - Campus General Central",
+        "desc": "Cruce analítico para rescatar monumentos degradados de la metrópoli combinando bases arqueológicas, texturizado digital e información geoespacial distribuida a servidores web open-source.",
+        "highlights": ["Tesis Laureada Unánime", "Publicidad Cultural", "Top Puntuación Cohorte"],
+        "extra": "Tesis Formal: Repositorios y ontologías documentales orientadas por objetos de la UFRGS a través de Modelado Tridimensional paramétrico avanzado."
+      },
+      {
+        "degree": "Colegio Mayor Superior en Publicidad B.A.", "period": "2004 - 2010", "org": "UFRGS - Facultad de Medios y Comunicación",
+        "desc": "Adquisición de bases lógicas formales, gestión publicitaria radial/televisiva clásica integrada al diseño visual prestando una estructura antropológica en relación con audiencias demográficas inestables.",
+        "highlights": ["Alineamiento UX", "Grupos Focales", "Redacción Comercial"],
+        "extra": "PFC: Antologías de internet - De la piratería descentralizada de Napster a modelos comerciales como Grooveshark y sus efectos corporativos en las discográficas multinacionales."
+      },
+      {
+        "degree": "Acreditación Comercial de Negociaciones Ejecutivas", "period": "2009 - 2010", "org": "Leinster Academic Campus - Irlanda Atlántica",
+        "desc": "Inmersión intensiva idiomática enfocada a léxico y vocabularios especializados corporativos, simulando juntas directivas multirraciales a la vez que expandía fronteras culturales europeas interpersonales.",
+        "highlights": ["Gestión Euro-Bilingüe", "Gramática Corporativa", "Diálogo de Nivel C-Suite"]
+      },
+      {
+        "degree": "Entrenamiento Maestro: Oratoria Dinámica en Emprendimientos", "period": "2011", "org": "Aceleradora Creativa Perestroika",
+        "desc": "Laboratorio disruptivo para romper métricas académicas y diseñar presentaciones narrativas modulares e impredecibles, usando psicología inversa orientada a capital riesgo, cautivando al sector público/privado.",
+        "highlights": ["Diseño Psicológico", "Storytelling", "Keynotes Emocionales"]
+      }
+    ]
+  },
+  "contact": {
+    "header_label": "Contacto",
+    "header_title": "Hablemos",
+    "header_outline": "de proyectos",
+    "header_subtitle": "¿Hablamos de tu próximo proyecto? Siempre estoy abierto a nuevas colaboraciones.",
+    "email_label": "E-mail",
+    "email_action": "Enviar E-mail →",
+    "whatsapp_action": "Mensaje en WhatsApp →",
+    "location_label": "Ubicación"
+  },
+  "footer": {
+    "role": "Diseñador de Innovación | UX/UI | IA | VR/AR",
+    "desc": "Investigador creando experiencias digitales de alto impacto tecnológico.",
+    "links_title": "Enlaces",
+    "contact_title": "Contacto",
+    "rights": "Guilherme Resende Muniz – Todos los derechos reservados."
+  },
+  "chat": {
+    "welcome": "¡Hola, soy yo pero digital! Estás hablando con el IA de Guilherme. Dime cómo puedo ayudarte en español, English, ou Português!"
+  }
+}

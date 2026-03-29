@@ -1,3 +1,5 @@
+import { useTranslation } from "react-i18next";
+
 const SKILLS = ["UX/UI Design", "Inteligência Artificial", "Realidade Virtual", "Realidade Aumentada", "Impressão 3D", "Design & Tecnologia", "Pesquisa Acadêmica", "Inovação", "Prototipagem", "Design de Interação"];
 
 function AnimatedWord({ text, delay, className }: { text: string; delay: number; className?: string }) {
@@ -15,6 +17,9 @@ function AnimatedWord({ text, delay, className }: { text: string; delay: number;
 }
 
 export default function Hero() {
+  const { t } = useTranslation();
+  const stats = t('hero.stats', { returnObjects: true }) as {num: string, label: string}[];
+
   return (
     <section id="inicio" className="relative min-h-screen flex flex-col justify-center overflow-hidden">
       {/* Grid */}
@@ -26,7 +31,7 @@ export default function Hero() {
         <div className="flex items-center gap-2.5 mb-8 opacity-0 animate-fade-up" style={{ animationDelay: "0.3s" }}>
           <span className="w-[7px] h-[7px] rounded-full bg-neon shadow-[0_0_8px_rgba(0,255,135,0.5)]" />
           <span className="font-mono text-[12px] font-medium text-neon uppercase tracking-[0.12em]">
-            CriaLab — Tecnopuc / PUC-RS
+            {t('hero.org')}
           </span>
         </div>
 
@@ -37,7 +42,7 @@ export default function Hero() {
             className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-neon/30"
           />
           <div>
-            <span className="font-sans text-muted-foreground text-sm">📍 Porto Alegre - RS, Brasil</span>
+            <span className="font-sans text-muted-foreground text-sm">{t('hero.location')}</span>
           </div>
         </div>
 
@@ -52,23 +57,23 @@ export default function Hero() {
         </h1>
 
         <p className="font-display text-electric font-semibold text-lg md:text-xl uppercase tracking-wide mb-4 opacity-0 animate-fade-up" style={{ animationDelay: "1.3s" }}>
-          Designer de Inovação e Tecnologias Emergentes
+          {t('hero.role')}
         </p>
 
         <p className="text-muted-foreground max-w-xl leading-relaxed mb-8 opacity-0 animate-fade-up" style={{ animationDelay: "1.5s", fontSize: "clamp(15px, 1.6vw, 18px)" }}>
-          Trabalho na interseção entre design, inteligência artificial e tecnologias emergentes, explorando novas formas de criação, prototipagem e inovação aplicada em educação, cultura e organizações.
+          {t('hero.description')}
         </p>
 
         <div className="flex flex-wrap items-center gap-4 mb-4 opacity-0 animate-fade-up" style={{ animationDelay: "1.7s" }}>
           <a href="#projetos" className="inline-flex items-center gap-2.5 font-sans text-[14px] font-bold uppercase tracking-[0.06em] bg-neon text-background px-8 py-4 hover:shadow-neon-strong transition-shadow animate-neon-pulse">
-            Ver Projetos <span>→</span>
+            {t('hero.btn_projects')} <span>→</span>
           </a>
           <a href="https://chatgpt.com/g/g-68654885f5c88191b5d2df8265320cce-guilherme-resende-gpt" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 font-sans text-[14px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-dim px-7 py-4 hover:border-electric hover:text-electric hover:bg-electric/5 transition-all">
-            Minha I.A
+            {t('hero.btn_ai')}
           </a>
           <a href="#contato" className="inline-flex items-center gap-2 font-sans text-[14px] font-medium uppercase tracking-[0.06em] text-muted-foreground border border-dim px-7 py-4 hover:border-neon hover:text-neon transition-all">
-            Entre em Contato
+            {t('hero.btn_contact')}
           </a>
         </div>
 
@@ -110,12 +115,7 @@ export default function Hero() {
 
       {/* Counters */}
       <div className="relative z-10 max-w-[1400px] mx-auto w-full px-6 md:px-12 mt-8 flex gap-10 opacity-0 animate-fade-up" style={{ animationDelay: "2.2s" }}>
-        {[
-          { num: "12+", label: "Publicações" },
-          { num: "01", label: "Patente" },
-          { num: "20+", label: "Projetos Digitais" },
-          { num: "08+", label: "Anos exp." },
-        ].map((c) => (
+        {stats.map((c) => (
           <div key={c.label}>
             <div className="font-display font-bold text-4xl md:text-5xl text-foreground tracking-tight">
               {c.num.replace("+", "")}<span className="text-neon">{c.num.includes("+") ? "+" : "."}</span>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { sendChatMessage, WELCOME_MESSAGE, type ChatHistory, type ChatAction, type ChatResponse } from "@/lib/gemini";
 import { generateCV, type CVType } from "@/lib/generateCV";
 
@@ -6,6 +7,7 @@ interface Message {
   role: "user" | "model";
   text: string;
   actions?: ChatAction[];
+  id?: string;
 }
 
 const MAX_MESSAGES = 20;
@@ -135,11 +137,13 @@ function ChatBubble({ msg, isLast, onVideo }: { msg: Message; isLast: boolean; o
 // ─── Main Widget ───────────────────────────────────────────────────────────────
 
 export default function ChatWidget() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "model",
-      text: WELCOME_MESSAGE,
+      text: t('chat.welcome'),
+      id: "1",
       actions: [
         { type: "scroll", label: "↓ Ver Projetos", section: "projetos" },
         { type: "scroll", label: "↓ Experiência", section: "experiencia" },
@@ -167,6 +171,16 @@ export default function ChatWidget() {
   useEffect(() => {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 300);
   }, [isOpen]);
+
+  // When language changes, update the initial message if it is the only message
+  useEffect(() => {
+    setMessages((prev) => {
+      if (prev.length === 1 && prev[0].id === "1") {
+        return [{ ...prev[0], text: t('chat.welcome') }];
+      }
+      return prev;
+    });
+  }, [t]);
 
   async function sendMessage() {
     const text = input.trim();

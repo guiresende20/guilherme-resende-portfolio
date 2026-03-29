@@ -1,4 +1,7 @@
+import { useTranslation } from "react-i18next";
+
 export default function Footer() {
+  const { t } = useTranslation();
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     document.getElementById(href.slice(1))?.scrollIntoView({ behavior: "smooth" });
@@ -15,20 +18,20 @@ export default function Footer() {
               Gui<span className="text-neon">.</span>Resende
             </span>
             <p className="text-[13px] text-muted-foreground mt-2 leading-relaxed max-w-xs">
-              Designer de Inovação | UX/UI | IA | VR/AR<br />
-              Pesquisador e inovador criando experiências digitais que fazem a diferença.
+              {t('footer.role')}<br />
+              {t('footer.desc')}
             </p>
           </div>
 
           {/* Quick links */}
           <div>
-            <span className="font-mono text-[10px] text-neon uppercase tracking-[0.12em] mb-4 block">Links Rápidos</span>
+            <span className="font-mono text-[10px] text-neon uppercase tracking-[0.12em] mb-4 block">{t('footer.links_title')}</span>
             <div className="flex flex-col gap-2">
-              {["Início", "Sobre", "Experiência", "Projetos", "Contato"].map((l) => (
-                <a key={l} href={`#${l.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`}
-                  onClick={(e) => handleClick(e, `#${l.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`)}
+              {["inicio", "sobre", "experiencia", "projetos", "contato"].map((l) => (
+                <a key={l} href={`#${l}`}
+                  onClick={(e) => handleClick(e, `#${l}`)}
                   className="font-sans text-[13px] text-muted-foreground hover:text-foreground transition-colors w-fit">
-                  {l}
+                  {t(`navbar.links.${l}`)}
                 </a>
               ))}
             </div>
@@ -36,7 +39,7 @@ export default function Footer() {
 
           {/* Contact info */}
           <div>
-            <span className="font-mono text-[10px] text-neon uppercase tracking-[0.12em] mb-4 block">Contato</span>
+            <span className="font-mono text-[10px] text-neon uppercase tracking-[0.12em] mb-4 block">{t('footer.contact_title')}</span>
             <div className="flex flex-col gap-2 text-[13px] text-muted-foreground">
               <span>Porto Alegre - RS, Brasil</span>
               <a href="mailto:guiresende20@gmail.com" className="hover:text-neon transition-colors">guiresende20@gmail.com</a>
@@ -49,7 +52,7 @@ export default function Footer() {
         <div className="neon-line mb-6" />
         <div className="flex flex-wrap items-center justify-between gap-4">
           <span className="font-mono text-[11px] text-muted-foreground tracking-[0.04em]">
-            © {new Date().getFullYear()} Guilherme Resende Muniz – Todos os direitos reservados.
+            © {new Date().getFullYear()} {t('footer.rights')}
           </span>
           <div className="flex gap-4">
             {[

@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
@@ -28,19 +29,31 @@ const JOBS = [
   },
 ];
 
+interface Job {
+  role: string;
+  type: string;
+  org: string;
+  period: string;
+  loc: string;
+  items: string[];
+}
+
 export default function Experience() {
+  const { t } = useTranslation();
+  const jobs = t('experience.jobs', { returnObjects: true }) as Job[];
+
   return (
     <section className="relative py-24 md:py-32 bg-card/30">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-30" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
-        <SectionHeader id="experiencia" label="Experiência profissional" title="Trajetória" titleOutline="profissional" />
+        <SectionHeader id="experiencia" label={t('experience.header_label')} title={t('experience.header_title')} titleOutline={t('experience.header_outline')} />
 
         <div className="relative">
           {/* Timeline line */}
           <div className="absolute left-0 md:left-6 top-0 bottom-0 w-px bg-gradient-to-b from-neon/40 via-dim to-transparent" />
 
           <div className="space-y-8">
-            {JOBS.map((job, i) => (
+            {jobs.map((job, i) => (
               <Reveal key={i} delay={i * 0.08}>
                 <div className="relative pl-8 md:pl-16 group">
                   {/* Dot */}

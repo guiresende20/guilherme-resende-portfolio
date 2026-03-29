@@ -1,16 +1,35 @@
-import { useState, useEffect } from "react";
-
-const LINKS = [
-  { href: "#inicio", label: "Início" },
-  { href: "#sobre", label: "Sobre" },
-  { href: "#experiencia", label: "Experiência" },
-  { href: "#projetos", label: "Projetos" },
-  { href: "#formacao", label: "Formação" },
-  { href: "#contato", label: "Contato" },
-];
+import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
+  const { t, i18n } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setLangMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    setLangMenuOpen(false);
+  };
+
+  const LINKS = [
+    { href: "#inicio", label: t("navbar.links.inicio") },
+    { href: "#sobre", label: t("navbar.links.sobre") },
+    { href: "#experiencia", label: t("navbar.links.experiencia") },
+    { href: "#projetos", label: t("navbar.links.projetos") },
+    { href: "#formacao", label: t("navbar.links.formacao") },
+    { href: "#contato", label: t("navbar.links.contato") },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -52,14 +71,34 @@ export default function Navbar() {
             </li>
           ))}
         </ul>
-        <a
-          href="https://chatgpt.com/g/g-68654885f5c88191b5d2df8265320cce-guilherme-resende-gpt"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden md:inline-flex items-center gap-2 font-sans text-[12px] font-semibold uppercase tracking-[0.06em] text-background bg-neon px-5 py-2.5 hover:shadow-neon transition-shadow"
-        >
-          Converse com minha IA
-        </a>
+        <div className="flex items-center gap-4">
+          <div className="relative" ref={langMenuRef}>
+            <button
+              onClick={() => setLangMenuOpen(!langMenuOpen)}
+              className="hidden md:inline-flex items-center gap-1.5 font-sans text-[12px] font-bold uppercase tracking-[0.06em] text-background bg-[#00ff87] px-4 py-2.5 hover:opacity-90 transition-opacity"
+            >
+              {i18n.language.toUpperCase()}
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+            
+            {langMenuOpen && (
+              <div className="absolute top-full right-0 mt-2 w-24 bg-card border border-border shadow-lg z-50 rounded-sm overflow-hidden flex flex-col">
+                <button onClick={() => changeLanguage('pt')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'pt' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>PT</button>
+                <button onClick={() => changeLanguage('en')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'en' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>EN</button>
+                <button onClick={() => changeLanguage('es')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'es' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>ES</button>
+              </div>
+            )}
+          </div>
+          
+          <a
+            href="https://chatgpt.com/g/g-68654885f5c88191b5d2df8265320cce-guilherme-resende-gpt"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:inline-flex items-center gap-2 font-sans text-[12px] font-semibold uppercase tracking-[0.06em] text-foreground bg-transparent border border-[#00ff87] px-5 py-2.5 hover:bg-[#00ff87]/10 transition-colors"
+          >
+            {t("navbar.chatBtn")}
+          </a>
+        </div>
       </div>
     </nav>
   );

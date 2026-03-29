@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
@@ -55,10 +56,10 @@ const GROUPS: SkillGroup[] = [
   },
 ];
 
-const LANGUAGES = [
-  { name: "Português", level: "Nativo" },
-  { name: "Inglês", level: "Profissional" },
-];
+interface Language {
+  name: string;
+  level: string;
+}
 
 function SkillBar({ name, pct, delay }: Skill & { delay: number }) {
   return (
@@ -87,14 +88,18 @@ function SkillBar({ name, pct, delay }: Skill & { delay: number }) {
 }
 
 export default function Skills() {
+  const { t } = useTranslation();
+  const groups = t('skills.groups', { returnObjects: true }) as SkillGroup[];
+  const languages = t('skills.languages', { returnObjects: true }) as Language[];
+
   return (
     <section className="relative py-24 md:py-32">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-50" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
-        <SectionHeader label="Skills & Tecnologias" title="Competências" titleOutline="técnicas" />
+        <SectionHeader label={t('skills.header_label')} title={t('skills.header_title')} titleOutline={t('skills.header_outline')} />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {GROUPS.map((g, gi) => (
+          {groups.map((g, gi) => (
             <Reveal key={g.title} delay={gi * 0.1}>
               <div className="bg-card border border-border rounded-md p-6 h-full">
                 <h3 className="font-display font-semibold text-foreground text-[14px] uppercase tracking-tight mb-6 pb-3 border-b border-border">
@@ -113,10 +118,10 @@ export default function Skills() {
           <div className="mt-10">
             <div className="flex items-center gap-3 mb-4">
               <span className="w-6 h-px bg-electric" />
-              <span className="font-mono text-[11px] font-medium text-electric uppercase tracking-[0.12em]">Idiomas</span>
+              <span className="font-mono text-[11px] font-medium text-electric uppercase tracking-[0.12em]">{t('skills.languages_title')}</span>
             </div>
             <div className="flex gap-4">
-              {LANGUAGES.map((l) => (
+              {languages.map((l) => (
                 <span key={l.name} className="font-sans text-[14px] text-muted-foreground">
                   <span className="text-foreground font-medium">{l.name}</span> — {l.level}
                 </span>

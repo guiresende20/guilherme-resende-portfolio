@@ -1,0 +1,218 @@
+{
+  "navbar": {
+    "links": {
+      "inicio": "Home",
+      "sobre": "About",
+      "experiencia": "Experience",
+      "projetos": "Projects",
+      "formacao": "Education",
+      "contato": "Contact"
+    },
+    "chatBtn": "My custom AI GPT"
+  },
+  "hero": {
+    "org": "CriaLab — Tecnopuc / PUC-RS",
+    "location": "📍 Porto Alegre - RS, Brazil",
+    "role": "Innovation & Emerging Technologies Designer",
+    "description": "I work at the intersection of design, artificial intelligence, and emerging technologies, exploring new forms of creation, prototyping, and applied innovation in education, culture, and organizations.",
+    "btn_projects": "View Projects",
+    "btn_ai": "My A.I.",
+    "btn_contact": "Get in Touch",
+    "stats": [
+      { "num": "12+", "label": "Publications" },
+      { "num": "01", "label": "Patent" },
+      { "num": "20+", "label": "Digital Projects" },
+      { "num": "08+", "label": "Years Exp." }
+    ]
+  },
+  "about": {
+    "header_label": "About me",
+    "header_title": "Trajectory",
+    "header_outline": "academic & professional",
+    "p1": "Designer and researcher with a Master's degree in Design & Technology and a Bachelor's in Social Communication from UFRGS. I work at CriaLab - Tecnopuc leading innovation and technology projects, including immersive technologies (VR/AR), developing strategic solutions for companies like HP and public institutions (e.g., Semear Agrohub).",
+    "p2": "I have hands-on experience in rapid prototyping, 3D printing, and workshop facilitation. As a technology enthusiast, I leverage AI for strategic analysis, insight generation, and service design.",
+    "p3": "My background includes working as a professor at ESPM, leading marketing at Anglo Vestibulares, and working at startup BSMotion—always at the intersection of tech, design, and innovation.",
+    "areas": [
+      { "icon": "UX", "title": "UX/UI Design", "desc": "Development of strategic solutions and user-centered interfaces.", "color": "neon" },
+      { "icon": "VR", "title": "VR/AR", "desc": "Research and development in immersive technologies and natural interaction.", "color": "electric" },
+      { "icon": "AI", "title": "AI in Design", "desc": "Application of AI for strategic analysis and actionable insights generation.", "color": "neon" }
+    ]
+  },
+  "experience": {
+    "header_label": "Professional Experience",
+    "header_title": "Trajectory",
+    "header_outline": "professional",
+    "jobs": [
+      {
+        "role": "Innovation Designer and Researcher", "type": "Current", "org": "CriaLab - Tecnopuc", "period": "2021 - Present", "loc": "Porto Alegre, Brazil",
+        "items": ["Development of UX/UI, AI, and immersive tech (VR/AR) projects", "Strategic tech solutions for companies like HP and public institutions", "Rapid prototyping, 3D printing, and workshop facilitation"]
+      },
+      {
+        "role": "PhD Candidate and Researcher", "type": "Academic", "org": "UFRGS - LdSM", "period": "2017 - Present", "loc": "Porto Alegre, Brazil",
+        "items": ["Research in 3D digitization and virtual reality interaction", "Development of the MuseuVR open-source project", "Scientific publications on heritage preservation using AR"]
+      },
+      {
+        "role": "Professor", "type": "Professional", "org": "ESPM", "period": "2018 - 2022", "loc": "Porto Alegre, Brazil",
+        "items": ["Taught Advertising, Design, Journalism, and Business courses", "Subjects: Cyberculture, Apps & Mobility, Editorial Design, Digital Consumerism, Web Design, Social Innovation"]
+      },
+      {
+        "role": "Head of Marketing", "type": "Professional", "org": "BSMotion", "period": "2017", "loc": "Porto Alegre, Brazil",
+        "items": ["Development of VR solutions integrating custom hardware and specialized software", "Created go-to-market strategies for the technology startup", "Team management and B2B client relations"]
+      },
+      {
+        "role": "Marketing Manager", "type": "Professional", "org": "Anglo Vestibulares", "period": "2012-2013 / 2008", "loc": "Porto Alegre, Brazil",
+        "items": ["Development of a new institutional website", "Restructuring corporate communications and PR", "Launch of targeted promotional campaigns", "Market analysis and competitive strategies mapping"]
+      },
+      {
+        "role": "Account Executive and Curator", "type": "Professional", "org": "Campus Party Brasil", "period": "2010-2011", "loc": "São Paulo, Brazil",
+        "items": ["Curator for the Gaming, Virtual Reality and Entertainment zone", "Content planning and budget management", "Key relationship building with external sponsors and strategic partners"]
+      }
+    ]
+  },
+  "projects": {
+    "header_label": "Projects & Publications",
+    "header_title": "Selected",
+    "header_outline": "projects",
+    "header_subtitle": "A curated selection of projects demonstrating my expertise in design, technology, and innovation.",
+    "btn_more": "Learn More",
+    "btn_soon": "Coming soon",
+    "btn_external": "Open external",
+    "items": [
+      { "title": "MuseuVR", "type": "Research", "desc": "PhD project focused on natural interactions in virtual cultural environments to develop immersive museum experiences.", "tags": ["Unity", "VR", "Natural Interaction"], "link": "https://www.youtube.com/embed/JV1fSU26OI8", "linkType": "youtube" },
+      { "title": "Semear AgroHUB", "type": "Professional", "desc": "UX Strategy and governance model for an agribusiness innovation hub connecting farmers to sustainable technologies.", "tags": ["UX Strategy", "Service Design", "Governance", "Innovation"], "link": "https://acrobat.adobe.com/link/review?uri=urn:aaid:scds:US:4887118c-3eca-3a20-ba15-09492d48bd71", "linkType": "iframe" },
+      { "title": "Projeto Aula 360º", "type": "Educational", "desc": "Educational initiative employing immersive technologies (Virtual Reality) to create advanced learning experiences.", "tags": ["VR", "Education", "Unity", "EdTech"], "link": "https://player.vimeo.com/video/53293573", "linkType": "vimeo" },
+      { "title": "Mobiteste App UX Evaluation", "type": "Research", "desc": "Extensive Usability Research of the 'Mobiteste' educational tool with a primary focus on student UX mapping.", "tags": ["UX Research", "Usability", "Mobile UX", "Education"], "link": "https://lume.ufrgs.br/handle/10183/159288", "linkType": "iframe" },
+      { "title": "Mandatory Reading E-Book UFRGS", "type": "Editorial", "desc": "Development of smart digital educational materials assisting high school students with exam prep material.", "tags": ["Editorial Design", "UX", "Education", "Digital Publishing"], "link": null, "linkType": "none" },
+      { "title": "3D Digitalization: Heritage Preservation", "type": "Research", "desc": "Development of an open 3D repository showcasing scans of historic architecture dedicated to cultural dissemination.", "tags": ["AR", "Heritage", "Preservation", "Research"], "link": "https://www.ufrgs.br/ldsm/3d/", "linkType": "iframe" },
+      { "title": "MataArte", "type": "Art", "desc": "Unique 360° exhibition fusing generative AI upscaling pipelines combined with raw analog photography experiments.", "tags": ["Generative AI", "Digital Art", "Analog Photography", "360° Exhibition"], "link": "https://www.youtube.com/embed/-djac5g7_QE", "linkType": "youtube" },
+      { "title": "IASPI AR - 3D Postcard", "type": "Professional", "desc": "Creation of an augmented reality smart postcard representing Porto Alegre architecture for an international summit.", "tags": ["AR", "3D", "Design", "Postcard"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" }
+    ],
+    "videos_title": "🎬 Project Videos",
+    "videos_list": "Video List",
+    "videos": [
+      { "id": "MfF3DtRcPt8", "title": "MUSEU VR - MEDIA COVERAGE", "desc": "National TV feature on the Virtual Museum prototype developed at UFRGS" },
+      { "id": "PnA-OM2vmQ4", "title": "TECNOPUC 3D HUB", "desc": "Showcase of applied 3D research and technologies maintained at TECNOPUC" },
+      { "id": "JV1fSU26OI8", "title": "MUSEUVR DEMO", "desc": "Interactive showcase of the robust gesture engine powering MuseuVR" },
+      { "id": "cnu7cPUpoUw", "title": "3D SCANNING - CHEMISTRY HUB UFRGS", "desc": "Fascinating LiDAR-based reality capture mapping the Historic UFRGS Campus" },
+      { "id": "D8rCRnvKOtg", "title": "IASPI 3D SUMMIT DEMO", "desc": "Live recording mapping AR objects to a physical souvenir postcard prototype" },
+      { "id": "dbQSeUF8NOQ", "title": "GRAFFITI VR EXPERIENCE", "desc": "Interactive VR spray-painting physics engine experiment" }
+    ],
+    "patent_title": "Registered Patent",
+    "patent_desc": "System and method for creating highly customizable industrial seating configurations — Nationally granted tech innovation.",
+    "awards_title": "Awards & Recognition",
+    "awards_bornancini": "Bornancini Prize 2024",
+    "awards_bornancini_desc": "Digital Design Category - Augmented & Extended Realities Innovation",
+    "awards_dh": "39th Human Rights Journalism Awards 2022",
+    "awards_dh_desc": "Honorable Mention - Ceos Digital Magazine Project",
+    "view_project": "view project"
+  },
+  "skills": {
+    "header_label": "Skills & Technologies",
+    "header_title": "Technical",
+    "header_outline": "Proficiencies",
+    "languages_title": "Languages",
+    "groups": [
+      {
+        "title": "UX/UI Design",
+        "skills": [
+          { "name": "Figma", "pct": 95 },
+          { "name": "User Research", "pct": 90 },
+          { "name": "Prototyping", "pct": 95 },
+          { "name": "Design Thinking", "pct": 90 },
+          { "name": "Service Design", "pct": 85 },
+          { "name": "Usability", "pct": 90 }
+        ]
+      },
+      {
+        "title": "Artificial Intelligence",
+        "skills": [
+          { "name": "AI enabled Design", "pct": 85 },
+          { "name": "Strategic Analysis", "pct": 80 },
+          { "name": "Prompt Engineering", "pct": 85 },
+          { "name": "Data Analytics", "pct": 75 },
+          { "name": "AI Ethics & Trust", "pct": 80 }
+        ]
+      },
+      {
+        "title": "VR/AR & 3D Tools",
+        "skills": [
+          { "name": "Unity 3D", "pct": 90 },
+          { "name": "Blender", "pct": 85 },
+          { "name": "Virtual Reality App", "pct": 95 },
+          { "name": "Augmented Reality", "pct": 85 },
+          { "name": "3D Scanning / Photog.", "pct": 90 },
+          { "name": "Additive Manuf. (3D Print)", "pct": 85 }
+        ]
+      },
+      {
+        "title": "Development & Tech",
+        "skills": [
+          { "name": "HTML/CSS", "pct": 85 },
+          { "name": "JavaScript", "pct": 75 },
+          { "name": "Python", "pct": 50 },
+          { "name": "Rapid Prototyping", "pct": 90 }
+        ]
+      }
+    ],
+    "languages": [
+      { "name": "Portuguese", "level": "Native" },
+      { "name": "English", "level": "Professional" },
+      { "name": "Spanish", "level": "Intermediate" }
+    ]
+  },
+  "education": {
+    "header_label": "Academic Background",
+    "header_title": "Formal",
+    "header_outline": "Education",
+    "highlights": "Highlights:",
+    "items": [
+      {
+        "degree": "Ph.D. in Design", "period": "2017 - Present", "org": "Federal University of Rio Grande do Sul (UFRGS)",
+        "desc": "Research on 3D digitization and virtual reality interactions. Development of the MuseuVR project for intuitive cultural environment exploration.",
+        "highlights": ["CAPES Full Scholar", "LdSM Lead Researcher", "International Pubs."]
+      },
+      {
+        "degree": "Master's in Design and Technology", "period": "2013 - 2015", "org": "Federal University of Rio Grande do Sul (UFRGS)",
+        "desc": "Advanced training mapping digital interactions, rapid prototyping, and empirical user testing methodologies in tech constraints.",
+        "highlights": ["Thesis Approved", "European Conferences", "Applied Innovation"],
+        "extra": "Dissertation: Integrating 3D technologies mapping building facades shaping UFRGS historical campus repository."
+      },
+      {
+        "degree": "B.A. in Social Communication - Advertising", "period": "2004 - 2010", "org": "Federal University of Rio Grande do Sul (UFRGS)",
+        "desc": "Deep dive into consumer psychology, corporate messaging frameworks, visual communication, and mass media strategies.",
+        "highlights": ["Fully certified degree", "Applied UX basics", "Creative networking"],
+        "extra": "Capstone: From Napster to Grooveshark — Analytics detailing shifting digital interaction paradigms across media streaming."
+      },
+      {
+        "degree": "English for Business Strategies", "period": "2009 - 2010", "org": "Leinster College - Ireland",
+        "desc": "Intensive language immersion scaling corporate translation and international business diplomacy skills during a gap year.",
+        "highlights": ["C2 Certification mapped", "Conversational UX", "Cross-cultural mgmt"]
+      },
+      {
+        "degree": "Chora PPT - Advanced Presentations", "period": "2011", "org": "Perestroika Creative School",
+        "desc": "World-class seminar exploring unconventional slide pitching mechanisms, disruptive narratives, and stage presence.",
+        "highlights": ["Dynamic Storytelling", "Visual hierarchy mapping", "TED-level insights"]
+      }
+    ]
+  },
+  "contact": {
+    "header_label": "Contact",
+    "header_title": "Let's",
+    "header_outline": "talk",
+    "header_subtitle": "Let's talk about your next project? I am always open to new opportunities and collaborations.",
+    "email_label": "E-mail",
+    "email_action": "Send E-mail →",
+    "whatsapp_action": "Message on WhatsApp →",
+    "location_label": "Location"
+  },
+  "footer": {
+    "role": "Innovation Designer | UX/UI | AI | VR/AR",
+    "desc": "Researcher and innovator creating digital experiences that make a difference.",
+    "links_title": "Quick Links",
+    "contact_title": "Contact",
+    "rights": "Guilherme Resende Muniz – All rights reserved."
+  },
+  "chat": {
+    "welcome": "Hello! I am Guilherme's AI assistant. How can I help you today?"
+  }
+}
