@@ -60,8 +60,9 @@ export class GeminiLiveChat {
             }
           }
         };
-        this.ws?.send(JSON.stringify(setup));
-      };
+          console.log("[Gemini Live] Sending Setup:", setup);
+          this.ws?.send(JSON.stringify(setup));
+        };
 
       this.ws.onmessage = async (event) => {
         let msg;
@@ -75,6 +76,14 @@ export class GeminiLiveChat {
         } catch (e) {
           console.error("Erro no parse do WebSocket:", e);
           return;
+        }
+
+        console.log("[Gemini Live] Received JSON:", msg); // LOG IMPORTANTE
+
+        if (msg.error) {
+           this.callbacks.onError?.(`API Error: ${msg.error.message || JSON.stringify(msg.error)}`);
+           this.stop();
+           return;
         }
 
         if (msg.setupComplete) {
@@ -106,11 +115,12 @@ export class GeminiLiveChat {
 
       this.ws.onerror = (e) => {
         console.error("WebSocket Error: ", e);
-        this.callbacks.onError?.("Erro na conexão com a IA.");
+        this.callbacks.onError?.("Erro de conexão (Falha no handshake WSS)");
         this.stop();
       };
 
-      this.ws.onclose = () => {
+      this.ws.onclose = (event) => {
+        console.log(`[Gemini Live] WS Closed: Code=${event.code}, Reason=${event.reason || "vazio"}`);
         this.callbacks.onStatusChange("disconnected");
         this.stop();
       };
@@ -149,10 +159,10 @@ export class GeminiLiveChat {
         const base64Chunk = this.bufferToBase64(pcm16.buffer);
         const msg = {
           realtimeInput: {
-            mediaChunks: [{
+            audio: {
               mimeType: "audio/pcm;rate=16000",
               data: base64Chunk
-            }]
+            }
           }
         };
         this.ws.send(JSON.stringify(msg));
