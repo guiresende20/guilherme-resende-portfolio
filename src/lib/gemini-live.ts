@@ -16,7 +16,7 @@ export class GeminiLiveChat {
   private audioContext: AudioContext | null = null;
   private mediaStream: MediaStream | null = null;
   private scriptProcessor: ScriptProcessorNode | null = null;
-  
+
   // Fila de áudio para reprodução contínua
   private playedFrames = 0;
   private nextPlayTime = 0;
@@ -25,7 +25,7 @@ export class GeminiLiveChat {
     private apiKey: string,
     private callbacks: LiveChatCallbacks,
     private systemInstruction: string
-  ) {}
+  ) { }
 
   public async start() {
     this.callbacks.onStatusChange("connecting");
@@ -50,7 +50,7 @@ export class GeminiLiveChat {
               speechConfig: {
                 voiceConfig: {
                   prebuiltVoiceConfig: {
-                    voiceName: "Fenrir", // Voz inquestionavelmente masculina, grave
+                    voiceName: "Umbriel", // Voz inquestionavelmente masculina, grave
                   }
                 }
               }
@@ -60,9 +60,9 @@ export class GeminiLiveChat {
             }
           }
         };
-          console.log("[Gemini Live] Sending Setup:", setup);
-          this.ws?.send(JSON.stringify(setup));
-        };
+        console.log("[Gemini Live] Sending Setup:", setup);
+        this.ws?.send(JSON.stringify(setup));
+      };
 
       this.ws.onmessage = async (event) => {
         let msg;
@@ -81,9 +81,9 @@ export class GeminiLiveChat {
         console.log("[Gemini Live] Received JSON:", msg); // LOG IMPORTANTE
 
         if (msg.error) {
-           this.callbacks.onError?.(`API Error: ${msg.error.message || JSON.stringify(msg.error)}`);
-           this.stop();
-           return;
+          this.callbacks.onError?.(`API Error: ${msg.error.message || JSON.stringify(msg.error)}`);
+          this.stop();
+          return;
         }
 
         if (msg.setupComplete) {
@@ -109,7 +109,7 @@ export class GeminiLiveChat {
 
         // Se o turno do servidor terminou, voltamos a "escutar"
         if (msg.serverContent?.turnComplete) {
-           this.callbacks.onStatusChange("listening");
+          this.callbacks.onStatusChange("listening");
         }
       };
 
@@ -137,10 +137,10 @@ export class GeminiLiveChat {
     try {
       this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const source = this.audioContext.createMediaStreamSource(this.mediaStream);
-      
+
       // Node para capturar blocos de áudio (obsoleto, mas seguro e vastamente suportado no Safari/Mobile)
       this.scriptProcessor = this.audioContext.createScriptProcessor(4096, 1, 1);
-      
+
       source.connect(this.scriptProcessor);
       this.scriptProcessor.connect(this.audioContext.destination);
 
@@ -184,9 +184,9 @@ export class GeminiLiveChat {
     const binaryString = window.atob(base64Data);
     const bytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
+      bytes[i] = binaryString.charCodeAt(i);
     }
-    
+
     // O retorno da API Live é PCM de 24kHz, 16-bit
     const int16Data = new Int16Array(bytes.buffer);
     const float32Data = new Float32Array(int16Data.length);
@@ -204,7 +204,7 @@ export class GeminiLiveChat {
     // Agendar reprodução sem furos
     const currentTime = this.audioContext.currentTime;
     if (this.nextPlayTime < currentTime) {
-        this.nextPlayTime = currentTime;
+      this.nextPlayTime = currentTime;
     }
     source.start(this.nextPlayTime);
     this.nextPlayTime += audioBuffer.duration;
@@ -216,7 +216,7 @@ export class GeminiLiveChat {
     const bytes = new Uint8Array(buffer);
     const len = bytes.byteLength;
     for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
+      binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
   }
@@ -225,12 +225,12 @@ export class GeminiLiveChat {
   public stop() {
     if (this.ws) {
       if (this.ws.readyState === WebSocket.OPEN) {
-          const clientContent = {
-              clientContent: {
-                  turnComplete: true
-              }
-          };
-          this.ws.send(JSON.stringify(clientContent));
+        const clientContent = {
+          clientContent: {
+            turnComplete: true
+          }
+        };
+        this.ws.send(JSON.stringify(clientContent));
       }
       this.ws.close();
       this.ws = null;
