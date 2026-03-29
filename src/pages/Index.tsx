@@ -8,6 +8,7 @@ import Skills from "@/components/Skills";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import ScrollProgress from "@/components/ScrollProgress";
+import ChatWidget from "@/components/ChatWidget";
 
 export default function Index() {
   return (
@@ -22,6 +23,7 @@ export default function Index() {
       <Skills />
       <Contact />
       <Footer />
+      <ChatWidget />
     </div>
   );
 }
