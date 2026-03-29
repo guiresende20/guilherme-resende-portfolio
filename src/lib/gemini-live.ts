@@ -44,7 +44,7 @@ export class GeminiLiveChat {
         // Enviar setup inicial
         const setup = {
           setup: {
-            model: "models/gemini-2.0-flash-exp",
+            model: "models/gemini-3.1-flash-live-preview",
             generationConfig: {
               responseModalities: ["AUDIO"],
               speechConfig: {
