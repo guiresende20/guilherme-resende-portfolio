@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { sendChatMessage, WELCOME_MESSAGE, type ChatHistory, type ChatAction, type ChatResponse } from "@/lib/gemini";
 import { generateCV, type CVType } from "@/lib/generateCV";
+import { GeminiLiveChat, type LiveChatStatus } from "@/lib/gemini-live";
+import { SYSTEM_PROMPT } from "@/lib/system-prompt";
+import { Mic, MicOff } from "lucide-react";
 
 interface Message {
   role: "user" | "model";
@@ -155,6 +158,8 @@ export default function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [liveStatus, setLiveStatus] = useState<LiveChatStatus>("disconnected");
+  const liveChatRef = useRef<GeminiLiveChat | null>(null);
   const historyRef = useRef<ChatHistory[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -181,6 +186,33 @@ export default function ChatWidget() {
       return prev;
     });
   }, [t]);
+
+  async function toggleLiveAudio() {
+    if (liveStatus !== "disconnected") {
+      liveChatRef.current?.stop();
+      return;
+    }
+    
+    // Conectar
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    if (!apiKey) {
+       alert("API Key do Gemini não encontrada nas variáveis de ambiente necessárias para o modo Live.");
+       return;
+    }
+
+    const live = new GeminiLiveChat(apiKey, {
+      onStatusChange: (status) => setLiveStatus(status),
+      onTextAction: (text) => {
+        setMessages(prev => [...prev, { role: "model", text }]);
+      },
+      onError: (err) => {
+        alert(err);
+      }
+    }, SYSTEM_PROMPT);
+
+    liveChatRef.current = live;
+    await live.start();
+  }
 
   async function sendMessage() {
     const text = input.trim();
@@ -333,6 +365,26 @@ export default function ChatWidget() {
               </div>
             )}
 
+            {liveStatus !== "disconnected" && (
+              <div className="sticky bottom-0 flex justify-center py-2 bg-gradient-to-t from-background via-background/90 to-transparent">
+                 <div className="flex items-center gap-2 bg-card border border-neon/50 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,135,0.2)]">
+                   <div className="w-2 h-2 rounded-full bg-neon animate-ping" />
+                   <span className="font-mono text-[10px] text-neon uppercase tracking-wider">
+                     {liveStatus === "connecting" && "Conectando..."}
+                     {liveStatus === "listening" && "Ouvindo..."}
+                     {liveStatus === "speaking" && "Falando..."}
+                   </span>
+                   {liveStatus === "speaking" && (
+                     <div className="flex items-center gap-1 h-3 ml-2">
+                       {[0,1,2,3].map(i => (
+                         <div key={i} className="w-1 bg-neon rounded-full animate-bounce" style={{ height: '100%', animationDelay: `${i * 0.15}s`, animationDuration: "0.5s" }} />
+                       ))}
+                     </div>
+                   )}
+                 </div>
+              </div>
+            )}
+
             {isExhausted && !isLoading && (
               <p className="text-center font-mono text-[10px] text-muted-foreground uppercase tracking-[0.06em] mt-2 border-t border-border pt-3">
                 Limite da sessão atingido ·{" "}
@@ -355,10 +407,24 @@ export default function ChatWidget() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={isExhausted ? "Sessão encerrada" : "Pergunte sobre minha trajetória..."}
-                disabled={isLoading || isExhausted}
+                disabled={isLoading || isExhausted || liveStatus !== "disconnected"}
                 className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-[13px] font-sans text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-neon/40 focus:ring-1 focus:ring-neon/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               />
-              <button onClick={sendMessage} disabled={!input.trim() || isLoading || isExhausted}
+              
+              <button onClick={toggleLiveAudio} title={liveStatus === "disconnected" ? "Falar por Áudio" : "Desligar Áudio"}
+                className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-md transition-all duration-200 hover:scale-105 ${
+                  liveStatus !== "disconnected" 
+                    ? "bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
+                    : "bg-card border border-border text-foreground hover:border-neon hover:text-neon"
+                }`}>
+                {liveStatus !== "disconnected" ? (
+                  <MicOff size={16} strokeWidth={2.5} />
+                ) : (
+                  <Mic size={16} strokeWidth={2.5} />
+                )}
+              </button>
+
+              <button onClick={sendMessage} disabled={!input.trim() || isLoading || isExhausted || liveStatus !== "disconnected"}
                 aria-label="Enviar mensagem"
                 className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-md bg-neon text-background hover:shadow-neon transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-105">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
