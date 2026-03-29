@@ -193,10 +193,18 @@ export default function ChatWidget() {
       return;
     }
     
-    // Conectar
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    // Conectar - Buscando chave dinâmica do backend para não expor direto no código-fonte nem quebrar Netlify
+    let apiKey = "";
+    try {
+      const resp = await fetch("/api/get-live-key");
+      const data = await resp.json();
+      apiKey = data.key;
+    } catch (e) {
+       console.error(e);
+    }
+    
     if (!apiKey) {
-       alert("API Key do Gemini não encontrada nas variáveis de ambiente necessárias para o modo Live.");
+       alert("API Key do Gemini não encontrada no servidor para o modo Live.");
        return;
     }
 
