@@ -50,7 +50,7 @@ export class GeminiLiveChat {
               speechConfig: {
                 voiceConfig: {
                   prebuiltVoiceConfig: {
-                    voiceName: "Puck", // Voz masculina
+                    voiceName: "Fenrir", // Voz inquestionavelmente masculina, grave
                   }
                 }
               }
