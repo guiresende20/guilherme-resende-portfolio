@@ -267,19 +267,23 @@ const handler: Handler = async (event: HandlerEvent) => {
       const result = await chat.sendMessage(message);
       const raw = result.response.text();
       let cleanRaw = raw.trim();
-      if (cleanRaw.startsWith("```json")) {
-        cleanRaw = cleanRaw.replace(/^```json/, "").replace(/```$/, "").trim();
-      } else if (cleanRaw.startsWith("```")) {
-        cleanRaw = cleanRaw.replace(/^```/, "").replace(/```$/, "").trim();
+
+      // Força a extração do bloco JSON caso o Gemini adicione texto extra em volta
+      const jsonStart = cleanRaw.indexOf("{");
+      const jsonEnd = cleanRaw.lastIndexOf("}");
+      
+      if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+        cleanRaw = cleanRaw.substring(jsonStart, jsonEnd + 1);
       }
 
       try {
         const parsed = JSON.parse(cleanRaw);
-        responseText = parsed.text || raw;
+        responseText = parsed.text || raw; // se parsed.text não existir, fallback
         actions = Array.isArray(parsed.actions) ? parsed.actions : [];
       } catch {
-        // Fallback se o modelo não retornou JSON válido
-        responseText = raw;
+        // Fallback robusto se o modelo quebrar o JSON e não encontrarmos chaves
+        // Tenta limpar marcas de markdown se restarem
+        responseText = raw.replace(/```json/g, "").replace(/```/g, "").replace(/\{[\s\S]*?"text":\s*"/g, "").replace(/"\s*\}[\s\S]*/g, "").trim();
         actions = [];
       }
     }
