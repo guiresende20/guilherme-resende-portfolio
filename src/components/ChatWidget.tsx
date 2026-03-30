@@ -280,9 +280,9 @@ export default function ChatWidget() {
 
   // Quick question suggestions for first interaction
   const suggestions = [
-    "Quais são seus projetos de VR?",
-    "Você está disponível para projetos?",
-    "Qual sua formação acadêmica?",
+    { label: "🤝 Fit cultural", text: "Que tipo de ambiente de trabalho você considera ideal para desenvolver seu melhor trabalho?" },
+    { label: "💼 Background profissional", text: "Você pode me contar um pouco sobre sua trajetória profissional e os principais tipos de projetos em que atuou?" },
+    { label: "🎓 Background acadêmico", text: "Como sua formação acadêmica influenciou a forma como você aborda problemas e projetos hoje?" },
   ];
 
   const isExhausted = messages.length >= MAX_MESSAGES;
@@ -359,9 +359,9 @@ export default function ChatWidget() {
                 <p className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.08em] mb-2">Sugestões:</p>
                 <div className="flex flex-col gap-1.5">
                   {suggestions.map((s) => (
-                    <button key={s} onClick={() => { setInput(s); setTimeout(() => inputRef.current?.focus(), 50); }}
+                    <button key={s.label} onClick={() => { setInput(s.text); setTimeout(() => inputRef.current?.focus(), 50); }}
                       className="text-left font-mono text-[10px] text-muted-foreground border border-dim/60 px-3 py-1.5 rounded-sm hover:border-neon/30 hover:text-foreground transition-all duration-200">
-                      {s}
+                      {s.label}
                     </button>
                   ))}
                 </div>
