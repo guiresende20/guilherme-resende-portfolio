@@ -83,7 +83,7 @@ export default function Hero() {
 
         <div className="flex flex-wrap gap-3 mt-2 opacity-0 animate-fade-up" style={{ animationDelay: "1.9s" }}>
           {[
-            { label: "LinkedIn", href: "https://www.linkedin.com/in/guiresende/" },
+            { label: "LinkedIn", href: "https://www.linkedin.com/in/guilhermeresende/" },
             { label: "E-mail", href: "mailto:guiresende20@gmail.com" },
             { label: "WhatsApp", href: "https://wa.me/5551997925092" },
             { label: "Lattes", href: "http://lattes.cnpq.br/5709726694301047" },
