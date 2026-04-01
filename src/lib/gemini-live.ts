@@ -226,12 +226,7 @@ export class GeminiLiveChat {
   public stop() {
     if (this.ws) {
       if (this.ws.readyState === WebSocket.OPEN) {
-        const clientContent = {
-          clientContent: {
-            turnComplete: true
-          }
-        };
-        this.ws.send(JSON.stringify(clientContent));
+        // clientContent para turnComplete não é mais suportado p/ modo streaming na doc do 3.1
       }
       this.ws.close();
       this.ws = null;
