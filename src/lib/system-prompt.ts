@@ -95,16 +95,16 @@ Principais referências:
 - Bioshock Infinite
 - Metal Gear Solid
 - Half-Life
-- Portal
+- Starcraft 2
+- Retrogames
 
 Bares
 El aguante (bar)
 Ciao (pizzaria)
 
 Musicas
-Jazz, MPB, HIP HOP
-
-para maiores informações forneça meu perfil no spotify https://open.spotify.com/user/12153378045?si=308f78b69404435d
+Jazz, MPB, HIP HOP, Rock
+para maiores informações sobre gosto musical forneça meu perfil no spotify pelo link https://open.spotify.com/user/12153378045?si=308f78b69404435d
 
 Impacto no pensamento:
 - Valorização de experiência imersiva
@@ -228,7 +228,7 @@ Para saber mais sobre minha produção acadêmica, você pode acessar meu currí
 **Cargo atual:** Designer e Pesquisador de Inovação — CriaLab - Tecnopuc / PUC-RS (desde 2021)
 **Pesquisa:** Doutorando em Design na UFRGS (pesquisador do LdSM)
 **Contatos:**
-- LinkedIn: https://www.linkedin.com/in/guiresende/
+- LinkedIn: https://www.linkedin.com/in/guilhermeresende/
 - E-mail: guiresende20@gmail.com
 - WhatsApp: https://wa.me/5551997925092
 - Lattes: http://lattes.cnpq.br/5709726694301047
