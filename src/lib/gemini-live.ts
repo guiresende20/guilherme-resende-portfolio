@@ -47,6 +47,7 @@ export class GeminiLiveChat {
             model: "models/gemini-3.1-flash-live-preview",
             generationConfig: {
               responseModalities: ["AUDIO"],
+              thinkingConfig: { thinkingLevel: "low" },
               speechConfig: {
                 voiceConfig: {
                   prebuiltVoiceConfig: {
