@@ -240,7 +240,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         systemInstruction: SYSTEM_PROMPT + "\n\nNeste modo, responda em texto simples sem JSON. Use os resultados de busca para enriquecer sua resposta.",
         // @ts-ignore — googleSearchRetrieval tool
         tools: [{ googleSearchRetrieval: {} }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 512 },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
       });
 
       const searchChat = searchModel.startChat({ history: Array.isArray(history) ? history : [] });
@@ -258,7 +258,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         generationConfig: {
           temperature: 0.5,
           topP: 0.9,
-          maxOutputTokens: 600,
+          maxOutputTokens: 1500,
           responseMimeType: "application/json",
         },
       });
