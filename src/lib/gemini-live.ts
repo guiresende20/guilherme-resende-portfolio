@@ -50,7 +50,6 @@ export class GeminiLiveChat {
             model: "models/gemini-3.1-flash-live-preview",
             generationConfig: {
               responseModalities: ["AUDIO"],
-              inputAudioTranscription: {},
               thinkingConfig: { thinkingLevel: "low" },
               speechConfig: {
                 voiceConfig: {
