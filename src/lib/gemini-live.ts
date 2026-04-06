@@ -8,7 +8,7 @@ export type LiveChatStatus = "disconnected" | "connecting" | "connected" | "list
 export interface LiveChatCallbacks {
   onStatusChange: (status: LiveChatStatus) => void;
   onTextAction?: (text: string) => void;
-  onTurnComplete?: (aiText: string) => void;
+  onTurnComplete?: (aiText: string, userText: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -22,6 +22,7 @@ export class GeminiLiveChat {
   private playedFrames = 0;
   private nextPlayTime = 0;
   private currentAiText = "";
+  private currentUserText = "";
 
   constructor(
     private apiKey: string,
@@ -49,6 +50,7 @@ export class GeminiLiveChat {
             model: "models/gemini-3.1-flash-live-preview",
             generationConfig: {
               responseModalities: ["AUDIO"],
+              inputAudioTranscription: {},
               thinkingConfig: { thinkingLevel: "low" },
               speechConfig: {
                 voiceConfig: {
@@ -95,6 +97,11 @@ export class GeminiLiveChat {
           return;
         }
 
+        // Transcrição do áudio do usuário
+        if (msg.serverContent?.inputTranscription?.text) {
+          this.currentUserText += msg.serverContent.inputTranscription.text;
+        }
+
         if (msg.serverContent?.modelTurn) {
           this.callbacks.onStatusChange("speaking");
           const parts = msg.serverContent.modelTurn.parts;
@@ -115,9 +122,10 @@ export class GeminiLiveChat {
         if (msg.serverContent?.turnComplete) {
           this.callbacks.onStatusChange("listening");
           if (this.currentAiText && this.callbacks.onTurnComplete) {
-            this.callbacks.onTurnComplete(this.currentAiText);
+            this.callbacks.onTurnComplete(this.currentAiText, this.currentUserText);
           }
           this.currentAiText = "";
+          this.currentUserText = "";
         }
       };
 

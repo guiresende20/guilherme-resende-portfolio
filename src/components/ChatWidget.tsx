@@ -219,11 +219,11 @@ export default function ChatWidget() {
       onTextAction: (text) => {
         setMessages(prev => [...prev, { role: "model", text }]);
       },
-      onTurnComplete: (aiText) => {
+      onTurnComplete: (aiText, userText) => {
         fetch("/api/log-voice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ai_response: aiText }),
+          body: JSON.stringify({ ai_response: aiText, user_message: userText || "[voz]" }),
         }).catch(() => { });
       },
       onError: (err) => {

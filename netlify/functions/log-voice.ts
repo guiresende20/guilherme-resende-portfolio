@@ -13,7 +13,7 @@ const handler: Handler = async (event: HandlerEvent) => {
   };
 
   try {
-    const { ai_response } = JSON.parse(event.body || "{}");
+    const { ai_response, user_message } = JSON.parse(event.body || "{}");
 
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -24,7 +24,7 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.from("chat_logs").insert({
-      user_message: "[voz]",
+      user_message: user_message || "[voz]",
       ai_response,
       voice: "voice",
     });
