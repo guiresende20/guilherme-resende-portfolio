@@ -1,5 +1,6 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { createClient } from "@supabase/supabase-js";
 
 // ─── System Prompt Completo ────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Você é uma inteligência artificial baseada na trajetória, no pensamento e na forma de atuação de Guilherme Resende Muniz.
@@ -286,6 +287,18 @@ const handler: Handler = async (event: HandlerEvent) => {
         responseText = raw.replace(/```json/g, "").replace(/```/g, "").replace(/\{[\s\S]*?"text":\s*"/g, "").replace(/"\s*\}[\s\S]*/g, "").trim();
         actions = [];
       }
+    }
+
+    // ─── Log no Supabase ───────────────────────────────────────────────────────
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (supabaseUrl && supabaseKey) {
+      const supabase = createClient(supabaseUrl, supabaseKey);
+      await supabase.from("chat_logs").insert({
+        user_message: message,
+        ai_response: responseText,
+        actions: actions.length > 0 ? actions : null,
+      });
     }
 
     return {
