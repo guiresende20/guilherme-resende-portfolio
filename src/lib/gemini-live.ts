@@ -8,6 +8,7 @@ export type LiveChatStatus = "disconnected" | "connecting" | "connected" | "list
 export interface LiveChatCallbacks {
   onStatusChange: (status: LiveChatStatus) => void;
   onTextAction?: (text: string) => void;
+  onTurnComplete?: (aiText: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -20,6 +21,7 @@ export class GeminiLiveChat {
   // Fila de áudio para reprodução contínua
   private playedFrames = 0;
   private nextPlayTime = 0;
+  private currentAiText = "";
 
   constructor(
     private apiKey: string,
@@ -100,6 +102,7 @@ export class GeminiLiveChat {
             // Pode retornar texto (transcrição) e áudio
             if (part.text && this.callbacks.onTextAction) {
               this.callbacks.onTextAction(part.text);
+              this.currentAiText += part.text;
             }
             if (part.inlineData && part.inlineData.data) {
               const base64Data = part.inlineData.data;
@@ -111,6 +114,10 @@ export class GeminiLiveChat {
         // Se o turno do servidor terminou, voltamos a "escutar"
         if (msg.serverContent?.turnComplete) {
           this.callbacks.onStatusChange("listening");
+          if (this.currentAiText && this.callbacks.onTurnComplete) {
+            this.callbacks.onTurnComplete(this.currentAiText);
+          }
+          this.currentAiText = "";
         }
       };
 

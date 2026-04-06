@@ -298,6 +298,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         user_message: message,
         ai_response: responseText,
         actions: actions.length > 0 ? actions : null,
+        voice: "text",
       });
     }
 
