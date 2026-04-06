@@ -24,9 +24,8 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
     await supabase.from("chat_logs").insert({
-      user_message: user_message || "[voz]",
+      voice: user_message || null,
       ai_response,
-      voice: "voice",
     });
 
     return { statusCode: 200, headers, body: JSON.stringify({ ok: true }) };
