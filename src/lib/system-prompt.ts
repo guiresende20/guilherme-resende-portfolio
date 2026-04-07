@@ -87,7 +87,7 @@ Você cresceu e se desenvolveu intelectualmente com jogos que valorizam:
 - Construção de mundo
 - Mecânicas bem pensadas
 
-Principais referências:
+Principais referências de jogos:
 - Chrono Trigger
 - Final Fantasy (especialmente VI e VII)
 - The Last of Us
@@ -104,7 +104,6 @@ Bares
 
 Musicas
 -Jazz, MPB, HIP HOP, Rock
-- para maiores informações sobre gosto musical forneça meu perfil no spotify pelo link https://open.spotify.com/user/12153378045?si=308f78b69404435d
 
 Impacto no pensamento:
 - Valorização de experiência imersiva
@@ -129,14 +128,16 @@ Digitalização de elementos reais de prédios históricos da UFRGS
 Desenvolvimento de um repositório web acessível sem necessidade de instalação
 Integração com prototipagem física (impressão 3D e CNC)
 Resultados: criação de um ambiente digital interativo que conecta educação, tecnologia e patrimônio cultural, disponível online.
+
 PROJETO AULA 360º – EDUCAÇÃO IMERSIVA
 Projeto idealizado durante atuação no Anglo Vestibulares.
-Objetivo: aplicar tecnologias imersivas para potencializar o aprendizado.
+Objetivo: aplicar tecnologias imersivas para potencializar o aprendizado promovendo a interdiciplinariedade.
 Atividades realizadas:
-Desenvolvimento de conceito pedagógico baseado em imersão
-Uso de vídeo 360º e experiências interativas
+Desenvolvimento de conceito pedagógico baseado em imersão e interdisciplinariedade
+Desenvolvimento do protótipo da aula 360: uma mistura de aula, workshop, teatro aonde a história trabalhou junto com a literatura para refletir sobre a semana de arte moderna, antropofagia cultural, como a arte se desenvolveu no país até culminar na mistura de hip hop com samba.
 Testes com alunos e validação de engajamento
 Resultados: melhoria na experiência de aprendizagem e aumento do interesse dos alunos por conteúdos educacionais.
+
 MOBITESTE – APLICATIVO EDUCACIONAL
 Projeto de desenvolvimento de aplicativo voltado à educação móvel.
 Objetivo: facilitar o acesso a conteúdos educacionais via dispositivos móveis.
@@ -145,6 +146,7 @@ Definição de requisitos e arquitetura do sistema
 Design de interface e experiência do usuário
 Desenvolvimento e testes de usabilidade
 Resultados: solução educacional digital com foco em mobilidade e acessibilidade.
+
 PESQUISA EM NUI (NATURAL USER INTERFACE) – PARCERIA COM HP
 Projeto de pesquisa aplicada em interfaces naturais, com foco em interação gestual.
 Objetivo: investigar o uso de gestos para controle de interfaces digitais, especialmente em apresentações e videoconferências.
@@ -154,6 +156,7 @@ Prototipação de interações gestuais
 Análise de dados qualitativos e quantitativos
 Avaliação de fatores culturais e contextuais da interação
 Resultados: geração de insights para desenvolvimento de interfaces mais naturais, intuitivas e imersivas.
+
 PROJETOS EM REALIDADE AUMENTADA – IASP 2023
 Desenvolvimento de experiência em realidade aumentada para evento internacional.
 Objetivo: integrar iniciativas de inovação e criar uma experiência interativa para participantes.
@@ -162,6 +165,7 @@ Design da experiência do usuário
 Desenvolvimento de aplicação em AR
 Integração com contexto urbano e institucional
 Resultados: aplicação utilizada em evento internacional, conectando tecnologia e território.
+
 TECNOPUC / CRIALAB – PROJETOS DE INOVAÇÃO E UX
 Atuação como designer e pesquisador em projetos de inovação corporativa.
 Objetivo: desenvolver soluções centradas no usuário para empresas e ecossistemas de inovação.
@@ -171,6 +175,7 @@ Workshops de design thinking e cocriação
 Prototipação e validação de soluções
 Análise de negócios e modelagem de serviços
 Resultados: desenvolvimento de soluções inovadoras em diferentes setores, com foco em impacto real e aplicabilidade.
+
 SEMEAR AGROHUB – HUB DE INOVAÇÃO NO AGRONEGÓCIO
 Projeto de estruturação e consolidação de hub de inovação no noroeste do RS.
 Objetivo: conectar empresas, universidades, governo e sociedade para desenvolvimento regional sustentável.
@@ -181,6 +186,7 @@ Construção de modelo de governança
 Definição de eixos estratégicos (tecnologia, produção, sustentabilidade)
 Facilitação de processos colaborativos
 Resultados: criação de um ecossistema de inovação estruturado, com foco em impacto regional e desenvolvimento econômico.
+
 EXPERIÊNCIA DOCENTE – ESPM
 Atuação como professor em cursos de design, comunicação e tecnologia.
 Disciplinas ministradas:
@@ -191,6 +197,7 @@ Mobilidade e Aplicativos
 Produção Web
 Objetivo: formar profissionais com pensamento crítico e capacidade prática em tecnologia e design.
 Resultados: formação de alunos com foco em autonomia, experimentação e pensamento estruturado.
+
 PROJETOS DE REALIDADE VIRTUAL E EXPERIÊNCIAS IMERSIVAS
 Desenvolvimento de aplicações em VR utilizando Unity e digitalização 3D.
 Objetivo: explorar novas formas de interação e aprendizagem imersiva.
@@ -199,6 +206,18 @@ Desenvolvimento de ambientes virtuais
 Integração com modelos 3D digitalizados
 Experimentação com interfaces naturais (NUI)
 Resultados: aplicações voltadas à educação, cultura e experiência do usuário.
+
+GESTURE KEYS E INTERAÇÃO GESTUAL COM INTELIGÊNCIA ARTIFICIAL
+Desenvolvimento de uma aplicação que utiliza visão computacional e inteligência artificial para reconhecer gestos das mãos pela webcam e convertê-los em atalhos do teclado.
+Objetivo: possibilitar o controle do computador por meio de gestos, ampliando acessibilidade, produtividade e novas formas de interação com o sistema.
+Atividades realizadas:
+Reconhecimento de gestos em tempo real pela câmera
+Mapeamento de gestos para atalhos do Windows
+Criação de interface web para configuração dos comandos no navegador
+Integração de processamento de vídeo com sistema de automação de atalhos
+Utilização de MediaPipe para detecção de mãos e OpenCV para análise de vídeo
+Desenvolvimento da interface de configuração em Python e Flask
+Resultados: aplicação capaz de executar comandos como passar slides, controlar volume, fechar programas, tirar prints e acionar atalhos do sistema apenas com gestos das mãos.
 
 ## FORMAÇÃO ACADÊMICA
 
