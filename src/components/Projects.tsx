@@ -136,7 +136,7 @@ export default function Projects() {
               </div>
               <div className="bg-card border border-border rounded-md p-4 flex flex-col">
                 <h4 className="font-display font-semibold text-foreground text-[13px] uppercase tracking-tight mb-4 pb-3 border-b border-border">{t('projects.videos_list')}</h4>
-                <div className="flex flex-col gap-2 overflow-y-auto flex-1" style={{ maxHeight: "420px" }}>
+                <div className="flex flex-col gap-2 flex-1">
                   {videos.map((v, i) => (
                     <button key={v.id} onClick={() => setActiveVideo(i)} className={`flex items-center gap-3 p-3 rounded-md text-left transition-all duration-300 ${i === activeVideo ? "bg-neon/10 border border-neon/30" : "bg-muted/30 border border-transparent hover:bg-muted/60 hover:border-dim"}`}>
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${i === activeVideo ? "bg-neon text-background" : "bg-dim text-muted-foreground"}`}>
