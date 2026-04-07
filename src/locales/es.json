@@ -85,7 +85,8 @@
       { "title": "E-Book Editorial Lecturas UFRGS", "type": "Editorial", "desc": "Adaptación móvil 100% responsiva diagramada para estudiantes procesando literatura exigente obligatoria.", "tags": ["Diagramación", "Diseño Gráfico PDF", "Móviles"], "link": null, "linkType": "none" },
       { "title": "Archivo Abierto 3D Heritage", "type": "Investigación", "desc": "Implementación técnica publicando docenas de escaneos LiDAR detallados renderizables en plataformas WebGL.", "tags": ["LiDAR Web", "WebGL", "TypeScript"], "link": "https://www.ufrgs.br/ldsm/3d/", "linkType": "iframe" },
       { "title": "Proyecto Artístico 'MataArte'", "type": "Arte", "desc": "Curaduría digital y upscaling a través de redes neuronales aplicadas a cintas rotas de 35mm clásicas.", "tags": ["Midjourney/Dall-E", "Arte Híbrido", "Composición Visual"], "link": "https://www.youtube.com/embed/-djac5g7_QE", "linkType": "youtube" },
-      { "title": "Postal Híbrida Inteligente IASPI", "type": "Profesional", "desc": "Marcador visual impreso diseñado especialmente para el montaje volumétrico con realidad aumentada óptica.", "tags": ["Reconocimiento", "Optica AR", "Marketing BTL"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" }
+      { "title": "Postal Híbrida Inteligente IASPI", "type": "Profesional", "desc": "Marcador visual impreso diseñado especialmente para el montaje volumétrico con realidad aumentada óptica.", "tags": ["Reconocimiento", "Optica AR", "Marketing BTL"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" },
+      { "title": "Gesture Keys", "type": "IA / Interacción", "desc": "Aplicación que usa inteligencia artificial para reconocer gestos de la mano por la webcam y convertirlos en atajos de teclado. La cámara detecta gestos en tiempo real (puño cerrado, mano abierta, pulgar arriba, pulgar abajo, paz, \"te amo\", señalar) y cada gesto se puede mapear a atajos de Windows (Alt+F4, Ctrl+C, Ctrl+V, etc.). Controla tu PC con gestos.", "tags": ["IA", "Visión por Computadora", "Python", "MediaPipe", "Accesibilidad"], "link": "https://www.youtube.com/embed/uyOTGKe0bGo", "linkType": "youtube" }
     ],
     "videos_title": "🎬 Grabaciones del Portafolio",
     "videos_list": "Archivo Multimedia",
@@ -95,10 +96,11 @@
       { "id": "JV1fSU26OI8", "title": "INTERACCIONES VR MUSEO", "desc": "Test de movimiento fluido procesado sin controladores externos." },
       { "id": "cnu7cPUpoUw", "title": "DIGITALIZACIÓN INSTITUTO QUÍMICA", "desc": "Procedimientos para escanear y convertir edificios universitarios 1:1." },
       { "id": "D8rCRnvKOtg", "title": "PROTOTIPO REALIDAD AUMENTADA MÓVIL", "desc": "Evaluación final de texturas implementadas al renderizar un tracker estático." },
-      { "id": "dbQSeUF8NOQ", "title": "CULTURA VR: GRAFFITI MULTIPLAYER", "desc": "Prueba de concepto evaluando latencia usando pintura dinámica hiperrealista." }
+      { "id": "dbQSeUF8NOQ", "title": "CULTURA VR: GRAFFITI MULTIPLAYER", "desc": "Prueba de concepto evaluando latencia usando pintura dinámica hiperrealista." },
+      { "id": "uyOTGKe0bGo", "title": "GESTURE KEYS", "desc": "Controla tu PC con gestos de la mano usando inteligencia artificial" }
     ],
     "patent_title": "Patente de Invento Registrada",
-    "patent_desc": "Procesamiento geométrico de asientos antropométricos — Innovación registrada estatal y federalmente.",
+    "patent_desc": "Procesamiento geométrico de asientos antropométricos — Innovación registrada estatal y federalmente. Registro: BR1020180685074.",
     "awards_title": "Honores Académicos e Industria",
     "awards_bornancini": "Premios Bornancini de Diseño 2024",
     "awards_bornancini_desc": "Galardonado como mejor Proyecto Multidisciplinario Interactivo (Extendido).",

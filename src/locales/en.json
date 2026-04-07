@@ -85,7 +85,8 @@
       { "title": "Mandatory Reading E-Book UFRGS", "type": "Editorial", "desc": "Development of smart digital educational materials assisting high school students with exam prep material.", "tags": ["Editorial Design", "UX", "Education", "Digital Publishing"], "link": null, "linkType": "none" },
       { "title": "3D Digitalization: Heritage Preservation", "type": "Research", "desc": "Development of an open 3D repository showcasing scans of historic architecture dedicated to cultural dissemination.", "tags": ["AR", "Heritage", "Preservation", "Research"], "link": "https://www.ufrgs.br/ldsm/3d/", "linkType": "iframe" },
       { "title": "MataArte", "type": "Art", "desc": "Unique 360° exhibition fusing generative AI upscaling pipelines combined with raw analog photography experiments.", "tags": ["Generative AI", "Digital Art", "Analog Photography", "360° Exhibition"], "link": "https://www.youtube.com/embed/-djac5g7_QE", "linkType": "youtube" },
-      { "title": "IASPI AR - 3D Postcard", "type": "Professional", "desc": "Creation of an augmented reality smart postcard representing Porto Alegre architecture for an international summit.", "tags": ["AR", "3D", "Design", "Postcard"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" }
+      { "title": "IASPI AR - 3D Postcard", "type": "Professional", "desc": "Creation of an augmented reality smart postcard representing Porto Alegre architecture for an international summit.", "tags": ["AR", "3D", "Design", "Postcard"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" },
+      { "title": "Gesture Keys", "type": "AI / Interaction", "desc": "App that uses artificial intelligence to recognize hand gestures via webcam and convert them into keyboard shortcuts. The camera detects gestures in real time (closed fist, open hand, thumbs up, thumbs down, peace, \"I love you\", pointing) and each gesture can be mapped to Windows shortcuts (Alt+F4, Ctrl+C, Ctrl+V, etc.). Control your PC with gestures — switch slides, adjust volume, close programs, take screenshots and more.", "tags": ["AI", "Computer Vision", "Python", "MediaPipe", "Accessibility"], "link": "https://www.youtube.com/embed/uyOTGKe0bGo", "linkType": "youtube" }
     ],
     "videos_title": "🎬 Project Videos",
     "videos_list": "Video List",
@@ -95,10 +96,11 @@
       { "id": "JV1fSU26OI8", "title": "MUSEUVR DEMO", "desc": "Interactive showcase of the robust gesture engine powering MuseuVR" },
       { "id": "cnu7cPUpoUw", "title": "3D SCANNING - CHEMISTRY HUB UFRGS", "desc": "Fascinating LiDAR-based reality capture mapping the Historic UFRGS Campus" },
       { "id": "D8rCRnvKOtg", "title": "IASPI 3D SUMMIT DEMO", "desc": "Live recording mapping AR objects to a physical souvenir postcard prototype" },
-      { "id": "dbQSeUF8NOQ", "title": "GRAFFITI VR EXPERIENCE", "desc": "Interactive VR spray-painting physics engine experiment" }
+      { "id": "dbQSeUF8NOQ", "title": "GRAFFITI VR EXPERIENCE", "desc": "Interactive VR spray-painting physics engine experiment" },
+      { "id": "uyOTGKe0bGo", "title": "GESTURE KEYS", "desc": "Control your PC with hand gestures using artificial intelligence" }
     ],
     "patent_title": "Registered Patent",
-    "patent_desc": "System and method for creating highly customizable industrial seating configurations — Nationally granted tech innovation.",
+    "patent_desc": "System and method for creating highly customizable industrial seating configurations — Nationally granted tech innovation. Registration: BR1020180685074.",
     "awards_title": "Awards & Recognition",
     "awards_bornancini": "Bornancini Prize 2024",
     "awards_bornancini_desc": "Digital Design Category - Augmented & Extended Realities Innovation",

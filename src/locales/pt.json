@@ -85,7 +85,8 @@
       { "title": "Ebook Leituras Obrigatórias UFRGS", "type": "Editorial", "desc": "Desenvolvimento de material educacional digital para auxiliar estudantes com as leituras obrigatórias do vestibular.", "tags": ["Design Editorial", "UX", "Educação", "Digital Publishing"], "link": null, "linkType": "none" },
       { "title": "Digitalização 3D: Preservação Patrimonial", "type": "Pesquisa", "desc": "Desenvolvimento de repositório 3D de digitalizações de prédios históricos voltado à preservação e difusão do patrimônio cultural. O projeto foi um dos resultados do meu mestrado.", "tags": ["AR", "Patrimônio Cultural", "Preservação", "Research"], "link": "https://www.ufrgs.br/ldsm/3d/", "linkType": "iframe" },
       { "title": "MataArte", "type": "Arte", "desc": "Exposição envolvendo imagem generativa a partir de fotos analógicas para exposição numa sala 360°.", "tags": ["IA Generativa", "Arte Digital", "Fotografia Analógica", "Exposição 360°"], "link": "https://www.youtube.com/embed/-djac5g7_QE", "linkType": "youtube" },
-      { "title": "IASPI AR - 3D", "type": "Profissional", "desc": "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos.", "tags": ["AR", "3D", "Design", "Cartão Postal"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" }
+      { "title": "IASPI AR - 3D", "type": "Profissional", "desc": "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos.", "tags": ["AR", "3D", "Design", "Cartão Postal"], "link": "https://www.youtube.com/embed/D8rCRnvKOtg", "linkType": "youtube" },
+      { "title": "Gesture Keys", "type": "IA / Interação", "desc": "App que usa inteligência artificial para reconhecer gestos da mão pela webcam e convertê-los em atalhos do teclado. A câmera detecta gestos em tempo real (punho fechado, mão aberta, positivo, negativo, paz, \"eu te amo\", apontar) e cada gesto pode ser mapeado para atalhos do Windows (Alt+F4, Ctrl+C, Ctrl+V, etc.). Controle seu PC com gestos — passe slides, ajuste volume, feche programas, tire prints e muito mais.", "tags": ["IA", "Computer Vision", "Python", "MediaPipe", "Acessibilidade"], "link": "https://www.youtube.com/embed/uyOTGKe0bGo", "linkType": "youtube" }
     ],
     "videos_title": "🎬 Vídeos dos Projetos",
     "videos_list": "Lista de Vídeos",
@@ -95,10 +96,11 @@
       { "id": "JV1fSU26OI8", "title": "MUSEUVR", "desc": "Projeto MuseuVR — interação natural em ambientes culturais virtuais" },
       { "id": "cnu7cPUpoUw", "title": "DIGITALIZAÇÃO 3D - INS QUÍMICA", "desc": "Processo de digitalização 3D do Instituto de Química da UFRGS" },
       { "id": "D8rCRnvKOtg", "title": "IASPI 3D", "desc": "Modelo 3D do cartão postal em realidade aumentada" },
-      { "id": "dbQSeUF8NOQ", "title": "GRAFITTI VR", "desc": "Experiência de grafitti em realidade virtual" }
+      { "id": "dbQSeUF8NOQ", "title": "GRAFITTI VR", "desc": "Experiência de grafitti em realidade virtual" },
+      { "id": "uyOTGKe0bGo", "title": "GESTURE KEYS", "desc": "Controle seu PC com gestos da mão usando inteligência artificial" }
     ],
     "patent_title": "Patente Registrada",
-    "patent_desc": "Sistema e método para produção de assentos customizáveis — Inovação tecnológica registrada com aplicação industrial.",
+    "patent_desc": "Sistema e método para produção de assentos customizáveis — Inovação tecnológica registrada com aplicação industrial. Registro: BR1020180685074.",
     "awards_title": "Prêmios e Reconhecimentos",
     "awards_bornancini": "Prêmio Bornancini 2024",
     "awards_bornancini_desc": "Categoria Design Digital - Realidade Aumentada e Realidades Extendidas",

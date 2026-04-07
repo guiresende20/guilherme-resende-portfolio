@@ -21,6 +21,7 @@ const PROJECTS: Project[] = [
   { title: "Digitalização 3D: Preservação Patrimonial", type: "Pesquisa", desc: "Desenvolvimento de repositório 3D de digitalizações de prédios históricos voltado à preservação e difusão do patrimônio cultural. O projeto foi um dos resultados do meu mestrado.", tags: ["AR", "Patrimônio Cultural", "Preservação", "Research"], link: "https://www.ufrgs.br/ldsm/3d/", linkType: "iframe" },
   { title: "MataArte", type: "Arte", desc: "Exposição envolvendo imagem generativa a partir de fotos analógicas para exposição numa sala 360°.", tags: ["IA Generativa", "Arte Digital", "Fotografia Analógica", "Exposição 360°"], link: "https://www.youtube.com/embed/-djac5g7_QE", linkType: "youtube" },
   { title: "IASPI AR - 3D", type: "Profissional", desc: "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos.", tags: ["AR", "3D", "Design", "Cartão Postal"], link: "https://www.youtube.com/embed/D8rCRnvKOtg", linkType: "youtube" },
+  { title: "Gesture Keys", type: "IA / Interação", desc: "App que usa inteligência artificial para reconhecer gestos da mão pela webcam e convertê-los em atalhos do teclado. Controle seu PC com gestos.", tags: ["IA", "Computer Vision", "Python", "MediaPipe", "Acessibilidade"], link: "https://www.youtube.com/embed/uyOTGKe0bGo", linkType: "youtube" },
 ];
 
 const VIDEOS = [
@@ -30,6 +31,7 @@ const VIDEOS = [
   { id: "cnu7cPUpoUw", title: "DIGITALIZAÇÃO 3D - INS QUÍMICA UFRGS / CENTRO CULTURAL", desc: "Processo de digitalização 3D do Instituto de Química da UFRGS" },
   { id: "D8rCRnvKOtg", title: "IASPI 3D", desc: "Modelo 3D do cartão postal em realidade aumentada" },
   { id: "dbQSeUF8NOQ", title: "GRAFITTI VR", desc: "Experiência de grafitti em realidade virtual" },
+  { id: "uyOTGKe0bGo", title: "GESTURE KEYS", desc: "Controle seu PC com gestos da mão usando inteligência artificial" },
 ];
 
 function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
