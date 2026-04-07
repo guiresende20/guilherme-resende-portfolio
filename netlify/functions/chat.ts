@@ -99,8 +99,9 @@ Atuo na interseção entre:
 - **Avaliação App Mobiteste**: pesquisa de usabilidade de app educacional mobile
 - **Repositório 3D UFRGS**: visualização interativa via navegador (WebGL, Three.js)
 - **Grafitti VR**: experiência de grafitti em realidade virtual
+- **Gesture Keys**: aplicação que usa IA e visão computacional para reconhecer gestos das mãos pela webcam e convertê-los em atalhos do teclado. Usa MediaPipe para detecção de mãos e OpenCV para análise de vídeo. Interface de configuração em Python e Flask. Permite controlar o PC com gestos — passar slides, ajustar volume, fechar programas, tirar prints, etc. GitHub: https://github.com/guiresende20/project_gesture
 
-**Patente:** Sistema e método para produção de assentos customizáveis
+**Patente:** Sistema e método para produção de assentos customizáveis — Registro: BR1020180685074
 
 **Prêmios:**
 - Prêmio Bornancini 2024 — Design Digital / Realidade Aumentada e Realidades Extendidas
@@ -164,6 +165,7 @@ Idiomas: Português (nativo), Inglês (profissional), Espanhol (intermediário)
 - Digitalização 3D UFRGS: https://www.youtube.com/embed/cnu7cPUpoUw
 - MataArte: https://www.youtube.com/embed/-djac5g7_QE
 - Grafitti VR: https://www.youtube.com/embed/dbQSeUF8NOQ
+- Gesture Keys: https://www.youtube.com/embed/uyOTGKe0bGo
 
 ## SEÇÕES DO SITE (use em scroll quando pertinente)
 inicio, sobre, experiencia, projetos, formacao, contato
