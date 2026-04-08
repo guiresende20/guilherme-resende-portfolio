@@ -24,6 +24,9 @@ export class GeminiLiveChat {
   private currentAiText = "";
   private currentUserText = "";
 
+  // Controle de interrupção: referências aos nós de áudio agendados
+  private scheduledSources: AudioBufferSourceNode[] = [];
+
   constructor(
     private apiKey: string,
     private callbacks: LiveChatCallbacks,
@@ -99,6 +102,12 @@ export class GeminiLiveChat {
         // Transcrição do áudio do usuário
         if (msg.serverContent?.inputTranscription?.text) {
           this.currentUserText += msg.serverContent.inputTranscription.text;
+        }
+
+        if (msg.serverContent?.interrupted) {
+          this.stopPlayback();
+          this.callbacks.onStatusChange("listening");
+          return;
         }
 
         if (msg.serverContent?.modelTurn) {
@@ -223,6 +232,26 @@ export class GeminiLiveChat {
     }
     source.start(this.nextPlayTime);
     this.nextPlayTime += audioBuffer.duration;
+
+    // Guardar referência para poder interromper
+    this.scheduledSources.push(source);
+    source.onended = () => {
+      this.scheduledSources = this.scheduledSources.filter(s => s !== source);
+    };
+  }
+
+  // Parar toda reprodução de áudio agendada (interrupção do usuário)
+  private stopPlayback() {
+    for (const source of this.scheduledSources) {
+      try {
+        source.stop();
+      } catch (_) {
+        // Ignora se já terminou
+      }
+    }
+    this.scheduledSources = [];
+    this.nextPlayTime = 0;
+    this.currentAiText = "";
   }
 
   // Função utilitária
