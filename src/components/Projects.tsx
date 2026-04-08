@@ -1,7 +1,30 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
+
+/** Renderiza descrições com links no formato [texto](url) */
+function renderDesc(desc: string): ReactNode {
+  const regex = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+  const parts: ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = regex.exec(desc)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(desc.slice(lastIndex, match.index));
+    }
+    parts.push(
+      <a key={match.index} href={match[2]} target="_blank" rel="noopener noreferrer" className="text-neon underline underline-offset-2 hover:text-neon/80 transition-colors">
+        {match[1]}
+      </a>
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  if (lastIndex < desc.length) {
+    parts.push(desc.slice(lastIndex));
+  }
+  return parts.length > 0 ? parts : desc;
+}
 
 interface Project {
   title: string;
@@ -14,13 +37,13 @@ interface Project {
 
 const PROJECTS: Project[] = [
   { title: "MuseuVR", type: "Pesquisa", desc: "Projeto de doutorado focado em interação natural em ambientes culturais virtuais, desenvolvendo novas formas de experiência imersiva em museus.", tags: ["Unity", "VR", "Interação Natural"], link: "https://www.youtube.com/embed/JV1fSU26OI8", linkType: "youtube" },
-  { title: "Semear AgroHUB", type: "Profissional", desc: "Desenvolvimento de estratégia, UX e governança para hub de inovação no agronegócio, conectando produtores com tecnologias sustentáveis. Relatórios compilados: https://drive.google.com/file/d/1gzqqo3-NV_Og9F25TjcPWdHq9tUjAXEm/view?usp=sharing", tags: ["UX Strategy", "Service Design", "Governança", "Inovação"], link: "https://drive.google.com/file/d/1MkKQl9d68MFkJwYq07YnHT0efYigdDyX/view?usp=drive_link", linkType: "iframe" },
+  { title: "Semear AgroHUB", type: "Profissional", desc: "Desenvolvimento de estratégia, UX e governança para hub de inovação no agronegócio, conectando produtores com tecnologias sustentáveis. [Relatórios do projeto](https://drive.google.com/file/d/1gzqqo3-NV_Og9F25TjcPWdHq9tUjAXEm/view?usp=sharing)", tags: ["UX Strategy", "Service Design", "Governança", "Inovação"], link: "https://drive.google.com/file/d/1MkKQl9d68MFkJwYq07YnHT0efYigdDyX/view?usp=drive_link", linkType: "iframe" },
   { title: "Projeto Aula 360º", type: "Educacional", desc: "Iniciativa educacional utilizando tecnologias imersivas para criar experiências de aprendizado em realidade virtual.", tags: ["VR", "Educação", "Unity", "Design Educacional"], link: "https://player.vimeo.com/video/53293573", linkType: "vimeo" },
   { title: "Avaliação do App Mobiteste", type: "Pesquisa", desc: "Pesquisa e avaliação de usabilidade do aplicativo educacional Mobiteste, focando na experiência do usuário estudante.", tags: ["UX Research", "Usabilidade", "Mobile UX", "Educação"], link: "https://lume.ufrgs.br/handle/10183/159288", linkType: "iframe" },
   { title: "Ebook Leituras Obrigatórias UFRGS", type: "Editorial", desc: "Desenvolvimento de material educacional digital para auxiliar estudantes com as leituras obrigatórias do vestibular.", tags: ["Design Editorial", "UX", "Educação", "Digital Publishing"], link: null, linkType: "none" },
   { title: "Digitalização 3D: Preservação Patrimonial", type: "Pesquisa", desc: "Desenvolvimento de repositório 3D de digitalizações de prédios históricos voltado à preservação e difusão do patrimônio cultural. O projeto foi um dos resultados do meu mestrado.", tags: ["AR", "Patrimônio Cultural", "Preservação", "Research"], link: "https://www.ufrgs.br/ldsm/3d/", linkType: "iframe" },
   { title: "MataArte", type: "Arte", desc: "Exposição envolvendo imagem generativa a partir de fotos analógicas para exposição numa sala 360°.", tags: ["IA Generativa", "Arte Digital", "Fotografia Analógica", "Exposição 360°"], link: "https://www.youtube.com/embed/-djac5g7_QE", linkType: "youtube" },
-  { title: "IASPI AR - 3D", type: "Profissional", desc: "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos. Detalhamento do projeto: https://drive.google.com/file/d/1ls8JBOotSEa8f7nBAFqPVHz0d7_P59E5/view?usp=sharing", tags: ["AR", "3D", "Design", "Cartão Postal"], link: "https://www.youtube.com/embed/D8rCRnvKOtg", linkType: "youtube" },
+  { title: "IASPI AR - 3D", type: "Profissional", desc: "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos. [Detalhes do projeto](https://drive.google.com/file/d/1ls8JBOotSEa8f7nBAFqPVHz0d7_P59E5/view?usp=sharing)", tags: ["AR", "3D", "Design", "Cartão Postal"], link: "https://www.youtube.com/embed/D8rCRnvKOtg", linkType: "youtube" },
   { title: "Gesture Keys", type: "IA / Interação", desc: "App que usa inteligência artificial para reconhecer gestos da mão pela webcam e convertê-los em atalhos do teclado. Controle seu PC com gestos.", tags: ["IA", "Computer Vision", "Python", "MediaPipe", "Acessibilidade"], link: "https://www.youtube.com/embed/uyOTGKe0bGo", linkType: "youtube" },
 ];
 
@@ -64,7 +87,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
           )}
         </div>
         <div className="flex items-center justify-between px-6 py-3 border-t border-border flex-shrink-0 bg-card">
-          <p className="text-[12px] text-muted-foreground max-w-lg leading-relaxed truncate">{project.desc}</p>
+          <p className="text-[12px] text-muted-foreground max-w-lg leading-relaxed truncate">{renderDesc(project.desc)}</p>
           {project.link && (
             <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-mono text-[10px] text-electric uppercase tracking-[0.06em] hover:text-neon transition-colors flex-shrink-0 ml-4">
               {t('projects.btn_external')} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" /></svg>
@@ -99,7 +122,7 @@ export default function Projects() {
                   <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em] border border-neon/25 px-2.5 py-1">{p.type}</span>
                 </div>
                 <h3 className="font-display font-semibold text-foreground text-[16px] uppercase tracking-tight mb-2">{p.title}</h3>
-                <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
+                <p className="text-[13px] text-muted-foreground leading-relaxed mb-4 flex-1">{renderDesc(p.desc)}</p>
                 <div className="flex flex-wrap gap-1.5 mb-4">
                   {p.tags.map((t) => (
                     <span key={t} className="font-mono text-[9px] text-muted-foreground uppercase tracking-[0.06em] border border-dim px-2 py-0.5">{t}</span>
