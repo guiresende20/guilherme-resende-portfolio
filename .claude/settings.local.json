@@ -4,7 +4,12 @@
       "Bash(npm run:*)",
       "Bash(npx netlify:*)",
       "mcp__claude_ai_Netlify__netlify-deploy-services-updater",
-      "Bash(npx -y @netlify/mcp@latest --site-id a10414d3-0cea-42c0-93a4-a88da8b45517 --proxy-path \"https://netlify-mcp.netlify.app/proxy/eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..cxckTxy46m2KORc8.TyW8G_5O-8Tuz5U70XB_88xlsrdyH7u_De43WCbUc9c8bO85FCVTesP8yAG2EVxbybqm6RRbRcKyCDktkLEi6qzUPC6R4Ei5Fujba2B6E6LlFjHBqZIfzV82LTsQW2RA4or3k0qtgzGD3IbPRBeQ80RW5xnmOVxNaRZ8kzllFUMD-8GZYBF2BnWWPZvLVAxFvRA92GBW9lsspPHHz8Ioqq2zV1_q-Z0687mgBtGJHWyD6ssFz6MEGrh8cZnx9_rAK7ToDH6hm8LKnTVMsQuRCwEsffOeCsC8RnFcZpGdo3FKmvg7g8t7EhJ4MIZUVawf3qgIL7J8AUiLw4N17JVV6OW00Bm4v945e1wfMvoAA9o2AbzIew.tyr_O5dnK8Goudeyv-Zsvg\")"
+      "Bash(npx -y @netlify/mcp@latest --site-id a10414d3-0cea-42c0-93a4-a88da8b45517 --proxy-path \"https://netlify-mcp.netlify.app/proxy/eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..cxckTxy46m2KORc8.TyW8G_5O-8Tuz5U70XB_88xlsrdyH7u_De43WCbUc9c8bO85FCVTesP8yAG2EVxbybqm6RRbRcKyCDktkLEi6qzUPC6R4Ei5Fujba2B6E6LlFjHBqZIfzV82LTsQW2RA4or3k0qtgzGD3IbPRBeQ80RW5xnmOVxNaRZ8kzllFUMD-8GZYBF2BnWWPZvLVAxFvRA92GBW9lsspPHHz8Ioqq2zV1_q-Z0687mgBtGJHWyD6ssFz6MEGrh8cZnx9_rAK7ToDH6hm8LKnTVMsQuRCwEsffOeCsC8RnFcZpGdo3FKmvg7g8t7EhJ4MIZUVawf3qgIL7J8AUiLw4N17JVV6OW00Bm4v945e1wfMvoAA9o2AbzIew.tyr_O5dnK8Goudeyv-Zsvg\")",
+      "Bash(claude:*)",
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)"
     ]
   }
 }

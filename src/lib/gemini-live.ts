@@ -67,7 +67,6 @@ export class GeminiLiveChat {
             }
           }
         };
-        console.log("[Gemini Live] Sending Setup:", setup);
         this.ws?.send(JSON.stringify(setup));
       };
 
@@ -84,8 +83,6 @@ export class GeminiLiveChat {
           console.error("Erro no parse do WebSocket:", e);
           return;
         }
-
-        console.log("[Gemini Live] Received JSON:", msg); // LOG IMPORTANTE
 
         if (msg.error) {
           this.callbacks.onError?.(`API Error: ${msg.error.message || JSON.stringify(msg.error)}`);
@@ -143,8 +140,7 @@ export class GeminiLiveChat {
         this.stop();
       };
 
-      this.ws.onclose = (event) => {
-        console.log(`[Gemini Live] WS Closed: Code=${event.code}, Reason=${event.reason || "vazio"}`);
+      this.ws.onclose = () => {
         this.callbacks.onStatusChange("disconnected");
         this.stop();
       };

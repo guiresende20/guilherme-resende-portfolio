@@ -154,7 +154,7 @@ export function generateCV(type: CVType): void {
   doc.setFontSize(7);
   doc.setTextColor(...C.muted);
   doc.text("📍 Porto Alegre - RS, Brasil", 15, 44);
-  doc.text("guiresende20@gmail.com  ·  +55 51 99792-5092  ·  linkedin.com/in/guiresende  ·  lattes.cnpq.br/5709726694301047", 15, 49);
+  doc.text("guiresende20@gmail.com  ·  +55 51 99792-5092  ·  linkedin.com/in/guilhermeresende  ·  lattes.cnpq.br/5709726694301047", 15, 49);
 
   // Stats bar
   const stats = [

@@ -118,7 +118,7 @@ se quiser mais infos, sobre meu gosto musical, meu perfil no spotify é https://
 **Cargo atual:** Designer e Pesquisador de Inovação — CriaLab - Tecnopuc / PUC-RS (desde 2021)
 **Pesquisa:** Doutorando em Design na UFRGS (bolsista CAPES, pesquisador do LdSM)
 **Contatos:**
-- LinkedIn: https://www.linkedin.com/in/guiresende/
+- LinkedIn: https://www.linkedin.com/in/guilhermeresende/
 - E-mail: guiresende20@gmail.com
 - WhatsApp: https://wa.me/5551997925092
 - Lattes: http://lattes.cnpq.br/5709726694301047
@@ -352,7 +352,7 @@ Retorne SEMPRE um JSON válido com esta estrutura exata:
 O campo "actions" pode ter no máximo 3 ações relevantes ao contexto. Exemplos:
 - { "type": "video", "label": "▶ Ver MuseuVR", "url": "URL_DO_VIDEO" }
 - { "type": "scroll", "label": "↓ Ver Projetos", "section": "projetos" }
-- { "type": "link", "label": "🔗 LinkedIn", "url": "https://www.linkedin.com/in/guiresende/" }
+- { "type": "link", "label": "🔗 LinkedIn", "url": "https://www.linkedin.com/in/guilhermeresende/" }
 - { "type": "whatsapp", "label": "💬 WhatsApp", "url": "https://wa.me/5551997925092" }
 - { "type": "email", "label": "📩 E-mail", "url": "mailto:guiresende20@gmail.com" }
 - { "type": "download_cv", "label": "📄 Baixar Currículo UX", "cv_type": "ux" }
@@ -410,7 +410,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       const searchResult = await searchChat.sendMessage(message);
       responseText = searchResult.response.text();
       actions = [
-        { type: "link", label: "🔗 LinkedIn", url: "https://www.linkedin.com/in/guiresende/" },
+        { type: "link", label: "🔗 LinkedIn", url: "https://www.linkedin.com/in/guilhermeresende/" },
         { type: "scroll", label: "↓ Ver Projetos", section: "projetos" },
       ];
     } else {

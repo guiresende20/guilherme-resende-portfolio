@@ -23,7 +23,8 @@
       { "num": "01", "label": "Patent" },
       { "num": "20+", "label": "Digital Projects" },
       { "num": "08+", "label": "Years Exp." }
-    ]
+    ],
+    "marquee_skills": ["UX/UI Design", "Artificial Intelligence", "Virtual Reality", "Augmented Reality", "3D Printing", "Design & Technology", "Academic Research", "Innovation", "Prototyping", "Interaction Design"]
   },
   "about": {
     "header_label": "About me",
@@ -215,6 +216,28 @@
     "rights": "Guilherme Resende Muniz – All rights reserved."
   },
   "chat": {
-    "welcome": "Hello! I am Guilherme's AI assistant. How can I help you today?"
+    "welcome": "Hello! I am Guilherme's AI assistant. How can I help you today?",
+    "header_name": "Guilherme",
+    "header_suffix": "A.I",
+    "header_status": "Designer & Researcher · Online",
+    "placeholder": "Ask about my experience...",
+    "placeholder_ended": "Session ended",
+    "suggestions_label": "Suggestions:",
+    "suggestion_fit": "🤝 Cultural fit",
+    "suggestion_fit_text": "What kind of work environment do you consider ideal to do your best work?",
+    "suggestion_career": "💼 Professional background",
+    "suggestion_career_text": "Can you tell me about your career path and the main types of projects you've worked on?",
+    "suggestion_academic": "🎓 Academic background",
+    "suggestion_academic_text": "How has your academic background influenced the way you approach problems and projects today?",
+    "session_limit": "Session limit reached",
+    "session_contact": "Get in touch",
+    "tooltip": "Talk with my A.I",
+    "video_title": "Project Video",
+    "powered": "Powered by Gemini · PT · EN · ES",
+    "btn_audio_on": "Speak by Audio",
+    "btn_audio_off": "Disconnect Audio",
+    "live_connecting": "Connecting...",
+    "live_listening": "Listening...",
+    "live_speaking": "Speaking..."
   }
 }

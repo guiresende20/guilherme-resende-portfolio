@@ -2,11 +2,6 @@ import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
-const AREAS = [
-  { icon: "UX", title: "UX/UI Design", desc: "Desenvolvimento de soluções estratégicas e interfaces centradas no usuário.", color: "neon" },
-  { icon: "VR", title: "VR/AR", desc: "Pesquisa e desenvolvimento em tecnologias imersivas e interação natural.", color: "electric" },
-  { icon: "AI", title: "IA em Design", desc: "Utilização de IA para análises estratégicas e geração de insights.", color: "neon" },
-];
 
 export default function About() {
   const { t } = useTranslation();

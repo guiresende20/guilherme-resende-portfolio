@@ -23,7 +23,8 @@
       { "num": "01", "label": "Patente" },
       { "num": "20+", "label": "Projetos Digitais" },
       { "num": "08+", "label": "Anos exp." }
-    ]
+    ],
+    "marquee_skills": ["UX/UI Design", "Inteligência Artificial", "Realidade Virtual", "Realidade Aumentada", "Impressão 3D", "Design & Tecnologia", "Pesquisa Acadêmica", "Inovação", "Prototipagem", "Design de Interação"]
   },
   "about": {
     "header_label": "Sobre mim",
@@ -215,6 +216,28 @@
     "rights": "Guilherme Resende Muniz – Todos os direitos reservados."
   },
   "chat": {
-    "welcome": "Olá! Eu sou o assistente digital do Guilherme. Como posso ajudar você hoje?"
+    "welcome": "Olá! Eu sou o assistente digital do Guilherme. Como posso ajudar você hoje?",
+    "header_name": "Guilherme",
+    "header_suffix": "I.A",
+    "header_status": "Designer & Pesquisador · Online",
+    "placeholder": "Pergunte sobre minha trajetória...",
+    "placeholder_ended": "Sessão encerrada",
+    "suggestions_label": "Sugestões:",
+    "suggestion_fit": "🤝 Fit cultural",
+    "suggestion_fit_text": "Que tipo de ambiente de trabalho você considera ideal para desenvolver seu melhor trabalho?",
+    "suggestion_career": "💼 Background profissional",
+    "suggestion_career_text": "Você pode me contar um pouco sobre sua trajetória profissional e os principais tipos de projetos em que atuou?",
+    "suggestion_academic": "🎓 Background acadêmico",
+    "suggestion_academic_text": "Como sua formação acadêmica influenciou a forma como você aborda problemas e projetos hoje?",
+    "session_limit": "Limite da sessão atingido",
+    "session_contact": "Entrar em contato",
+    "tooltip": "Fale com minha I.A",
+    "video_title": "Vídeo do Projeto",
+    "powered": "Powered by Gemini · PT · EN · ES",
+    "btn_audio_on": "Falar por Áudio",
+    "btn_audio_off": "Desligar Áudio",
+    "live_connecting": "Conectando...",
+    "live_listening": "Ouvindo...",
+    "live_speaking": "Falando..."
   }
 }

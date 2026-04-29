@@ -23,7 +23,8 @@
       { "num": "01", "label": "Patente" },
       { "num": "20+", "label": "Proyectos" },
       { "num": "08+", "label": "Años exp." }
-    ]
+    ],
+    "marquee_skills": ["Diseño UX/UI", "Inteligencia Artificial", "Realidad Virtual", "Realidad Aumentada", "Impresión 3D", "Diseño & Tecnología", "Investigación", "Innovación", "Prototipado", "Diseño de Interacción"]
   },
   "about": {
     "header_label": "Sobre mí",
@@ -215,6 +216,28 @@
     "rights": "Guilherme Resende Muniz – Todos los derechos reservados."
   },
   "chat": {
-    "welcome": "¡Hola, soy yo pero digital! Estás hablando con el IA de Guilherme. Dime cómo puedo ayudarte en español, English, ou Português!"
+    "welcome": "¡Hola, soy yo pero digital! Estás hablando con el IA de Guilherme. Dime cómo puedo ayudarte en español, English, ou Português!",
+    "header_name": "Guilherme",
+    "header_suffix": "I.A",
+    "header_status": "Diseñador & Investigador · Online",
+    "placeholder": "Pregunta sobre mi trayectoria...",
+    "placeholder_ended": "Sesión finalizada",
+    "suggestions_label": "Sugerencias:",
+    "suggestion_fit": "🤝 Encaje cultural",
+    "suggestion_fit_text": "¿Qué tipo de ambiente de trabajo consideras ideal para desarrollar tu mejor trabajo?",
+    "suggestion_career": "💼 Trayectoria profesional",
+    "suggestion_career_text": "¿Puedes contarme un poco sobre tu trayectoria profesional y los principales tipos de proyectos en los que has trabajado?",
+    "suggestion_academic": "🎓 Formación académica",
+    "suggestion_academic_text": "¿Cómo ha influido tu formación académica en la forma en que abordas problemas y proyectos hoy?",
+    "session_limit": "Límite de sesión alcanzado",
+    "session_contact": "Contactar",
+    "tooltip": "Habla con mi I.A",
+    "video_title": "Video del Proyecto",
+    "powered": "Powered by Gemini · PT · EN · ES",
+    "btn_audio_on": "Hablar por Audio",
+    "btn_audio_off": "Desconectar Audio",
+    "live_connecting": "Conectando...",
+    "live_listening": "Escuchando...",
+    "live_speaking": "Hablando..."
   }
 }

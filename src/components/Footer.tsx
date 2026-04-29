@@ -56,8 +56,8 @@ export default function Footer() {
           </span>
           <div className="flex gap-4">
             {[
-              { label: "LinkedIn", href: "https://www.linkedin.com/in/guiresende/" },
-              { label: "Lattes", href: "http://lattes.cnpq.br/" },
+              { label: "LinkedIn", href: "https://www.linkedin.com/in/guilhermeresende/" },
+              { label: "Lattes", href: "http://lattes.cnpq.br/5709726694301047" },
             ].map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
                 className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.08em] hover:text-neon transition-colors">

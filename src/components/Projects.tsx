@@ -35,27 +35,7 @@ interface Project {
   linkType: "youtube" | "vimeo" | "iframe" | "none";
 }
 
-const PROJECTS: Project[] = [
-  { title: "MuseuVR", type: "Pesquisa", desc: "Projeto de doutorado focado em interação natural em ambientes culturais virtuais, desenvolvendo novas formas de experiência imersiva em museus.", tags: ["Unity", "VR", "Interação Natural"], link: "https://www.youtube.com/embed/JV1fSU26OI8", linkType: "youtube" },
-  { title: "Semear AgroHUB", type: "Profissional", desc: "Desenvolvimento de estratégia, UX e governança para hub de inovação no agronegócio, conectando produtores com tecnologias sustentáveis. [Relatórios do projeto](https://drive.google.com/file/d/1gzqqo3-NV_Og9F25TjcPWdHq9tUjAXEm/view?usp=sharing)", tags: ["UX Strategy", "Service Design", "Governança", "Inovação"], link: "https://drive.google.com/file/d/1MkKQl9d68MFkJwYq07YnHT0efYigdDyX/view?usp=drive_link", linkType: "iframe" },
-  { title: "Projeto Aula 360º", type: "Educacional", desc: "Iniciativa educacional utilizando tecnologias imersivas para criar experiências de aprendizado em realidade virtual.", tags: ["VR", "Educação", "Unity", "Design Educacional"], link: "https://player.vimeo.com/video/53293573", linkType: "vimeo" },
-  { title: "Avaliação do App Mobiteste", type: "Pesquisa", desc: "Pesquisa e avaliação de usabilidade do aplicativo educacional Mobiteste, focando na experiência do usuário estudante.", tags: ["UX Research", "Usabilidade", "Mobile UX", "Educação"], link: "https://lume.ufrgs.br/handle/10183/159288", linkType: "iframe" },
-  { title: "Ebook Leituras Obrigatórias UFRGS", type: "Editorial", desc: "Desenvolvimento de material educacional digital para auxiliar estudantes com as leituras obrigatórias do vestibular.", tags: ["Design Editorial", "UX", "Educação", "Digital Publishing"], link: null, linkType: "none" },
-  { title: "Digitalização 3D: Preservação Patrimonial", type: "Pesquisa", desc: "Desenvolvimento de repositório 3D de digitalizações de prédios históricos voltado à preservação e difusão do patrimônio cultural. O projeto foi um dos resultados do meu mestrado.", tags: ["AR", "Patrimônio Cultural", "Preservação", "Research"], link: "https://www.ufrgs.br/ldsm/3d/", linkType: "iframe" },
-  { title: "MataArte", type: "Arte", desc: "Exposição envolvendo imagem generativa a partir de fotos analógicas para exposição numa sala 360°.", tags: ["IA Generativa", "Arte Digital", "Fotografia Analógica", "Exposição 360°"], link: "https://www.youtube.com/embed/-djac5g7_QE", linkType: "youtube" },
-  { title: "IASPI AR - 3D", type: "Profissional", desc: "Criação de um cartão postal com conteúdo em realidade aumentada da cidade de Porto Alegre para o encontro internacional dos parques tecnológicos. [Detalhes do projeto](https://drive.google.com/file/d/1ls8JBOotSEa8f7nBAFqPVHz0d7_P59E5/view?usp=sharing)", tags: ["AR", "3D", "Design", "Cartão Postal"], link: "https://www.youtube.com/embed/D8rCRnvKOtg", linkType: "youtube" },
-  { title: "Gesture Keys", type: "IA / Interação", desc: "App que usa inteligência artificial para reconhecer gestos da mão pela webcam e convertê-los em atalhos do teclado. Controle seu PC com gestos.", tags: ["IA", "Computer Vision", "Python", "MediaPipe", "Acessibilidade"], link: "https://www.youtube.com/embed/uyOTGKe0bGo", linkType: "youtube" },
-];
 
-const VIDEOS = [
-  { id: "MfF3DtRcPt8", title: "MUSEU VR - REPORTAGEM", desc: "Reportagem sobre o projeto de Museu Virtual desenvolvido na UFRGS" },
-  { id: "PnA-OM2vmQ4", title: "TECNOPUC 3D", desc: "Demonstração das tecnologias 3D desenvolvidas no TECNOPUC" },
-  { id: "JV1fSU26OI8", title: "MUSEUVR", desc: "Projeto MuseuVR — interação natural em ambientes culturais virtuais" },
-  { id: "cnu7cPUpoUw", title: "DIGITALIZAÇÃO 3D - INS QUÍMICA UFRGS / CENTRO CULTURAL", desc: "Processo de digitalização 3D do Instituto de Química da UFRGS" },
-  { id: "D8rCRnvKOtg", title: "IASPI 3D", desc: "Modelo 3D do cartão postal em realidade aumentada" },
-  { id: "dbQSeUF8NOQ", title: "GRAFITTI VR", desc: "Experiência de grafitti em realidade virtual" },
-  { id: "uyOTGKe0bGo", title: "GESTURE KEYS", desc: "Controle seu PC com gestos da mão usando inteligência artificial" },
-];
 
 function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
   const { t } = useTranslation();

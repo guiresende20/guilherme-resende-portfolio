@@ -2,32 +2,6 @@ import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
-const JOBS = [
-  {
-    role: "Designer e Pesquisador de Inovação", type: "Atual", org: "CriaLab - Tecnopuc", period: "2021 - presente", loc: "Porto Alegre, RS",
-    items: ["Desenvolvimento de projetos de UX/UI, IA e tecnologias imersivas (VR/AR)", "Soluções estratégicas para empresas como HP e órgãos públicos", "Prototipagem rápida, impressão 3D e facilitação de workshops"],
-  },
-  {
-    role: "Doutorando e Pesquisador", type: "Acadêmico", org: "UFRGS - LdSM", period: "2017 - presente", loc: "Porto Alegre, RS",
-    items: ["Pesquisa em digitalização 3D e interação em realidade virtual", "Desenvolvimento do projeto MuseuVR", "Publicações científicas sobre preservação patrimonial em AR"],
-  },
-  {
-    role: "Professor", type: "Profissional", org: "ESPM", period: "2018 - 2022", loc: "Porto Alegre, RS",
-    items: ["Cursos de Publicidade, Design, Jornalismo e Administração", "Disciplinas: Cibercultura, Mobilidade & Apps, Design Editorial, Design Digital, Consumo digital e entretenimento, Web design, Projeto de Inovação IV Social, Desenho Digital, Mobilidade e Aplicações, Inovação Social"],
-  },
-  {
-    role: "Head de Marketing", type: "Profissional", org: "BSMotion", period: "2017", loc: "Porto Alegre, RS",
-    items: ["Desenvolvimento de soluções de VR com hardware e software integrados", "Estratégia de marketing para startup de tecnologia", "Gestão de equipe e relacionamento com clientes"],
-  },
-  {
-    role: "Gerente de Marketing", type: "Profissional", org: "Anglo Vestibulares", period: "2012-2013 / 2008", loc: "Porto Alegre, RS",
-    items: ["Desenvolvimento do novo site do curso", "Reestruturação da comunicação institucional", "Desenvolvimento de ações promocionais", "Análise de mercado e estratégias competitivas"],
-  },
-  {
-    role: "Executivo de Contas e Curador", type: "Profissional", org: "Campus Party Brasil", period: "2010-2011", loc: "São Paulo, SP",
-    items: ["Curadoria da área de games", "Planejamento de conteúdo e gestão de orçamento", "Relacionamento com patrocinadores e parceiros"],
-  },
-];
 
 interface Job {
   role: string;

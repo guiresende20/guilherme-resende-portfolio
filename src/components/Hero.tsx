@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 
-const SKILLS = ["UX/UI Design", "Inteligência Artificial", "Realidade Virtual", "Realidade Aumentada", "Impressão 3D", "Design & Tecnologia", "Pesquisa Acadêmica", "Inovação", "Prototipagem", "Design de Interação"];
 
 function AnimatedWord({ text, delay, className }: { text: string; delay: number; className?: string }) {
   return (
@@ -19,6 +18,7 @@ function AnimatedWord({ text, delay, className }: { text: string; delay: number;
 export default function Hero() {
   const { t } = useTranslation();
   const stats = t('hero.stats', { returnObjects: true }) as {num: string, label: string}[];
+  const skills = t('hero.marquee_skills', { returnObjects: true }) as string[];
 
   return (
     <section id="inicio" className="relative min-h-screen flex flex-col justify-center overflow-hidden">
@@ -106,7 +106,7 @@ export default function Hero() {
         <div className="flex w-max animate-marquee">
           {[0, 1].map((r) => (
             <span key={r} className="flex">
-              {SKILLS.map((s, i) => (
+              {skills.map((s, i) => (
                 <span key={`${r}-${i}`} className="font-mono text-[12px] uppercase tracking-[0.06em] whitespace-nowrap px-3">
                   <span className={i % 3 === 0 ? "text-neon font-medium" : "text-muted-foreground"}>{s}</span>
                   <span className="text-dim mx-3">•</span>

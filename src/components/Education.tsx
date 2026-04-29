@@ -2,35 +2,6 @@ import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
-const EDU = [
-  {
-    degree: "Doutorado em Design", period: "2017 - em andamento", org: "Universidade Federal do Rio Grande do Sul (UFRGS)",
-    desc: "Pesquisa em digitalização 3D e interação em realidade virtual. Desenvolvimento do projeto MuseuVR para interação natural em ambientes culturais virtuais.",
-    highlights: ["Bolsista CAPES", "Pesquisador do LdSM", "Publicações internacionais"],
-  },
-  {
-    degree: "Mestrado em Design e Tecnologia", period: "2013 - 2015", org: "Universidade Federal do Rio Grande do Sul (UFRGS)",
-    desc: "Formação avançada em design e tecnologia com foco em inovação e metodologias de pesquisa.",
-    highlights: ["Dissertação aprovada", "Participação em congressos", "Pesquisa aplicada"],
-    extra: "Dissertação: O uso do design e de tecnologias 3D na criação do repositório digital de elementos de fachada de prédios históricos da UFRGS",
-  },
-  {
-    degree: "Bacharelado em Comunicação Social - Publicidade", period: "2004 - 2010", org: "Universidade Federal do Rio Grande do Sul (UFRGS)",
-    desc: "Formação em comunicação social com especialização em publicidade e propaganda.",
-    highlights: ["Formação completa", "Projetos práticos", "Base sólida em comunicação"],
-    extra: "TCC: Do Napster ao Grooveshark: uma análise comparativa da evolução do compartilhamento de música na internet",
-  },
-  {
-    degree: "English for Business", period: "2009 - 2010", org: "Leinster College - Irlanda",
-    desc: "Curso de inglês para negócios com imersão cultural na Irlanda.",
-    highlights: ["Certificação internacional", "Fluência em inglês", "Experiência internacional"],
-  },
-  {
-    degree: "Chora PPT - Apresentações Criativas", period: "2011", org: "Perestroika",
-    desc: "Curso especializado em criação de apresentações criativas e storytelling.",
-    highlights: ["Certificação em apresentações", "Técnicas avançadas", "Storytelling"],
-  },
-];
 
 interface EduItem {
   degree: string;

@@ -29,6 +29,7 @@ function TypingDots() {
 }
 
 function VideoModal({ url, onClose }: { url: string; onClose: () => void }) {
+  const { t } = useTranslation();
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
@@ -40,7 +41,7 @@ function VideoModal({ url, onClose }: { url: string; onClose: () => void }) {
       <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm" onClick={onClose} />
       <div className="fixed inset-4 md:inset-16 lg:inset-24 z-[61] flex flex-col bg-card border border-border rounded-md overflow-hidden shadow-[0_0_60px_rgba(0,255,135,0.1)]">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card/80 flex-shrink-0">
-          <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em]">Vídeo do Projeto</span>
+          <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em]">{t('chat.video_title')}</span>
           <button onClick={onClose} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -53,7 +54,7 @@ function VideoModal({ url, onClose }: { url: string; onClose: () => void }) {
             className="absolute inset-0 w-full h-full border-0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen
-            title="Vídeo do projeto"
+            title={t('chat.video_title')}
           />
         </div>
       </div>
@@ -287,9 +288,9 @@ export default function ChatWidget() {
 
   // Quick question suggestions for first interaction
   const suggestions = [
-    { label: "🤝 Fit cultural", text: "Que tipo de ambiente de trabalho você considera ideal para desenvolver seu melhor trabalho?" },
-    { label: "💼 Background profissional", text: "Você pode me contar um pouco sobre sua trajetória profissional e os principais tipos de projetos em que atuou?" },
-    { label: "🎓 Background acadêmico", text: "Como sua formação acadêmica influenciou a forma como você aborda problemas e projetos hoje?" },
+    { label: t('chat.suggestion_fit'), text: t('chat.suggestion_fit_text') },
+    { label: t('chat.suggestion_career'), text: t('chat.suggestion_career_text') },
+    { label: t('chat.suggestion_academic'), text: t('chat.suggestion_academic_text') },
   ];
 
   const isExhausted = messages.length >= MAX_MESSAGES;
@@ -305,7 +306,7 @@ export default function ChatWidget() {
         {!isOpen && (
           <button
             onClick={() => setIsOpen(true)}
-            aria-label="Abrir chat com Guilherme IA"
+            aria-label={t('chat.tooltip')}
             className="relative group w-14 h-14 rounded-full bg-neon flex items-center justify-center shadow-neon-strong hover:shadow-[0_0_40px_rgba(0,255,135,0.5)] transition-all duration-300 hover:scale-110 animate-neon-pulse"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -313,7 +314,7 @@ export default function ChatWidget() {
             </svg>
             <span className="absolute inset-0 rounded-full border-2 border-neon/40 animate-ping" style={{ animationDuration: "2.5s" }} />
             <span className="absolute right-16 top-1/2 -translate-y-1/2 whitespace-nowrap font-mono text-[11px] text-neon bg-background/90 border border-neon/20 px-2.5 py-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none backdrop-blur-sm">
-              Fale com minha I.A
+              {t('chat.tooltip')}
             </span>
           </button>
         )}
@@ -337,14 +338,14 @@ export default function ChatWidget() {
               </div>
               <div>
                 <p className="font-display font-semibold text-foreground text-[14px] uppercase tracking-tight leading-none">
-                  Guilherme <span className="text-neon">I.A</span>
+                  {t('chat.header_name')} <span className="text-neon">{t('chat.header_suffix')}</span>
                 </p>
                 <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-[0.08em] mt-0.5">
-                  Designer & Pesquisador · Online
+                  {t('chat.header_status')}
                 </p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} aria-label="Fechar chat"
+            <button onClick={() => setIsOpen(false)} aria-label="Close chat"
               className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-all">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
@@ -363,7 +364,7 @@ export default function ChatWidget() {
             {/* Quick suggestions on first message */}
             {isFirstMessage && !isLoading && (
               <div className="mt-1 mb-2">
-                <p className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.08em] mb-2">Sugestões:</p>
+                <p className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.08em] mb-2">{t('chat.suggestions_label')}</p>
                 <div className="flex flex-col gap-1.5">
                   {suggestions.map((s) => (
                     <button key={s.label} onClick={() => { setInput(s.text); setTimeout(() => inputRef.current?.focus(), 50); }}
@@ -391,9 +392,9 @@ export default function ChatWidget() {
                  <div className="flex items-center gap-2 bg-card border border-neon/50 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,135,0.2)]">
                    <div className="w-2 h-2 rounded-full bg-neon animate-ping" />
                    <span className="font-mono text-[10px] text-neon uppercase tracking-wider">
-                     {liveStatus === "connecting" && "Conectando..."}
-                     {liveStatus === "listening" && "Ouvindo..."}
-                     {liveStatus === "speaking" && "Falando..."}
+                     {liveStatus === "connecting" && t('chat.live_connecting')}
+                     {liveStatus === "listening" && t('chat.live_listening')}
+                     {liveStatus === "speaking" && t('chat.live_speaking')}
                    </span>
                    {liveStatus === "speaking" && (
                      <div className="flex items-center gap-1 h-3 ml-2">
@@ -408,9 +409,9 @@ export default function ChatWidget() {
 
             {isExhausted && !isLoading && (
               <p className="text-center font-mono text-[10px] text-muted-foreground uppercase tracking-[0.06em] mt-2 border-t border-border pt-3">
-                Limite da sessão atingido ·{" "}
+                {t('chat.session_limit')} ·{" "}
                 <a href="mailto:guiresende20@gmail.com" className="text-electric hover:text-neon transition-colors">
-                  Entrar em contato
+                  {t('chat.session_contact')}
                 </a>
               </p>
             )}
@@ -427,12 +428,12 @@ export default function ChatWidget() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isExhausted ? "Sessão encerrada" : "Pergunte sobre minha trajetória..."}
+                placeholder={isExhausted ? t('chat.placeholder_ended') : t('chat.placeholder')}
                 disabled={isLoading || isExhausted || liveStatus !== "disconnected"}
                 className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-[13px] font-sans text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-neon/40 focus:ring-1 focus:ring-neon/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               />
               
-              <button onClick={toggleLiveAudio} title={liveStatus === "disconnected" ? "Falar por Áudio" : "Desligar Áudio"}
+              <button onClick={toggleLiveAudio} title={liveStatus === "disconnected" ? t('chat.btn_audio_on') : t('chat.btn_audio_off')}
                 className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-md transition-all duration-200 hover:scale-105 ${
                   liveStatus !== "disconnected" 
                     ? "bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
@@ -454,7 +455,7 @@ export default function ChatWidget() {
               </button>
             </div>
             <p className="font-mono text-[9px] text-muted-foreground/40 uppercase tracking-[0.06em] mt-2 text-center">
-              Powered by Gemini Pro · PT · EN · ES
+              {t('chat.powered')}
             </p>
           </div>
         </div>

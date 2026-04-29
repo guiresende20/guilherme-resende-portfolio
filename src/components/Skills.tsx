@@ -12,49 +12,6 @@ interface SkillGroup {
   skills: Skill[];
 }
 
-const GROUPS: SkillGroup[] = [
-  {
-    title: "UX/UI Design",
-    skills: [
-      { name: "Figma", pct: 95 },
-      { name: "User Research", pct: 90 },
-      { name: "Prototipagem", pct: 95 },
-      { name: "Design Thinking", pct: 90 },
-      { name: "Service Design", pct: 85 },
-      { name: "Usabilidade", pct: 90 },
-    ],
-  },
-  {
-    title: "Inteligência Artificial",
-    skills: [
-      { name: "IA aplicada a Design", pct: 85 },
-      { name: "Análises Estratégicas", pct: 80 },
-      { name: "Geração de Insights", pct: 85 },
-      { name: "Data Analysis", pct: 75 },
-      { name: "AI Ethics", pct: 80 },
-    ],
-  },
-  {
-    title: "VR/AR & 3D",
-    skills: [
-      { name: "Unity 3D", pct: 90 },
-      { name: "Blender", pct: 85 },
-      { name: "Realidade Virtual", pct: 95 },
-      { name: "Realidade Aumentada", pct: 85 },
-      { name: "Digitalização 3D", pct: 90 },
-      { name: "Impressão 3D", pct: 85 },
-    ],
-  },
-  {
-    title: "Desenvolvimento & Tecnologia",
-    skills: [
-      { name: "HTML/CSS", pct: 85 },
-      { name: "JavaScript", pct: 75 },
-      { name: "Python", pct: 50 },
-      { name: "Prototipagem Rápida", pct: 90 },
-    ],
-  },
-];
 
 interface Language {
   name: string;
