@@ -2,6 +2,8 @@ import type { Handler, HandlerEvent } from "@netlify/functions";
 
 // Origens permitidas — seu domínio de produção + dev local
 const ALLOWED_ORIGINS = [
+  "https://guiresende20.netlify.app",
+  "https://main--guiresende20.netlify.app",
   "https://guilhermeresende.netlify.app",
   "http://localhost:8888",
   "http://localhost:5173",
