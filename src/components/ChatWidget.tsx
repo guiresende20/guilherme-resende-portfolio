@@ -111,7 +111,7 @@ function ChatBubble({ msg, isLast, onVideo }: { msg: Message; isLast: boolean; o
       <div className={`flex ${isUser ? "justify-end" : "justify-start"} w-full`}>
         {!isUser && (
           <div className="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden border border-neon/30 mr-2 mt-0.5">
-            <img src="/guilherme-foto.png" alt="Guilherme" className="w-full h-full object-cover" />
+            <img src="/guilherme-foto.webp" alt="Guilherme" loading="lazy" decoding="async" className="w-full h-full object-cover" />
           </div>
         )}
         <div
@@ -333,7 +333,7 @@ export default function ChatWidget() {
           <div className="flex items-center justify-between px-4 py-3 border-b border-border flex-shrink-0 bg-card/60 backdrop-blur-sm">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <img src="/guilherme-foto.png" alt="Guilherme" className="w-9 h-9 rounded-full object-cover border border-neon/30" />
+                <img src="/guilherme-foto.webp" alt="Guilherme" loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover border border-neon/30" />
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-neon border-2 border-background shadow-[0_0_6px_rgba(0,255,135,0.8)]" />
               </div>
               <div>
@@ -379,7 +379,7 @@ export default function ChatWidget() {
             {isLoading && (
               <div className="flex justify-start mb-3">
                 <div className="flex-shrink-0 w-7 h-7 rounded-full overflow-hidden border border-neon/30 mr-2 mt-0.5">
-                  <img src="/guilherme-foto.png" alt="Guilherme" className="w-full h-full object-cover" />
+                  <img src="/guilherme-foto.webp" alt="Guilherme" loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </div>
                 <div className="bg-card border border-border rounded-md rounded-bl-sm px-3.5 py-2.5">
                   <TypingDots />

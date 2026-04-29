@@ -37,7 +37,7 @@ export default function Hero() {
 
         <div className="mb-4 flex items-center gap-4 opacity-0 animate-fade-up" style={{ animationDelay: "0.2s" }}>
           <img
-            src="/guilherme-foto.png"
+            src="/guilherme-foto.webp"
             alt="Guilherme Resende"
             className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-neon/30"
           />

@@ -11,13 +11,19 @@ const ALLOWED_ORIGINS = [
 
 const handler: Handler = async (event: HandlerEvent) => {
   const origin = event.headers["origin"] || event.headers["Origin"] || "";
+  const referer = event.headers["referer"] || event.headers["Referer"] || "";
+
+  // Same-origin GET no browser não envia Origin — aceita Referer como fallback
+  const isAllowed =
+    (origin && ALLOWED_ORIGINS.includes(origin)) ||
+    ALLOWED_ORIGINS.some((allowed) => referer.startsWith(allowed + "/") || referer === allowed);
 
   // Preflight CORS
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 204,
       headers: {
-        "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : "",
+        "Access-Control-Allow-Origin": isAllowed ? origin : "",
         "Access-Control-Allow-Methods": "GET, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
       },
@@ -29,8 +35,7 @@ const handler: Handler = async (event: HandlerEvent) => {
     return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
   }
 
-  // Bloqueia requests sem origin ou de origem não autorizada
-  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+  if (!isAllowed) {
     return {
       statusCode: 403,
       body: JSON.stringify({ error: "Acesso não autorizado" }),

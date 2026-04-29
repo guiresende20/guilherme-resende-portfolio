@@ -43,7 +43,7 @@ export class GeminiLiveChat {
       });
 
       // 2. Conectar WebSocket
-      const wssUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${this.apiKey}`;
+      const wssUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${this.apiKey}`;
       this.ws = new WebSocket(wssUrl);
 
       this.ws.onopen = () => {
