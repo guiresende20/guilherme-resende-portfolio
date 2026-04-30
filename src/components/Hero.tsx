@@ -39,6 +39,10 @@ export default function Hero() {
           <img
             src="/guilherme-foto.webp"
             alt="Guilherme Resende"
+            width="96"
+            height="96"
+            fetchPriority="high"
+            decoding="async"
             className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-neon/30"
           />
           <div>

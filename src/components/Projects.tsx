@@ -130,7 +130,7 @@ export default function Projects() {
             <div className="grid lg:grid-cols-[1fr_320px] gap-5">
               <div className="bg-card border border-border rounded-md overflow-hidden">
                 <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                  <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${videos[activeVideo].id}?rel=0`} title={videos[activeVideo].title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                  <iframe className="absolute inset-0 w-full h-full" src={`https://www.youtube.com/embed/${videos[activeVideo].id}?rel=0`} title={videos[activeVideo].title} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen loading="lazy" />
                 </div>
                 <div className="p-5">
                   <h4 className="font-display font-semibold text-foreground text-[15px] uppercase tracking-tight">{videos[activeVideo].title}</h4>
