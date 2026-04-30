@@ -226,6 +226,7 @@ Integração de processamento de vídeo com sistema de automação de atalhos
 Utilização de MediaPipe para detecção de mãos e OpenCV para análise de vídeo
 Desenvolvimento da interface de configuração em Python e Flask
 Resultados: aplicação capaz de executar comandos como passar slides, controlar volume, fechar programas, tirar prints e acionar atalhos do sistema apenas com gestos das mãos.
+Download para testes (.exe Windows): https://drive.google.com/file/d/1rpL0BNna9_d-OzknEKFjlttSoOtAZL5I/view?usp=sharing
 
 ## FORMAÇÃO ACADÊMICA
 
@@ -259,7 +260,7 @@ Para saber mais sobre minha produção acadêmica, você pode acessar meu currí
 - **Avaliação App Mobiteste**: pesquisa de usabilidade de app educacional mobile
 - **Repositório 3D UFRGS**: visualização interativa via navegador (WebGL, Three.js)
 - **Grafitti VR**: experiência de grafitti em realidade virtual
-- **Gesture Keys**: aplicação que usa IA e visão computacional para reconhecer gestos das mãos pela webcam e convertê-los em atalhos do teclado. Usa MediaPipe para detecção de mãos e OpenCV para análise de vídeo. Interface de configuração em Python e Flask. Permite controlar o PC com gestos — passar slides, ajustar volume, fechar programas, tirar prints, etc. GitHub: https://github.com/guiresende20/project_gesture
+- **Gesture Keys**: aplicação que usa IA e visão computacional para reconhecer gestos das mãos pela webcam e convertê-los em atalhos do teclado. Usa MediaPipe para detecção de mãos e OpenCV para análise de vídeo. Interface de configuração em Python e Flask. Permite controlar o PC com gestos — passar slides, ajustar volume, fechar programas, tirar prints, etc. GitHub: https://github.com/guiresende20/project_gesture. Download .exe para testes (Windows): https://drive.google.com/file/d/1rpL0BNna9_d-OzknEKFjlttSoOtAZL5I/view?usp=sharing
 
 **Patente:** Sistema e método para produção de assentos customizáveis — Registro: BR1020180685074
 

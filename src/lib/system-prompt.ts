@@ -219,6 +219,7 @@ Integração de processamento de vídeo com sistema de automação de atalhos
 Utilização de MediaPipe para detecção de mãos e OpenCV para análise de vídeo
 Desenvolvimento da interface de configuração em Python e Flask
 Resultados: aplicação capaz de executar comandos como passar slides, controlar volume, fechar programas, tirar prints e acionar atalhos do sistema apenas com gestos das mãos.
+Download para testes (.exe Windows): https://drive.google.com/file/d/1rpL0BNna9_d-OzknEKFjlttSoOtAZL5I/view?usp=sharing
 
 ## FORMAÇÃO ACADÊMICA
 
