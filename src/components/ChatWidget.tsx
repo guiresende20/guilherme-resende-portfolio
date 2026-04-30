@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { sendChatMessage, WELCOME_MESSAGE, type ChatHistory, type ChatAction, type ChatResponse } from "@/lib/gemini";
-import { generateCV, type CVType } from "@/lib/generateCV";
+import type { CVType } from "@/lib/generateCV";
 import { GeminiLiveChat, type LiveChatStatus } from "@/lib/gemini-live";
 import { SYSTEM_PROMPT } from "@/lib/system-prompt";
 import { Mic, MicOff } from "lucide-react";
@@ -63,7 +63,8 @@ function VideoModal({ url, onClose }: { url: string; onClose: () => void }) {
 }
 
 function ActionButton({ action, onVideo }: { action: ChatAction; onVideo: (url: string) => void }) {
-  const handleClick = () => {
+  const [loadingCV, setLoadingCV] = useState(false);
+  const handleClick = async () => {
     switch (action.type) {
       case "video":
         if (action.url) onVideo(action.url);
@@ -80,7 +81,15 @@ function ActionButton({ action, onVideo }: { action: ChatAction; onVideo: (url: 
         if (action.url) window.open(action.url, "_blank", "noopener,noreferrer");
         break;
       case "download_cv":
-        if (action.cv_type) generateCV(action.cv_type as CVType);
+        if (action.cv_type && !loadingCV) {
+          setLoadingCV(true);
+          try {
+            const { generateCV } = await import("@/lib/generateCV");
+            generateCV(action.cv_type as CVType);
+          } finally {
+            setLoadingCV(false);
+          }
+        }
         break;
     }
   };
@@ -97,9 +106,11 @@ function ActionButton({ action, onVideo }: { action: ChatAction; onVideo: (url: 
   return (
     <button
       onClick={handleClick}
-      className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.06em] border px-3 py-1.5 rounded-sm transition-all duration-200 hover:-translate-y-px ${styles[action.type] || styles.link}`}
+      disabled={loadingCV}
+      aria-busy={loadingCV}
+      className={`inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.06em] border px-3 py-1.5 rounded-sm transition-all duration-200 hover:-translate-y-px disabled:opacity-60 disabled:cursor-wait ${styles[action.type] || styles.link}`}
     >
-      {action.label}
+      {loadingCV ? "Gerando..." : action.label}
     </button>
   );
 }

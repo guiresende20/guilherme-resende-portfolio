@@ -52,6 +52,18 @@ function addPageBackground(doc: jsPDF) {
   doc.rect(0, 0, 210, 297, "F");
 }
 
+function addPageBreak(doc: jsPDF): number {
+  doc.addPage();
+  addPageBackground(doc);
+  doc.setFillColor(...C.neon);
+  doc.rect(0, 0, 4, 297, "F");
+  return 15;
+}
+
+function ensureSpace(doc: jsPDF, y: number, needed: number): number {
+  return y + needed > 278 ? addPageBreak(doc) : y;
+}
+
 function addSection(doc: jsPDF, label: string, y: number): number {
   doc.setDrawColor(...C.neon);
   doc.setLineWidth(0.3);
@@ -153,7 +165,7 @@ export function generateCV(type: CVType): void {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...C.muted);
-  doc.text("📍 Porto Alegre - RS, Brasil", 15, 44);
+  doc.text("Porto Alegre - RS, Brasil", 15, 44);
   doc.text("guiresende20@gmail.com  ·  +55 51 99792-5092  ·  linkedin.com/in/guilhermeresende  ·  lattes.cnpq.br/5709726694301047", 15, 49);
 
   // Stats bar
@@ -218,18 +230,37 @@ export function generateCV(type: CVType): void {
   ], y);
 
   if (type !== "ux") {
+    y = ensureSpace(doc, y, 30);
     y = addItem(doc, "Professor", "ESPM Porto Alegre", "2018 – 2022", [
       "Disciplinas: Cibercultura, Web Design, Design Digital, Inovação Social, Mobilidade & Apps",
     ], y);
   }
 
-  if (y > 240) {
-    doc.addPage();
-    addPageBackground(doc);
-    doc.setFillColor(...C.neon);
-    doc.rect(0, 0, 4, 297, "F");
-    y = 15;
+  if (type === "full") {
+    y = ensureSpace(doc, y, 30);
+    y = addItem(doc, "Head de Marketing", "BSMotion", "2017", [
+      "Desenvolvimento de soluções de VR com hardware e software integrados",
+      "Estratégia de marketing para startup de tecnologia",
+      "Gestão de equipe e relacionamento com clientes",
+    ], y);
+
+    y = ensureSpace(doc, y, 35);
+    y = addItem(doc, "Gerente de Marketing", "Anglo Vestibulares", "2012 – 2013 / 2008", [
+      "Desenvolvimento do novo site do curso",
+      "Reestruturação da comunicação institucional",
+      "Desenvolvimento de ações promocionais",
+      "Análise de mercado e estratégias competitivas",
+    ], y);
+
+    y = ensureSpace(doc, y, 30);
+    y = addItem(doc, "Executivo de Contas e Curador", "Campus Party Brasil — São Paulo", "2010 – 2011", [
+      "Curadoria da área de games",
+      "Planejamento de conteúdo e gestão de orçamento",
+      "Relacionamento com patrocinadores e parceiros",
+    ], y);
   }
+
+  y = ensureSpace(doc, y, 50);
 
   // ── Formação ──────────────────────────────────────────────────────────────────
   y = addSection(doc, "Formação Acadêmica", y);
@@ -245,19 +276,19 @@ export function generateCV(type: CVType): void {
   y = addItem(doc, "Bacharelado em Comunicação Social — Publicidade", "UFRGS", "2004 – 2010", [], y);
 
   if (type === "academic" || type === "full") {
+    y = ensureSpace(doc, y, 20);
     y = addItem(doc, "English for Business", "Leinster College — Irlanda", "2009 – 2010", [], y);
   }
 
-  // ── Skills ────────────────────────────────────────────────────────────────────
-  if (y > 230) {
-    doc.addPage();
-    addPageBackground(doc);
-    doc.setFillColor(...C.neon);
-    doc.rect(0, 0, 4, 297, "F");
-    y = 15;
+  if (type === "full") {
+    y = ensureSpace(doc, y, 20);
+    y = addItem(doc, "Chora PPT — Apresentações Criativas", "Perestroika", "2011", [], y);
   }
 
-  y = addSection(doc, "Competências", y);
+  // ── Skills ────────────────────────────────────────────────────────────────────
+  if (type !== "full") {
+    y = ensureSpace(doc, y, 50);
+    y = addSection(doc, "Competências", y);
 
   const skillGroups =
     type === "ux"
@@ -295,24 +326,26 @@ export function generateCV(type: CVType): void {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(7);
       doc.setTextColor(...C.white);
-      doc.text(`→ ${item}`, cx + 4, sy);
+      doc.text(`- ${item}`, cx + 4, sy);
       sy += 5;
     }
     if (sy > maxY) maxY = sy;
   });
 
-  y = maxY + 6;
+    y = maxY + 6;
+  }
 
   // ── Prêmios & Idiomas ──────────────────────────────────────────────────────────
+  y = ensureSpace(doc, y, 35);
   y = addSection(doc, "Prêmios · Patente · Idiomas", y);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...C.white);
-  doc.text("🏆 Prêmio Bornancini 2024 — Design Digital · Realidade Aumentada", 15, y);
+  doc.text("Prêmio Bornancini 2024 — Design Digital · Realidade Aumentada", 15, y);
   y += 5;
-  doc.text("🏆 39º Prêmio Direitos Humanos de Jornalismo 2022 — Menção honrosa (Revista Ceos)", 15, y);
+  doc.text("39º Prêmio Direitos Humanos de Jornalismo 2022 — Menção honrosa (Revista Ceos)", 15, y);
   y += 5;
-  doc.text("🔬 Patente Registrada — Sistema e método para produção de assentos customizáveis", 15, y);
+  doc.text("Patente Registrada — Sistema e método para produção de assentos customizáveis", 15, y);
   y += 5;
   doc.setTextColor(...C.muted);
   doc.text("Idiomas: Português (Nativo)  ·  Inglês (Profissional)  ·  Espanhol (Intermediário)", 15, y);
