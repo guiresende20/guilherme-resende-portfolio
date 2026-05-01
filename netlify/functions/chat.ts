@@ -1,6 +1,42 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
+import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
+import { checkRateLimits } from "./_lib/ratelimit";
+
+const CHAT_RATE_LIMITS = [
+  { limit: 10, windowMs: 60_000, label: "min" },
+  { limit: 50, windowMs: 60 * 60_000, label: "hour" },
+];
+
+const MAX_MESSAGE_LEN = 2000;
+const MAX_HISTORY_ENTRIES = 50;
+const MAX_HISTORY_PART_LEN = 4000;
+
+type HistoryEntry = { role: "user" | "model"; parts: { text: string }[] };
+
+function validateHistory(value: unknown): HistoryEntry[] | null {
+  if (value === undefined || value === null) return [];
+  if (!Array.isArray(value)) return null;
+  if (value.length > MAX_HISTORY_ENTRIES) return null;
+  const result: HistoryEntry[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") return null;
+    const entry = item as { role?: unknown; parts?: unknown };
+    if (entry.role !== "user" && entry.role !== "model") return null;
+    if (!Array.isArray(entry.parts)) return null;
+    const parts: { text: string }[] = [];
+    for (const part of entry.parts) {
+      if (!part || typeof part !== "object") return null;
+      const text = (part as { text?: unknown }).text;
+      if (typeof text !== "string") return null;
+      if (text.length > MAX_HISTORY_PART_LEN) return null;
+      parts.push({ text });
+    }
+    result.push({ role: entry.role, parts });
+  }
+  return result;
+}
 
 // ─── System Prompt Completo ────────────────────────────────────────────────────
 const SYSTEM_PROMPT = `Você é uma inteligência artificial baseada na trajetória, no pensamento e na forma de atuação de Guilherme Resende Muniz.
@@ -367,26 +403,50 @@ Regras para actions:
 
 // ─── Handler ───────────────────────────────────────────────────────────────────
 const handler: Handler = async (event: HandlerEvent) => {
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
+  const origin = getRequestOrigin(event);
+  const allowed = isOriginAllowed(origin);
+
+  if (event.httpMethod === "OPTIONS") {
+    if (!allowed) return { statusCode: 403, body: "" };
+    return { statusCode: 204, headers: corsHeaders(origin, "POST"), body: "" };
   }
 
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Content-Type": "application/json",
-  };
+  if (!allowed) {
+    return { statusCode: 403, body: JSON.stringify({ error: "Origem não autorizada" }) };
+  }
+
+  const headers = { ...corsHeaders(origin, "POST"), "Content-Type": "application/json" };
+
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
+  }
+
+  const ip = getClientIp(event);
+  const rate = checkRateLimits("chat", ip, CHAT_RATE_LIMITS);
+  if (!rate.ok) {
+    return {
+      statusCode: 429,
+      headers: { ...headers, "Retry-After": String(rate.retryAfter) },
+      body: JSON.stringify({ error: "Muitas requisições. Tente novamente em instantes." }),
+    };
+  }
 
   try {
-    const { message, history } = JSON.parse(event.body || "{}");
+    const { message, history: rawHistory } = JSON.parse(event.body || "{}");
 
-    if (!message || typeof message !== "string") {
+    if (!message || typeof message !== "string" || message.length > MAX_MESSAGE_LEN) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: "Mensagem inválida" }) };
+    }
+
+    const history = validateHistory(rawHistory);
+    if (history === null) {
+      return { statusCode: 400, headers, body: JSON.stringify({ error: "Histórico inválido" }) };
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return { statusCode: 500, headers, body: JSON.stringify({ error: "API key não configurada" }) };
+      console.error("chat: GEMINI_API_KEY ausente");
+      return { statusCode: 500, headers, body: JSON.stringify({ error: "Erro interno" }) };
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -407,7 +467,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
       });
 
-      const searchChat = searchModel.startChat({ history: Array.isArray(history) ? history : [] });
+      const searchChat = searchModel.startChat({ history });
       const searchResult = await searchChat.sendMessage(message);
       responseText = searchResult.response.text();
       actions = [
@@ -427,7 +487,7 @@ const handler: Handler = async (event: HandlerEvent) => {
         },
       });
 
-      const chat = model.startChat({ history: Array.isArray(history) ? history : [] });
+      const chat = model.startChat({ history });
       const result = await chat.sendMessage(message);
       const raw = result.response.text();
       let cleanRaw = raw.trim();
@@ -471,11 +531,10 @@ const handler: Handler = async (event: HandlerEvent) => {
     };
   } catch (error: unknown) {
     console.error("Gemini API error:", error);
-    const message = error instanceof Error ? error.message : "Erro desconhecido";
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: message }),
+      body: JSON.stringify({ error: "Erro ao processar sua mensagem" }),
     };
   }
 };

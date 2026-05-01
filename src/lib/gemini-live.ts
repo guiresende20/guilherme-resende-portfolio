@@ -28,7 +28,7 @@ export class GeminiLiveChat {
   private scheduledSources: AudioBufferSourceNode[] = [];
 
   constructor(
-    private apiKey: string,
+    private ephemeralToken: string,
     private callbacks: LiveChatCallbacks,
     private systemInstruction: string
   ) { }
@@ -42,8 +42,9 @@ export class GeminiLiveChat {
         sampleRate: 16000, // Gemini espera 16kHz para input
       });
 
-      // 2. Conectar WebSocket
-      const wssUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=${this.apiKey}`;
+      // 2. Conectar WebSocket usando ephemeral token (v1alpha + Constrained path).
+      // Master key fica no servidor; este token é single-use, expira em ~30min.
+      const wssUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(this.ephemeralToken)}`;
       this.ws = new WebSocket(wssUrl);
 
       this.ws.onopen = () => {

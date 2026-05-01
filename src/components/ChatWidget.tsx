@@ -210,26 +210,31 @@ export default function ChatWidget() {
       liveChatRef.current?.stop();
       return;
     }
-    
-    // Conectar - Buscando chave dinâmica do backend para não expor direto no código-fonte nem quebrar Netlify
-    let apiKey = "";
+
+    // Buscar token efêmero do servidor. A master key (GEMINI_API_KEY) nunca chega no browser;
+    // o token retornado é single-use, vive ~30min e só funciona com a Live API v1alpha.
+    let token = "";
     try {
-      const resp = await fetch("/api/get-live-key");
+      const resp = await fetch("/api/live-token", { method: "POST" });
+      if (!resp.ok) throw new Error(`status ${resp.status}`);
       const data = await resp.json();
-      apiKey = data.key;
+      token = data.token;
     } catch (e) {
-       console.error(e);
-    }
-    
-    if (!apiKey) {
-       alert("API Key do Gemini não encontrada no servidor para o modo Live.");
-       return;
+      console.error("Falha ao obter token Live:", e);
     }
 
-    const live = new GeminiLiveChat(apiKey, {
+    if (!token) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "model", text: t('chat.live_unavailable') },
+      ]);
+      return;
+    }
+
+    const live = new GeminiLiveChat(token, {
       onStatusChange: (status) => setLiveStatus(status),
       onTextAction: (text) => {
-        setMessages(prev => [...prev, { role: "model", text }]);
+        setMessages((prev) => [...prev, { role: "model", text }]);
       },
       onTurnComplete: (aiText, userText) => {
         fetch("/api/log-voice", {
@@ -239,8 +244,8 @@ export default function ChatWidget() {
         }).catch(() => { });
       },
       onError: (err) => {
-        alert(err);
-      }
+        setMessages((prev) => [...prev, { role: "model", text: err }]);
+      },
     }, SYSTEM_PROMPT);
 
     liveChatRef.current = live;
@@ -400,21 +405,21 @@ export default function ChatWidget() {
 
             {liveStatus !== "disconnected" && (
               <div className="sticky bottom-0 flex justify-center py-2 bg-gradient-to-t from-background via-background/90 to-transparent">
-                 <div className="flex items-center gap-2 bg-card border border-neon/50 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,135,0.2)]">
-                   <div className="w-2 h-2 rounded-full bg-neon animate-ping" />
-                   <span className="font-mono text-[10px] text-neon uppercase tracking-wider">
-                     {liveStatus === "connecting" && t('chat.live_connecting')}
-                     {liveStatus === "listening" && t('chat.live_listening')}
-                     {liveStatus === "speaking" && t('chat.live_speaking')}
-                   </span>
-                   {liveStatus === "speaking" && (
-                     <div className="flex items-center gap-1 h-3 ml-2">
-                       {[0,1,2,3].map(i => (
-                         <div key={i} className="w-1 bg-neon rounded-full animate-bounce" style={{ height: '100%', animationDelay: `${i * 0.15}s`, animationDuration: "0.5s" }} />
-                       ))}
-                     </div>
-                   )}
-                 </div>
+                <div className="flex items-center gap-2 bg-card border border-neon/50 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(0,255,135,0.2)]">
+                  <div className="w-2 h-2 rounded-full bg-neon animate-ping" />
+                  <span className="font-mono text-[10px] text-neon uppercase tracking-wider">
+                    {liveStatus === "connecting" && t('chat.live_connecting')}
+                    {liveStatus === "listening" && t('chat.live_listening')}
+                    {liveStatus === "speaking" && t('chat.live_speaking')}
+                  </span>
+                  {liveStatus === "speaking" && (
+                    <div className="flex items-center gap-1 h-3 ml-2">
+                      {[0, 1, 2, 3].map(i => (
+                        <div key={i} className="w-1 bg-neon rounded-full animate-bounce" style={{ height: '100%', animationDelay: `${i * 0.15}s`, animationDuration: "0.5s" }} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -443,11 +448,12 @@ export default function ChatWidget() {
                 disabled={isLoading || isExhausted || liveStatus !== "disconnected"}
                 className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-[13px] font-sans text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:border-neon/40 focus:ring-1 focus:ring-neon/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               />
-              
-              <button onClick={toggleLiveAudio} title={liveStatus === "disconnected" ? t('chat.btn_audio_on') : t('chat.btn_audio_off')}
+
+              <button onClick={toggleLiveAudio}
+                title={liveStatus === "disconnected" ? t('chat.btn_audio_on') : t('chat.btn_audio_off')}
                 className={`flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-md transition-all duration-200 hover:scale-105 ${
-                  liveStatus !== "disconnected" 
-                    ? "bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]" 
+                  liveStatus !== "disconnected"
+                    ? "bg-red-500/20 text-red-500 border border-red-500/50 hover:bg-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]"
                     : "bg-card border border-border text-foreground hover:border-neon hover:text-neon"
                 }`}>
                 {liveStatus !== "disconnected" ? (

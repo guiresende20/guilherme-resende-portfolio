@@ -238,6 +238,8 @@
     "btn_audio_off": "Desconectar Audio",
     "live_connecting": "Conectando...",
     "live_listening": "Escuchando...",
-    "live_speaking": "Hablando..."
+    "live_speaking": "Hablando...",
+    "live_unavailable": "El modo de voz no está disponible temporalmente por mantenimiento. Continúa por texto que respondo enseguida.",
+    "live_unavailable_short": "Modo voz en mantenimiento"
   }
 }

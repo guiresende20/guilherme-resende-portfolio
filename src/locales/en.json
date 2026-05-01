@@ -238,6 +238,8 @@
     "btn_audio_off": "Disconnect Audio",
     "live_connecting": "Connecting...",
     "live_listening": "Listening...",
-    "live_speaking": "Speaking..."
+    "live_speaking": "Speaking...",
+    "live_unavailable": "Voice mode is temporarily unavailable for maintenance. Please continue via text — I'll reply right away.",
+    "live_unavailable_short": "Voice mode under maintenance"
   }
 }
