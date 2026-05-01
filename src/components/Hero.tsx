@@ -31,7 +31,6 @@ export default function Hero() {
     };
 
     let idleId: number | undefined;
-    let fallbackId: number | undefined;
     let loaded = false;
 
     const loadScene = () => setShouldLoadScene(true);
@@ -45,7 +44,6 @@ export default function Hero() {
       if (loaded) return;
       loaded = true;
       removeInteractionListeners();
-      if (fallbackId !== undefined) window.clearTimeout(fallbackId);
 
       if (win.requestIdleCallback) {
         idleId = win.requestIdleCallback(loadScene, { timeout: 1200 });
@@ -58,12 +56,10 @@ export default function Hero() {
     window.addEventListener("scroll", scheduleIdleLoad, { passive: true });
     window.addEventListener("touchstart", scheduleIdleLoad, { passive: true });
     window.addEventListener("keydown", scheduleIdleLoad);
-    fallbackId = window.setTimeout(scheduleIdleLoad, 12000);
 
     return () => {
       removeInteractionListeners();
       if (idleId !== undefined) win.cancelIdleCallback?.(idleId);
-      if (fallbackId !== undefined) window.clearTimeout(fallbackId);
     };
   }, []);
 
