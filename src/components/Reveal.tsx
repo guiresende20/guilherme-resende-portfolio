@@ -1,5 +1,6 @@
 import { useInView } from "./SectionHeader";
 import type { ReactNode, CSSProperties } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 interface Props {
   children: ReactNode;
@@ -11,24 +12,35 @@ interface Props {
 
 export default function Reveal({ children, delay = 0, direction = "up", className = "", style }: Props) {
   const { ref, visible } = useInView(0.1);
+  const prefersReducedMotion = useReducedMotion();
   const transforms: Record<string, string> = {
     up: "translateY(40px)",
     left: "translateX(40px)",
     right: "translateX(-40px)",
     scale: "scale(0.95)",
   };
+
+  if (prefersReducedMotion) {
+    return (
+      <div ref={ref} className={className} style={style}>
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div
+    <motion.div
       ref={ref}
       className={className}
-      style={{
+      initial={false}
+      animate={{
         opacity: visible ? 1 : 0,
         transform: visible ? "none" : transforms[direction],
-        transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}s, transform 0.7s cubic-bezier(0.16,1,0.3,1) ${delay}s`,
-        ...style,
       }}
+      transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
+      style={style}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

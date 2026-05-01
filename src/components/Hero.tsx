@@ -1,4 +1,7 @@
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+
+const HeroScene3D = lazy(() => import("./HeroScene3D"));
 
 
 function AnimatedWord({ text, delay, className }: { text: string; delay: number; className?: string }) {
@@ -17,13 +20,45 @@ function AnimatedWord({ text, delay, className }: { text: string; delay: number;
 
 export default function Hero() {
   const { t } = useTranslation();
+  const [shouldLoadScene, setShouldLoadScene] = useState(false);
   const stats = t('hero.stats', { returnObjects: true }) as {num: string, label: string}[];
   const skills = t('hero.marquee_skills', { returnObjects: true }) as string[];
+
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const loadScene = () => setShouldLoadScene(true);
+    const scheduleIdleLoad = () => {
+      if (win.requestIdleCallback) {
+        idleId = win.requestIdleCallback(loadScene, { timeout: 1200 });
+      } else {
+        loadScene();
+      }
+    };
+
+    timeoutId = window.setTimeout(scheduleIdleLoad, 900);
+
+    return () => {
+      if (idleId !== undefined) win.cancelIdleCallback?.(idleId);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, []);
 
   return (
     <section id="inicio" className="relative min-h-screen flex flex-col justify-center overflow-hidden">
       {/* Grid */}
       <div className="absolute inset-0 bg-grid pointer-events-none" />
+      {shouldLoadScene && (
+        <Suspense fallback={null}>
+          <HeroScene3D />
+        </Suspense>
+      )}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#0a0a0f_100%)] pointer-events-none" />
 
       {/* Content */}
@@ -41,7 +76,6 @@ export default function Hero() {
             alt="Guilherme Resende"
             width="96"
             height="96"
-            fetchPriority="high"
             decoding="async"
             className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover border-2 border-neon/30"
           />
@@ -50,13 +84,13 @@ export default function Hero() {
           </div>
         </div>
 
-        <h1 className="font-display font-bold uppercase tracking-[-0.035em] leading-[0.9] mb-6" style={{ fontSize: "clamp(2.8rem, 8vw, 7rem)", perspective: "600px" }}>
+        <h1 className="font-display font-bold uppercase tracking-[-0.035em] leading-[0.9] mb-6" style={{ fontSize: "clamp(2.55rem, 8vw, 7rem)", perspective: "600px" }}>
           <span className="block overflow-hidden">
             <AnimatedWord text="Guilherme" delay={0.4} className="text-foreground" />
           </span>
           <span className="block overflow-hidden">
             <AnimatedWord text="Resende" delay={0.75} className="text-outline" />
-            <AnimatedWord text=" Muniz" delay={1.05} className="text-neon" />
+            <AnimatedWord text="Muniz" delay={1.05} className="text-neon block sm:inline sm:ml-[0.18em]" />
           </span>
         </h1>
 
