@@ -27,9 +27,6 @@ export default defineConfig({
           if (id.includes("react") || id.includes("react-dom") || id.includes("scheduler")) {
             return "react-vendor";
           }
-          if (id.includes("framer-motion")) {
-            return "motion-vendor";
-          }
           if (id.includes("@supabase") || id.includes("@google/generative-ai")) {
             return "api-vendor";
           }

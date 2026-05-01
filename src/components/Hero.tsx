@@ -31,10 +31,22 @@ export default function Hero() {
     };
 
     let idleId: number | undefined;
-    let timeoutId: number | undefined;
+    let fallbackId: number | undefined;
+    let loaded = false;
 
     const loadScene = () => setShouldLoadScene(true);
+    const removeInteractionListeners = () => {
+      window.removeEventListener("pointermove", scheduleIdleLoad);
+      window.removeEventListener("scroll", scheduleIdleLoad);
+      window.removeEventListener("touchstart", scheduleIdleLoad);
+      window.removeEventListener("keydown", scheduleIdleLoad);
+    };
     const scheduleIdleLoad = () => {
+      if (loaded) return;
+      loaded = true;
+      removeInteractionListeners();
+      if (fallbackId !== undefined) window.clearTimeout(fallbackId);
+
       if (win.requestIdleCallback) {
         idleId = win.requestIdleCallback(loadScene, { timeout: 1200 });
       } else {
@@ -42,11 +54,16 @@ export default function Hero() {
       }
     };
 
-    timeoutId = window.setTimeout(scheduleIdleLoad, 900);
+    window.addEventListener("pointermove", scheduleIdleLoad, { passive: true });
+    window.addEventListener("scroll", scheduleIdleLoad, { passive: true });
+    window.addEventListener("touchstart", scheduleIdleLoad, { passive: true });
+    window.addEventListener("keydown", scheduleIdleLoad);
+    fallbackId = window.setTimeout(scheduleIdleLoad, 12000);
 
     return () => {
+      removeInteractionListeners();
       if (idleId !== undefined) win.cancelIdleCallback?.(idleId);
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      if (fallbackId !== undefined) window.clearTimeout(fallbackId);
     };
   }, []);
 
