@@ -40,7 +40,8 @@ audiência pra tese técnica.
 ## Roadmap
 
 Itens organizados por esforço crescente. A coluna "Tema" usa:
-**A** = wow-factor, **D** = playground técnico, **A+D** = ambos.
+**A** = wow-factor, **D** = playground técnico, **A+D** = ambos,
+**S** = SEO & discoverability.
 
 > Numeração não-sequencial (sem item 4) preserva os IDs usados durante
 > o brainstorming. O item 4 original (Konami easter egg) foi descartado
@@ -229,6 +230,64 @@ do país via geo) em tempo real sobre o hero.
 - **Risco:** privacidade — não coletar nada além de cursor + país.
 - **Critério de pronto:** suporta até 50 cursores simultâneos, degrada
   pra solo se conexão WS falha, opt-out em 1 click.
+
+### SEO & Discoverability — Tema: S
+
+Itens focados em fazer o site aparecer melhor no Google e em previews
+sociais. Não são wow nem playground técnico, mas alimentam ambos:
+ranking mais alto = mais audiência pros itens visuais.
+
+#### 15. hreflang no head — Tema: S — Esforço: 🟢 quick win
+
+Adicionar `<link rel="alternate" hreflang="...">` no `<head>` declarando
+as variantes PT-BR, EN e ES. Hoje o i18n troca conteúdo no cliente sem
+URL própria por idioma — o Google não enxerga.
+
+- **Stack:** decidir estratégia de URL por idioma (`?lang=en` vs
+  `/en/` vs subdomínio). `?lang=` é a opção mais barata por não exigir
+  rotas novas. Atualizar o roteador i18n pra ler/escrever esse param.
+- **Por que importa:** desbloqueia tráfego internacional. Hoje quem
+  busca em inglês não acha o site mesmo com o conteúdo traduzido.
+- **Dependência:** prefere ser feito antes do item 16 pra ambos
+  saírem juntos no sitemap.
+- **Critério de pronto:** 3 URLs únicas indexáveis (uma por idioma),
+  cada uma com hreflang apontando pras outras duas + x-default.
+
+#### 16. Rotas estáticas por projeto + sitemap expandido — Tema: S — Esforço: 🟡 médio
+
+Hoje o sitemap só tem a home (`/`). Cada projeto principal
+(Gesture Keys, Aula 360°, Patente, Digitalização 3D, etc.) ganha sua
+própria URL indexável com OG image e metadata específicos.
+
+- **Stack:** rotas SPA `/projeto/:slug` + pré-renderização no build
+  via `vite-plugin-prerender` ou `react-snap`. Sitemap gerado por
+  script Node a partir do mesmo array de projetos usado em `pt.json`.
+- **Por que importa:** transforma o portfólio de 1 página indexável
+  em 10+. Quem busca "Gesture Keys patent" passa a achar você
+  diretamente.
+- **Dependência:** item 15 (hreflang) pra cada projeto ter as 3
+  variantes de idioma.
+- **Critério de pronto:** sitemap.xml com ≥10 URLs, Google Search
+  Console mostrando todas como indexadas, cada uma com OG image
+  própria (combina com item 5).
+
+#### 17. Estratégia de backlinks (ação off-code) — Tema: S — Esforço: 🟢 quick win
+
+Backlinks são o maior multiplicador de ranking — e não dependem de
+código. Criar e manter uma lista de fontes que apontam pro portfólio:
+
+- README do GitHub do projeto (link em destaque pra `guiresende20.netlify.app`).
+- Bio do LinkedIn (já há perfil em `sameAs` no JSON-LD).
+- Lattes (já há, mantido).
+- Resumo na página pessoal da PUC-RS / CriaLab se aplicável.
+- Publicação no Medium / Dev.to com algum case técnico (ex: o post sobre
+  o hero 3D quando item 11 sair) linkando de volta.
+- Submeter o site em diretórios de portfólio (Awwwards, Siteinspire,
+  CSS Design Awards) — bônus: chance de prêmio.
+
+- **Critério de pronto:** lista versionada em
+  `docs/backlinks.md` com status de cada item (publicado/pendente),
+  ≥5 backlinks ativos verificáveis.
 
 ## Critérios de qualidade transversais
 
