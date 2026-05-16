@@ -8,6 +8,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/blog/post/*"
+  to = "/.netlify/functions/blog-post/:splat"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
