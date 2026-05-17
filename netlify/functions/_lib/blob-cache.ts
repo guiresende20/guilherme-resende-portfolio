@@ -1,0 +1,80 @@
+import { getStore } from "@netlify/blobs";
+
+interface CachedEntry<T> {
+  value: T;
+  expiresAt: number | null; // null = never expires
+}
+
+const STORE_NAME = "blog";
+
+// Returns null when Blobs is unavailable (e.g. `netlify dev` without injected
+// context). Callers degrade to no-cache behavior instead of crashing.
+function safeStore() {
+  try {
+    return getStore(STORE_NAME);
+  } catch (e) {
+    if (e instanceof Error && e.name === "MissingBlobsEnvironmentError") {
+      return null;
+    }
+    throw e;
+  }
+}
+
+export async function getCached<T>(key: string): Promise<T | null> {
+  const s = safeStore();
+  if (!s) return null;
+  const raw = await s.get(key, { type: "json" });
+  if (!raw) return null;
+  const entry = raw as CachedEntry<T>;
+  if (entry.expiresAt !== null && entry.expiresAt < Date.now()) {
+    return null;
+  }
+  return entry.value;
+}
+
+export async function setCached<T>(
+  key: string,
+  value: T,
+  ttlMs: number | null
+): Promise<void> {
+  const s = safeStore();
+  if (!s) return;
+  const entry: CachedEntry<T> = {
+    value,
+    expiresAt: ttlMs === null ? null : Date.now() + ttlMs,
+  };
+  await s.setJSON(key, entry);
+}
+
+export async function getCachedBinary(key: string): Promise<Buffer | null> {
+  const s = safeStore();
+  if (!s) return null;
+  const buf = await s.get(key, { type: "arrayBuffer" });
+  return buf ? Buffer.from(buf) : null;
+}
+
+export async function setCachedBinary(
+  key: string,
+  data: Buffer
+): Promise<void> {
+  const s = safeStore();
+  if (!s) return;
+  const ab = data.buffer.slice(
+    data.byteOffset,
+    data.byteOffset + data.byteLength
+  ) as ArrayBuffer;
+  await s.set(key, ab);
+}
+
+export async function deleteCached(key: string): Promise<void> {
+  const s = safeStore();
+  if (!s) return;
+  await s.delete(key);
+}
+
+export async function deleteByPrefix(prefix: string): Promise<void> {
+  const s = safeStore();
+  if (!s) return;
+  const { blobs } = await s.list({ prefix });
+  await Promise.all(blobs.map((b) => s.delete(b.key)));
+}

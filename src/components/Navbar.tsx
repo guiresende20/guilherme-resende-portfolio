@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 export default function Navbar() {
@@ -23,11 +24,16 @@ export default function Navbar() {
     setLangMenuOpen(false);
   };
 
-  const LINKS = [
+  type NavLink =
+    | { href: string; to?: never; label: string }
+    | { to: string; href?: never; label: string };
+
+  const LINKS: NavLink[] = [
     { href: "#inicio", label: t("navbar.links.inicio") },
     { href: "#sobre", label: t("navbar.links.sobre") },
     { href: "#experiencia", label: t("navbar.links.experiencia") },
     { href: "#projetos", label: t("navbar.links.projetos") },
+    { to: "/blog", label: t("navbar.links.blog") },
     { href: "#formacao", label: t("navbar.links.formacao") },
     { href: "#contato", label: t("navbar.links.contato") },
   ];
@@ -70,15 +76,25 @@ export default function Navbar() {
           {/* Desktop links */}
           <ul className="hidden md:flex items-center gap-8">
             {LINKS.map((l) => (
-              <li key={l.href}>
-                <a
-                  href={l.href}
-                  onClick={(e) => handleClick(e, l.href)}
-                  className="relative font-sans text-[13px] font-medium text-muted-foreground uppercase tracking-[0.06em] hover:text-foreground transition-colors group"
-                >
-                  {l.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-px bg-neon transition-all duration-300 group-hover:w-full" />
-                </a>
+              <li key={l.to ?? l.href}>
+                {l.to ? (
+                  <Link
+                    to={l.to}
+                    className="relative font-sans text-[13px] font-medium text-muted-foreground uppercase tracking-[0.06em] hover:text-foreground transition-colors group"
+                  >
+                    {l.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-neon transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ) : (
+                  <a
+                    href={l.href}
+                    onClick={(e) => handleClick(e, l.href!)}
+                    className="relative font-sans text-[13px] font-medium text-muted-foreground uppercase tracking-[0.06em] hover:text-foreground transition-colors group"
+                  >
+                    {l.label}
+                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-neon transition-all duration-300 group-hover:w-full" />
+                  </a>
+                )}
               </li>
             ))}
           </ul>
@@ -136,19 +152,35 @@ export default function Navbar() {
       >
         <div className="flex flex-col items-center justify-center h-full gap-6 px-8">
           {LINKS.map((l, i) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={(e) => handleClick(e, l.href)}
-              className="font-display font-semibold text-2xl text-foreground uppercase tracking-tight hover:text-neon transition-colors"
-              style={{
-                opacity: mobileOpen ? 1 : 0,
-                transform: mobileOpen ? "translateY(0)" : "translateY(20px)",
-                transition: `all 0.4s cubic-bezier(0.16,1,0.3,1) ${0.1 + i * 0.05}s`,
-              }}
-            >
-              {l.label}
-            </a>
+            l.to ? (
+              <Link
+                key={l.to}
+                to={l.to}
+                onClick={() => setMobileOpen(false)}
+                className="font-display font-semibold text-2xl text-foreground uppercase tracking-tight hover:text-neon transition-colors"
+                style={{
+                  opacity: mobileOpen ? 1 : 0,
+                  transform: mobileOpen ? "translateY(0)" : "translateY(20px)",
+                  transition: `all 0.4s cubic-bezier(0.16,1,0.3,1) ${0.1 + i * 0.05}s`,
+                }}
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={(e) => handleClick(e, l.href!)}
+                className="font-display font-semibold text-2xl text-foreground uppercase tracking-tight hover:text-neon transition-colors"
+                style={{
+                  opacity: mobileOpen ? 1 : 0,
+                  transform: mobileOpen ? "translateY(0)" : "translateY(20px)",
+                  transition: `all 0.4s cubic-bezier(0.16,1,0.3,1) ${0.1 + i * 0.05}s`,
+                }}
+              >
+                {l.label}
+              </a>
+            )
           ))}
 
           {/* Language + GPT in mobile menu */}
