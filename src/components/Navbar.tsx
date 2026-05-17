@@ -35,9 +35,9 @@ export default function Navbar() {
     { href: "#sobre", label: t("navbar.links.sobre") },
     { href: "#experiencia", label: t("navbar.links.experiencia") },
     { href: "#projetos", label: t("navbar.links.projetos") },
-    { to: "/blog", label: t("navbar.links.blog") },
     { href: "#formacao", label: t("navbar.links.formacao") },
     { href: "#contato", label: t("navbar.links.contato") },
+    { to: "/blog", label: t("navbar.links.blog") },
   ];
 
   useEffect(() => {
