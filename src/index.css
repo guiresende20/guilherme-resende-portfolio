@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    color-scheme: dark;
     --background: 240 10% 4%;
     --foreground: 240 3% 91%;
     --primary: 150 100% 50%;
