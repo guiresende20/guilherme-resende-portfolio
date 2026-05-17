@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   const { t } = useTranslation();
@@ -34,6 +35,9 @@ export default function Footer() {
                   {t(`navbar.links.${l}`)}
                 </a>
               ))}
+              <Link to="/blog" className="font-sans text-[13px] text-muted-foreground hover:text-foreground transition-colors w-fit">
+                {t('navbar.links.blog')}
+              </Link>
             </div>
           </div>
 
