@@ -7,3 +7,16 @@ dist
 
 # Local Netlify folder
 .netlify
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
+
+# Claude Code per-machine settings
+.claude/settings.local.json
+
+# Deno lockfile (project does not use Deno)
+deno.lock
+
+# Personal notes / non-site assets
+Portifolio pessoal IA.txt
+screenshots-linkedin/
