@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import type { PostMeta } from "../lib/blog/frontmatter";
 import { fetchPostList } from "../lib/blog/api";
 import PostCard from "../components/blog/PostCard";
+import BlogLayout from "../components/blog/BlogLayout";
 
 const PAGE_SIZE = 15;
 
@@ -32,17 +33,21 @@ export default function Blog() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-6 py-16 text-foreground">
-        <p className="text-red-400">Erro ao carregar posts: {error}</p>
-      </div>
+      <BlogLayout>
+        <div className="container mx-auto px-6 py-16 text-foreground">
+          <p className="text-red-400">Erro ao carregar posts: {error}</p>
+        </div>
+      </BlogLayout>
     );
   }
 
   if (!posts) {
     return (
-      <div className="container mx-auto px-6 py-16 text-foreground">
-        <p className="text-muted-foreground">Carregando posts…</p>
-      </div>
+      <BlogLayout>
+        <div className="container mx-auto px-6 py-16 text-foreground">
+          <p className="text-muted-foreground">Carregando posts…</p>
+        </div>
+      </BlogLayout>
     );
   }
 
@@ -50,6 +55,7 @@ export default function Blog() {
   const hasMore = visible < filtered.length;
 
   return (
+    <BlogLayout>
     <div className="container mx-auto px-6 py-16">
       <header className="mb-12">
         <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em]">Blog</span>
@@ -111,5 +117,6 @@ export default function Blog() {
         </div>
       )}
     </div>
+    </BlogLayout>
   );
 }

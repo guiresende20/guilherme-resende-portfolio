@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { fetchPost, type PostResponse } from "../lib/blog/api";
 import MarkdownRenderer from "../components/blog/MarkdownRenderer";
 import { formatDate, formatReadingTime, useLocale } from "../lib/blog/format";
+import BlogLayout from "../components/blog/BlogLayout";
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -26,38 +27,45 @@ export default function BlogPost() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-6 py-16 text-foreground">
-        <p className="text-red-400">Erro: {error}</p>
-        <Link to="/blog" className="text-neon underline mt-4 inline-block">
-          ← Voltar para o blog
-        </Link>
-      </div>
+      <BlogLayout>
+        <div className="container mx-auto px-6 py-16 text-foreground">
+          <p className="text-red-400">Erro: {error}</p>
+          <Link to="/blog" className="text-neon underline mt-4 inline-block">
+            ← Voltar para o blog
+          </Link>
+        </div>
+      </BlogLayout>
     );
   }
 
   if (notFound) {
     return (
-      <div className="container mx-auto px-6 py-24 text-foreground text-center">
-        <h1 className="font-display text-4xl mb-4">Post não encontrado</h1>
-        <p className="text-muted-foreground mb-8">
-          O post "{slug}" não existe ou foi removido.
-        </p>
-        <Link to="/blog" className="text-neon underline">
-          ← Voltar para o blog
-        </Link>
-      </div>
+      <BlogLayout>
+        <div className="container mx-auto px-6 py-24 text-foreground text-center">
+          <h1 className="font-display text-4xl mb-4">Post não encontrado</h1>
+          <p className="text-muted-foreground mb-8">
+            O post "{slug}" não existe ou foi removido.
+          </p>
+          <Link to="/blog" className="text-neon underline">
+            ← Voltar para o blog
+          </Link>
+        </div>
+      </BlogLayout>
     );
   }
 
   if (!post) {
     return (
-      <div className="container mx-auto px-6 py-16 text-muted-foreground">
-        Carregando…
-      </div>
+      <BlogLayout>
+        <div className="container mx-auto px-6 py-16 text-muted-foreground">
+          Carregando…
+        </div>
+      </BlogLayout>
     );
   }
 
   return (
+    <BlogLayout>
     <div className="container mx-auto px-6 py-16 max-w-3xl">
       <Link
         to="/blog"
@@ -95,5 +103,6 @@ export default function BlogPost() {
 
       <MarkdownRenderer body={post.body} />
     </div>
+    </BlogLayout>
   );
 }
