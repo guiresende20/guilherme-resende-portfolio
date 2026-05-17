@@ -20,3 +20,7 @@ deno.lock
 # Personal notes / non-site assets
 Portifolio pessoal IA.txt
 screenshots-linkedin/
+
+# Local blog post drafts (uploaded to Drive, not committed here)
+/*.md
+!/README.md
