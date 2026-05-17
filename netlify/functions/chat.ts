@@ -62,7 +62,7 @@ async function getPostsForPrompt(): Promise<string> {
       lines.push(`- /blog/${meta.slug} — "${meta.title}" — ${excerpt}`);
     }
     const summary = lines.length
-      ? `\n\n---\n\nPOSTOS DO BLOG (recomende quando relevante, com o link /blog/<slug>):\n${lines.join("\n")}`
+      ? `\n\n---\n\nPOSTS DO BLOG (recomende quando relevante, com o link /blog/<slug>):\n${lines.join("\n")}`
       : "";
     await setCached(cacheKey, summary, POST_LIST_TTL_MS);
     return summary;
