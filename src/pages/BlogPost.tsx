@@ -175,7 +175,7 @@ export default function BlogPost() {
               />
             )}
           </div>
-          <PostTOC />
+          <PostTOC body={bodyToRender} />
         </div>
       </div>
     </BlogLayout>

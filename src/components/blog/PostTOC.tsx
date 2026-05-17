@@ -13,7 +13,13 @@ function slugify(text: string): string {
     .replace(/\s+/g, "-");
 }
 
-export default function PostTOC({ articleSelector = "article" }: { articleSelector?: string }) {
+export default function PostTOC({
+  articleSelector = "article",
+  body,
+}: {
+  articleSelector?: string;
+  body: string;
+}) {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -32,7 +38,7 @@ export default function PostTOC({ articleSelector = "article" }: { articleSelect
       return { id, text };
     });
     setHeadings(list);
-  }, [articleSelector]);
+  }, [articleSelector, body]);
 
   // Track which heading is currently in view.
   useEffect(() => {
