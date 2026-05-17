@@ -5,6 +5,7 @@ import MarkdownRenderer from "../components/blog/MarkdownRenderer";
 import { formatDate, formatReadingTime, useLocale } from "../lib/blog/format";
 import BlogLayout from "../components/blog/BlogLayout";
 import TranslateBanner from "../components/blog/TranslateBanner";
+import DisqusEmbed from "../components/blog/DisqusEmbed";
 
 function blogPostingJsonLd(meta: { slug: string; title: string; date: string; lang: string; excerpt?: string; cover?: string }) {
   return JSON.stringify({
@@ -150,6 +151,15 @@ export default function BlogPost() {
       )}
 
       <MarkdownRenderer body={bodyToRender} />
+
+      {import.meta.env.VITE_DISQUS_SHORTNAME && (
+        <DisqusEmbed
+          shortname={import.meta.env.VITE_DISQUS_SHORTNAME}
+          identifier={`post-${post.meta.slug}`}
+          title={post.meta.title}
+          url={`https://guiresende20.netlify.app/blog/${post.meta.slug}`}
+        />
+      )}
     </div>
     </BlogLayout>
   );
