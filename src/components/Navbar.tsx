@@ -24,7 +24,11 @@ export default function Navbar() {
     setLangMenuOpen(false);
   };
 
-  const LINKS: Array<{ href?: string; to?: string; label: string }> = [
+  type NavLink =
+    | { href: string; to?: never; label: string }
+    | { to: string; href?: never; label: string };
+
+  const LINKS: NavLink[] = [
     { href: "#inicio", label: t("navbar.links.inicio") },
     { href: "#sobre", label: t("navbar.links.sobre") },
     { href: "#experiencia", label: t("navbar.links.experiencia") },
