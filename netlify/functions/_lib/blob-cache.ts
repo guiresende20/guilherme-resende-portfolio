@@ -7,12 +7,23 @@ interface CachedEntry<T> {
 
 const STORE_NAME = "blog";
 
-function store() {
-  return getStore(STORE_NAME);
+// Returns null when Blobs is unavailable (e.g. `netlify dev` without injected
+// context). Callers degrade to no-cache behavior instead of crashing.
+function safeStore() {
+  try {
+    return getStore(STORE_NAME);
+  } catch (e) {
+    if (e instanceof Error && e.name === "MissingBlobsEnvironmentError") {
+      return null;
+    }
+    throw e;
+  }
 }
 
 export async function getCached<T>(key: string): Promise<T | null> {
-  const raw = await store().get(key, { type: "json" });
+  const s = safeStore();
+  if (!s) return null;
+  const raw = await s.get(key, { type: "json" });
   if (!raw) return null;
   const entry = raw as CachedEntry<T>;
   if (entry.expiresAt !== null && entry.expiresAt < Date.now()) {
@@ -26,15 +37,19 @@ export async function setCached<T>(
   value: T,
   ttlMs: number | null
 ): Promise<void> {
+  const s = safeStore();
+  if (!s) return;
   const entry: CachedEntry<T> = {
     value,
     expiresAt: ttlMs === null ? null : Date.now() + ttlMs,
   };
-  await store().setJSON(key, entry);
+  await s.setJSON(key, entry);
 }
 
 export async function getCachedBinary(key: string): Promise<Buffer | null> {
-  const buf = await store().get(key, { type: "arrayBuffer" });
+  const s = safeStore();
+  if (!s) return null;
+  const buf = await s.get(key, { type: "arrayBuffer" });
   return buf ? Buffer.from(buf) : null;
 }
 
@@ -42,18 +57,24 @@ export async function setCachedBinary(
   key: string,
   data: Buffer
 ): Promise<void> {
+  const s = safeStore();
+  if (!s) return;
   const ab = data.buffer.slice(
     data.byteOffset,
     data.byteOffset + data.byteLength
   ) as ArrayBuffer;
-  await store().set(key, ab);
+  await s.set(key, ab);
 }
 
 export async function deleteCached(key: string): Promise<void> {
-  await store().delete(key);
+  const s = safeStore();
+  if (!s) return;
+  await s.delete(key);
 }
 
 export async function deleteByPrefix(prefix: string): Promise<void> {
-  const { blobs } = await store().list({ prefix });
-  await Promise.all(blobs.map((b) => store().delete(b.key)));
+  const s = safeStore();
+  if (!s) return;
+  const { blobs } = await s.list({ prefix });
+  await Promise.all(blobs.map((b) => s.delete(b.key)));
 }
