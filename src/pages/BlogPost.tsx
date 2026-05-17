@@ -11,11 +11,13 @@ function blogPostingJsonLd(meta: { slug: string; title: string; date: string; la
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: meta.title,
-    datePublished: meta.date,
-    dateModified: meta.date,
+    datePublished: `${meta.date}T00:00:00Z`,
+    dateModified: `${meta.date}T00:00:00Z`,
     inLanguage: meta.lang,
     description: meta.excerpt,
-    image: meta.cover ? `https://guiresende20.netlify.app/api/blog/image/${meta.cover}` : undefined,
+    image: meta.cover
+      ? `https://guiresende20.netlify.app/api/blog/image/${meta.cover}`
+      : "https://guiresende20.netlify.app/guilherme-foto.webp",
     url: `https://guiresende20.netlify.app/blog/${meta.slug}`,
     author: {
       "@type": "Person",
