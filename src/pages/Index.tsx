@@ -19,7 +19,11 @@ export default function Index() {
     if (!location.hash) return;
     const id = location.hash.slice(1);
     const t = window.setTimeout(() => {
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      if (id === "chat") {
+        window.dispatchEvent(new Event("open-chat"));
+      } else {
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+      }
     }, 50);
     return () => window.clearTimeout(t);
   }, [location]);

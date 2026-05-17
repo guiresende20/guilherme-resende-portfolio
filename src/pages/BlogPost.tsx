@@ -74,14 +74,19 @@ export default function BlogPost() {
   if (notFound) {
     return (
       <BlogLayout>
-        <div className="container mx-auto px-6 py-24 text-foreground text-center">
+        <div className="container mx-auto px-6 py-24 text-foreground text-center max-w-xl">
           <h1 className="font-display text-4xl mb-4">Post não encontrado</h1>
           <p className="text-muted-foreground mb-8">
-            O post "{slug}" não existe ou foi removido.
+            O post "{slug}" não existe ou foi removido. Quer perguntar sobre o assunto?
           </p>
-          <Link to="/blog" className="text-neon underline">
-            ← Voltar para o blog
-          </Link>
+          <div className="flex gap-3 justify-center flex-wrap">
+            <Link to="/blog" className="font-mono text-xs uppercase tracking-[0.1em] border border-border text-foreground px-4 py-2">
+              ← Voltar para o blog
+            </Link>
+            <a href="/#chat" className="font-mono text-xs uppercase tracking-[0.1em] border border-neon text-neon px-4 py-2 hover:bg-neon/10">
+              Falar com a IA
+            </a>
+          </div>
         </div>
       </BlogLayout>
     );
