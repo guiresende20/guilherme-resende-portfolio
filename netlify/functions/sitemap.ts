@@ -5,6 +5,16 @@ import { parsePost } from "../../src/lib/blog/frontmatter";
 
 const SITE_URL = "https://guiresende20.netlify.app";
 
+function escapeXml(s: string): string {
+  return s.replace(/[<>&"']/g, (c) => ({
+    "<": "&lt;",
+    ">": "&gt;",
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+  }[c]!));
+}
+
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== "GET") {
     return { statusCode: 405, body: "Method not allowed" };
@@ -42,13 +52,13 @@ export const handler: Handler = async (event) => {
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${SITE_URL}/</loc>
+    <loc>${escapeXml(SITE_URL + "/")}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>${SITE_URL}/blog</loc>
+    <loc>${escapeXml(SITE_URL + "/blog")}</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -56,7 +66,7 @@ export const handler: Handler = async (event) => {
 ${blogUrls
   .map(
     (u) => `  <url>
-    <loc>${u.loc}</loc>
+    <loc>${escapeXml(u.loc)}</loc>
     <lastmod>${u.lastmod}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
