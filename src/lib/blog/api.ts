@@ -24,3 +24,24 @@ export async function fetchPost(slug: string): Promise<PostResponse | null> {
   if (!res.ok) throw new Error(`Failed to fetch post: ${res.status}`);
   return (await res.json()) as PostResponse;
 }
+
+export interface TranslateResponse {
+  slug: string;
+  lang: string;
+  body: string;
+  cached: boolean;
+}
+
+export async function translatePost(
+  slug: string,
+  lang: "en" | "es"
+): Promise<string> {
+  const res = await fetch("/api/blog/translate", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ slug, lang }),
+  });
+  if (!res.ok) throw new Error(`Translation failed: ${res.status}`);
+  const data = (await res.json()) as TranslateResponse;
+  return data.body;
+}

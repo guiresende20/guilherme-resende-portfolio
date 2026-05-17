@@ -4,19 +4,29 @@ import { fetchPost, type PostResponse } from "../lib/blog/api";
 import MarkdownRenderer from "../components/blog/MarkdownRenderer";
 import { formatDate, formatReadingTime, useLocale } from "../lib/blog/format";
 import BlogLayout from "../components/blog/BlogLayout";
+import TranslateBanner from "../components/blog/TranslateBanner";
+
+function pickTranslationTarget(userLang: string, postLang: string): "en" | "es" | null {
+  if (postLang !== "pt") return null;
+  if (userLang.startsWith("en")) return "en";
+  if (userLang.startsWith("es")) return "es";
+  return null;
+}
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
-  const lang = useLocale();
+  const userLang = useLocale();
   const [post, setPost] = useState<PostResponse | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [translatedBody, setTranslatedBody] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
     setPost(null);
     setNotFound(false);
     setError(null);
+    setTranslatedBody(null);
     fetchPost(slug)
       .then((p) => {
         if (!p) setNotFound(true);
@@ -64,6 +74,9 @@ export default function BlogPost() {
     );
   }
 
+  const target = pickTranslationTarget(userLang, post.meta.lang);
+  const bodyToRender = translatedBody ?? post.body;
+
   return (
     <BlogLayout>
     <div className="container mx-auto px-6 py-16 max-w-3xl">
@@ -79,9 +92,9 @@ export default function BlogPost() {
           {post.meta.title}
         </h1>
         <div className="flex flex-wrap items-center gap-3 mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
-          <span>{formatDate(post.meta.date, lang)}</span>
+          <span>{formatDate(post.meta.date, userLang)}</span>
           <span>·</span>
-          <span>{formatReadingTime(post.meta.readingTimeMin, lang)}</span>
+          <span>{formatReadingTime(post.meta.readingTimeMin, userLang)}</span>
           <span>·</span>
           <span>{post.meta.lang}</span>
           {post.meta.tags.length > 0 && (
@@ -101,7 +114,17 @@ export default function BlogPost() {
         </div>
       </header>
 
-      <MarkdownRenderer body={post.body} />
+      {target && (
+        <TranslateBanner
+          slug={post.meta.slug}
+          targetLang={target}
+          onTranslated={setTranslatedBody}
+          onReset={() => setTranslatedBody(null)}
+          showingTranslation={translatedBody !== null}
+        />
+      )}
+
+      <MarkdownRenderer body={bodyToRender} />
     </div>
     </BlogLayout>
   );
