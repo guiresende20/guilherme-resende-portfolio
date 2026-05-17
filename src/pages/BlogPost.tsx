@@ -6,13 +6,14 @@ import { formatDate, formatReadingTime, useLocale } from "../lib/blog/format";
 import BlogLayout from "../components/blog/BlogLayout";
 import TranslateBanner from "../components/blog/TranslateBanner";
 
-function blogPostingJsonLd(meta: { slug: string; title: string; date: string; excerpt?: string; cover?: string }) {
+function blogPostingJsonLd(meta: { slug: string; title: string; date: string; lang: string; excerpt?: string; cover?: string }) {
   return JSON.stringify({
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: meta.title,
     datePublished: meta.date,
     dateModified: meta.date,
+    inLanguage: meta.lang,
     description: meta.excerpt,
     image: meta.cover ? `https://guiresende20.netlify.app/api/blog/image/${meta.cover}` : undefined,
     url: `https://guiresende20.netlify.app/blog/${meta.slug}`,
@@ -21,7 +22,7 @@ function blogPostingJsonLd(meta: { slug: string; title: string; date: string; ex
       name: "Guilherme Resende Muniz",
       url: "https://guiresende20.netlify.app/",
     },
-  });
+  }).replace(/<\//g, "<\\/");
 }
 
 function pickTranslationTarget(userLang: string, postLang: string): "en" | "es" | null {
