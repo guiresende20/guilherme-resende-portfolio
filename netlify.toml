@@ -23,6 +23,16 @@
   status = 200
 
 [[redirects]]
+  from = "/api/blog/rss"
+  to = "/.netlify/functions/blog-rss"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap.xml"
+  to = "/.netlify/functions/sitemap"
+  status = 200
+
+[[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
