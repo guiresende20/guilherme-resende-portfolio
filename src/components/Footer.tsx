@@ -1,10 +1,16 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export default function Footer() {
   const { t } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
+    if (location.pathname !== "/") {
+      navigate("/" + href);
+      return;
+    }
     document.getElementById(href.slice(1))?.scrollIntoView({ behavior: "smooth" });
   };
 
