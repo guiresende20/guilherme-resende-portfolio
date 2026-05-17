@@ -55,11 +55,15 @@ async function getPostsForPrompt(): Promise<string> {
     const mds = files.filter((f) => f.mimeType === "text/markdown" || f.name.endsWith(".md"));
     const lines: string[] = [];
     for (const f of mds) {
-      const raw = await downloadText(f.id);
-      const { meta } = parsePost(raw, f.name);
-      if (meta.draft) continue;
-      const excerpt = meta.excerpt ?? "";
-      lines.push(`- /blog/${meta.slug} — "${meta.title}" — ${excerpt}`);
+      try {
+        const raw = await downloadText(f.id);
+        const { meta } = parsePost(raw, f.name);
+        if (meta.draft) continue;
+        const excerpt = meta.excerpt ?? "";
+        lines.push(`- /blog/${meta.slug} — "${meta.title}" — ${excerpt}`);
+      } catch (err) {
+        console.error("getPostsForPrompt: skipping", f.name, err);
+      }
     }
     const summary = lines.length
       ? `\n\n---\n\nPOSTS DO BLOG (recomende quando relevante, com o link /blog/<slug>):\n${lines.join("\n")}`
