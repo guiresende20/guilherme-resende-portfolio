@@ -38,9 +38,17 @@ export const handler: Handler = async (event) => {
 
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
-  const mdFiles = files.filter(
-    (f: DriveFile) => f.mimeType === "text/markdown" || f.name.endsWith(".md")
-  );
+  const mdFiles: DriveFile[] = [];
+  for (const f of files) {
+    if (!f.name.endsWith(".md")) continue;
+    if (f.mimeType.startsWith("application/vnd.google-apps.")) {
+      // Drive auto-converted this upload to a native Google Doc; cannot be
+      // downloaded as raw text. Owner must re-upload with conversion disabled.
+      console.warn(`Skipping "${f.name}": stored as ${f.mimeType} (Google-converted, not raw markdown)`);
+      continue;
+    }
+    mdFiles.push(f);
+  }
 
   const metas: PostMeta[] = [];
   for (const file of mdFiles) {

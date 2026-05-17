@@ -32,9 +32,12 @@ export const handler: Handler = async (event) => {
     "cache-control": "public, max-age=60",
   };
 
-  // Path comes through redirect as /.netlify/functions/blog-post/:slug
-  const match = event.path.match(/blog-post\/([^/?]+)/);
-  const slug = match?.[1];
+  // event.path may be the original /api/blog/post/:slug or the rewritten
+  // /.netlify/functions/blog-post/:slug depending on environment.
+  const remainder = event.path
+    .replace(/^\/api\/blog\/post\//, "")
+    .replace(/^\/\.netlify\/functions\/blog-post\//, "");
+  const slug = remainder.split("/")[0].split("?")[0] || null;
   if (!slug) {
     return { statusCode: 400, headers: baseHeaders, body: JSON.stringify({ error: "slug required" }) };
   }
@@ -51,9 +54,15 @@ export const handler: Handler = async (event) => {
 
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
-  const mdFiles = files.filter(
-    (f: DriveFile) => f.mimeType === "text/markdown" || f.name.endsWith(".md")
-  );
+  const mdFiles: DriveFile[] = [];
+  for (const f of files) {
+    if (!f.name.endsWith(".md")) continue;
+    if (f.mimeType.startsWith("application/vnd.google-apps.")) {
+      console.warn(`Skipping "${f.name}": stored as ${f.mimeType} (Google-converted, not raw markdown)`);
+      continue;
+    }
+    mdFiles.push(f);
+  }
 
   let found: PostPayload | null = null;
   for (const file of mdFiles) {

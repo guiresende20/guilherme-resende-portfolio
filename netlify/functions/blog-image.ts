@@ -27,8 +27,13 @@ export const handler: Handler = async (event) => {
     return { statusCode: 405, body: "Method not allowed" };
   }
 
-  const match = event.path.match(/blog-image\/([^/?]+)/);
-  const filename = match?.[1] ? decodeURIComponent(match[1]) : null;
+  // event.path may be the original /api/blog/image/:filename or the rewritten
+  // /.netlify/functions/blog-image/:filename depending on environment.
+  const remainder = event.path
+    .replace(/^\/api\/blog\/image\//, "")
+    .replace(/^\/\.netlify\/functions\/blog-image\//, "");
+  const rawName = remainder.split("/")[0].split("?")[0];
+  const filename = rawName ? decodeURIComponent(rawName) : null;
   if (!filename) return { statusCode: 400, body: "filename required" };
 
   // Reject path traversal attempts.
