@@ -3,6 +3,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
+import { listFolder, downloadText } from "./_lib/drive";
+import { resolveBlogFolders } from "./_lib/blog-folders";
+import { getCached, setCached } from "./_lib/blob-cache";
+import { parsePost } from "../../src/lib/blog/frontmatter";
 
 const CHAT_RATE_LIMITS = [
   { limit: 10, windowMs: 60_000, label: "min" },
@@ -36,6 +40,36 @@ function validateHistory(value: unknown): HistoryEntry[] | null {
     result.push({ role: entry.role, parts });
   }
   return result;
+}
+
+// ─── Blog Posts Helper ────────────────────────────────────────────────────────
+const POST_LIST_TTL_MS = 10 * 60_000;
+
+async function getPostsForPrompt(): Promise<string> {
+  const cacheKey = "posts/prompt-summary";
+  const cached = await getCached<string>(cacheKey);
+  if (cached) return cached;
+  try {
+    const folders = await resolveBlogFolders();
+    const files = await listFolder(folders.rootId);
+    const mds = files.filter((f) => f.mimeType === "text/markdown" || f.name.endsWith(".md"));
+    const lines: string[] = [];
+    for (const f of mds) {
+      const raw = await downloadText(f.id);
+      const { meta } = parsePost(raw, f.name);
+      if (meta.draft) continue;
+      const excerpt = meta.excerpt ?? "";
+      lines.push(`- /blog/${meta.slug} — "${meta.title}" — ${excerpt}`);
+    }
+    const summary = lines.length
+      ? `\n\n---\n\nPOSTOS DO BLOG (recomende quando relevante, com o link /blog/<slug>):\n${lines.join("\n")}`
+      : "";
+    await setCached(cacheKey, summary, POST_LIST_TTL_MS);
+    return summary;
+  } catch (err) {
+    console.error("getPostsForPrompt failed", err);
+    return "";
+  }
 }
 
 // ─── System Prompt Completo ────────────────────────────────────────────────────
@@ -451,6 +485,9 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     const genAI = new GoogleGenerativeAI(apiKey);
 
+    const postsSummary = await getPostsForPrompt();
+    const fullSystemPrompt = SYSTEM_PROMPT + postsSummary;
+
     // Detecta se é uma busca por conteúdo recente/web
     const isSearchQuery = /recente|últimos|notícia|busca|internet|google|recent|latest|news|noticias/i.test(message);
 
@@ -461,7 +498,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       // Modo busca: usa Google Search Grounding, retorna texto simples
       const searchModel = genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
-        systemInstruction: SYSTEM_PROMPT + "\n\nNeste modo, responda em texto simples sem JSON. Use os resultados de busca para enriquecer sua resposta.",
+        systemInstruction: fullSystemPrompt + "\n\nNeste modo, responda em texto simples sem JSON. Use os resultados de busca para enriquecer sua resposta.",
         // @ts-ignore — googleSearchRetrieval tool
         tools: [{ googleSearchRetrieval: {} }],
         generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
@@ -478,7 +515,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       // Modo padrão: resposta estruturada em JSON com action cards
       const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
-        systemInstruction: SYSTEM_PROMPT,
+        systemInstruction: fullSystemPrompt,
         generationConfig: {
           temperature: 0.5,
           topP: 0.9,
