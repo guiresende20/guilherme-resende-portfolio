@@ -3089,6 +3089,38 @@ Before declaring done:
 - [ ] Manual acceptance from Task 5.11 all pass.
 - [ ] `docs/blog-setup.md` followed by owner end-to-end at least once.
 
+## Phase 6 — Future enhancements (backlog, not scheduled)
+
+Items intentionally deferred. Reopen and plan when justified.
+
+### Task 6.1: Native Google Docs as source (alongside `.md`)
+
+**Goal:** Let the owner create a post directly as a Google Doc in the blog folder, without uploading a raw `.md`. Native Docs feel more natural for long-form writing and enable Drive's collaborative editing.
+
+**Why deferred (2026-05-17):** Owner accepted the pragmatic raw-`.md` workflow for the first ~5-10 posts. Reopen if the upload-`.md` flow becomes a real bottleneck.
+
+**Design sketch (when implemented):**
+- In `blog-list.ts` and `blog-post.ts`, also accept `mimeType === 'application/vnd.google-apps.document'`.
+- For Docs, replace `downloadText(file.id)` with `drive.files.export({ fileId, mimeType: 'text/markdown' })` — Drive exports Docs to markdown natively.
+- Frontmatter convention — pick one:
+  - **(a)** Owner pastes YAML frontmatter as the first paragraph of the Doc (export preserves it as text).
+  - **(b)** Store metadata in Drive `appProperties` set via Apps Script or the API.
+  - Option (a) is simpler and keeps frontmatter visible to the author.
+- Inline image handling — pick one:
+  - **(a)** Strip; require owner to use external/CDN URLs.
+  - **(b)** Walk the exported markdown, detect Drive attachment refs, mirror to `images/`, rewrite URLs.
+- Add unit tests for the Docs-export → frontmatter pipeline (more brittle than raw `.md`).
+- Update `docs/blog-setup.md` with the dual workflow.
+
+**Acceptance:**
+- A Google Doc named `my-post` in the blog folder with frontmatter in the first paragraph publishes at `/blog/my-post`.
+- Existing raw `.md` posts keep working unchanged.
+- Inline images render correctly.
+
+**Risks:**
+- Drive Docs→Markdown export has known fidelity issues (code blocks, nested lists, tables). May force owner-side editing rules.
+- Two source formats means two test paths and twice the failure modes.
+
 ## Out-of-scope reminders
 
 Items from the spec explicitly NOT in this plan (do not creep):
