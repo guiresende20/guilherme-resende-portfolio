@@ -7,6 +7,8 @@ import { listFolder, downloadText } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { parsePost } from "../../src/lib/blog/frontmatter";
+import { retrieveRelevantChunks } from "./_lib/rag";
+import { ensureBlobsContext } from "./_lib/blobs-context";
 
 const CHAT_RATE_LIMITS = [
   { limit: 10, windowMs: 60_000, label: "min" },
@@ -40,6 +42,20 @@ function validateHistory(value: unknown): HistoryEntry[] | null {
     result.push({ role: entry.role, parts });
   }
   return result;
+}
+
+const RAG_TIMEOUT_MS = 1500;
+
+async function getRagContextSafe(message: string): Promise<string> {
+  try {
+    return await Promise.race([
+      retrieveRelevantChunks(message),
+      new Promise<string>((resolve) => setTimeout(() => resolve(""), RAG_TIMEOUT_MS)),
+    ]);
+  } catch (err) {
+    console.error("chat: rag retrieve threw unexpectedly", err);
+    return "";
+  }
 }
 
 // ─── Blog Posts Helper ────────────────────────────────────────────────────────
@@ -441,6 +457,7 @@ Regras para actions:
 
 // ─── Handler ───────────────────────────────────────────────────────────────────
 const handler: Handler = async (event: HandlerEvent) => {
+  ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
   const allowed = isOriginAllowed(origin);
 
@@ -490,7 +507,8 @@ const handler: Handler = async (event: HandlerEvent) => {
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const postsSummary = await getPostsForPrompt();
-    const fullSystemPrompt = SYSTEM_PROMPT + postsSummary;
+    const ragContext = await getRagContextSafe(message);
+    const fullSystemPrompt = SYSTEM_PROMPT + postsSummary + ragContext;
 
     // Detecta se é uma busca por conteúdo recente/web
     const isSearchQuery = /recente|últimos|notícia|busca|internet|google|recent|latest|news|noticias/i.test(message);
