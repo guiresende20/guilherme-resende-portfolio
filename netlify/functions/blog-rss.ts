@@ -1,4 +1,4 @@
-import type { Handler } from "@netlify/functions";
+import type { Handler, HandlerResponse } from "@netlify/functions";
 import { listFolder, downloadText } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { parsePost } from "../../src/lib/blog/frontmatter";
@@ -15,7 +15,7 @@ function escapeXml(s: string): string {
   }[c]!));
 }
 
-export const handler: Handler = async (event) => {
+export const handler: Handler = async (event): Promise<HandlerResponse> => {
   if (event.httpMethod !== "GET") {
     return { statusCode: 405, body: "Method not allowed" };
   }
