@@ -8,6 +8,7 @@ import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { parsePost } from "../../src/lib/blog/frontmatter";
 import { retrieveRelevantChunks } from "./_lib/rag";
+import { ensureBlobsContext } from "./_lib/blobs-context";
 
 const CHAT_RATE_LIMITS = [
   { limit: 10, windowMs: 60_000, label: "min" },
@@ -456,6 +457,7 @@ Regras para actions:
 
 // ─── Handler ───────────────────────────────────────────────────────────────────
 const handler: Handler = async (event: HandlerEvent) => {
+  ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
   const allowed = isOriginAllowed(origin);
 

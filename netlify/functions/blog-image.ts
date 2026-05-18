@@ -2,6 +2,7 @@ import type { Handler } from "@netlify/functions";
 import { listFolder, downloadBinary } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCachedBinary, setCachedBinary } from "./_lib/blob-cache";
+import { ensureBlobsContext } from "./_lib/blobs-context";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 
 function contentTypeForName(name: string): string {
@@ -15,6 +16,7 @@ function contentTypeForName(name: string): string {
 }
 
 export const handler: Handler = async (event) => {
+  ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
   const allowed = isOriginAllowed(origin);
 

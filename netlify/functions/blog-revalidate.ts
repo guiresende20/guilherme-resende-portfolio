@@ -4,6 +4,7 @@ import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { parsePost } from "../../src/lib/blog/frontmatter";
 import { indexPost, removePost as ragRemovePost } from "./_lib/rag";
+import { ensureBlobsContext } from "./_lib/blobs-context";
 
 async function listMdFiles(): Promise<DriveFile[]> {
   const folders = await resolveBlogFolders();
@@ -38,6 +39,7 @@ async function reindexSlug(slug: string): Promise<
 }
 
 export const handler: Handler = async (event) => {
+  ensureBlobsContext(event);
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
   }

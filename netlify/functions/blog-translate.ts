@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
+import { ensureBlobsContext } from "./_lib/blobs-context";
 import { parsePost } from "../../src/lib/blog/frontmatter";
 import {
   corsHeaders,
@@ -36,6 +37,7 @@ Rules:
 - Do NOT include or repeat the YAML frontmatter — you receive only the body.`;
 
 export const handler: Handler = async (event) => {
+  ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
   const allowed = isOriginAllowed(origin);
 
