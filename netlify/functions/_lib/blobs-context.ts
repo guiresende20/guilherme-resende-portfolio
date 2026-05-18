@@ -20,29 +20,3 @@ export function ensureBlobsContext(event: HandlerEvent): void {
   }
 }
 
-export interface BlobsContextDiag {
-  eventHasBlobs: boolean;
-  blobsType: string;
-  envHasContext: boolean;
-  hasSiteIdHeader: boolean;
-  hasDeployIdHeader: boolean;
-  connectError: string | null;
-}
-
-export function diagnoseBlobsContext(event: HandlerEvent): BlobsContextDiag {
-  const e = event as unknown as { blobs?: unknown; headers?: Record<string, string> };
-  const diag: BlobsContextDiag = {
-    eventHasBlobs: e.blobs !== undefined && e.blobs !== null,
-    blobsType: typeof e.blobs,
-    envHasContext: Boolean(process.env.NETLIFY_BLOBS_CONTEXT),
-    hasSiteIdHeader: Boolean(e.headers?.["x-nf-site-id"]),
-    hasDeployIdHeader: Boolean(e.headers?.["x-nf-deploy-id"]),
-    connectError: null,
-  };
-  try {
-    connectLambda(event as unknown as Parameters<typeof connectLambda>[0]);
-  } catch (err) {
-    diag.connectError = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
-  }
-  return diag;
-}
