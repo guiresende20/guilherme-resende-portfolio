@@ -2,6 +2,7 @@ import type { Handler } from "@netlify/functions";
 import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
+import { ensureBlobsContext } from "./_lib/blobs-context";
 import { parsePost, type PostMeta } from "../../src/lib/blog/frontmatter";
 import { rewriteImagePaths } from "../../src/lib/blog/image-paths";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
@@ -14,6 +15,7 @@ interface PostPayload {
 }
 
 export const handler: Handler = async (event) => {
+  ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
   const allowed = isOriginAllowed(origin);
 

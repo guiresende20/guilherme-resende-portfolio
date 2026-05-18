@@ -33,6 +33,11 @@
   status = 200
 
 [[redirects]]
+  from = "/api/blog/reindex"
+  to = "/.netlify/functions/blog-reindex"
+  status = 200
+
+[[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
   status = 200
