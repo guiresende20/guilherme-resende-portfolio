@@ -2,6 +2,8 @@
 // Todas as chamadas vão para a Netlify Function /api/chat (proxy seguro).
 // A API Key fica EXCLUSIVAMENTE no servidor — nunca no browser.
 
+import { validateChatActions } from "./chat-actions";
+
 export const WELCOME_MESSAGE =
   "Olá! Sou o Guilherme Resende — designer, pesquisador e entusiasta de tecnologia.\n\nEstou aqui para conversar sobre minha trajetória, projetos, skills ou qualquer coisa relacionada ao meu trabalho. O que você quer saber?";
 
@@ -51,9 +53,12 @@ export async function sendChatMessage(
 
   const data = await response.json();
 
-  // Garante que a resposta tem o formato correto
+  // Defense in depth: re-validate actions client-side. The server already
+  // validates, but a stale cache or middleware tampering could deliver bad
+  // shapes — and the consequence (window.open / iframe src) is too direct
+  // to trust a single layer.
   return {
     text: data.text || "Desculpe, não consegui processar sua mensagem.",
-    actions: Array.isArray(data.actions) ? data.actions : [],
+    actions: validateChatActions(data.actions),
   };
 }

@@ -46,12 +46,16 @@ export const handler: Handler = async (event) => {
     return { statusCode: 204, headers: corsHeaders(origin, "POST"), body: "" };
   }
 
+  if (!allowed) {
+    return { statusCode: 403, body: JSON.stringify({ error: "Origem não autorizada" }) };
+  }
+
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
   }
 
   const baseHeaders: Record<string, string> = {
-    ...(allowed ? corsHeaders(origin, "POST") : {}),
+    ...corsHeaders(origin, "POST"),
     "content-type": "application/json",
   };
 

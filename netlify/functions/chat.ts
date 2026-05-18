@@ -7,6 +7,7 @@ import { listFolder, downloadText } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { parsePost } from "../../src/lib/blog/frontmatter";
+import { validateChatActions } from "../../src/lib/chat-actions";
 import { retrieveRelevantChunks } from "./_lib/rag";
 import { ensureBlobsContext } from "./_lib/blobs-context";
 
@@ -562,7 +563,13 @@ const handler: Handler = async (event: HandlerEvent) => {
       try {
         const parsed = JSON.parse(cleanRaw);
         responseText = parsed.text || raw; // se parsed.text não existir, fallback
-        actions = Array.isArray(parsed.actions) ? parsed.actions : [];
+        actions = validateChatActions(parsed.actions);
+        if (Array.isArray(parsed.actions) && parsed.actions.length !== actions.length) {
+          console.warn("chat: dropped invalid actions", {
+            received: parsed.actions.length,
+            kept: actions.length,
+          });
+        }
       } catch {
         // Fallback robusto se o modelo quebrar o JSON e não encontrarmos chaves
         // Tenta limpar marcas de markdown se restarem
