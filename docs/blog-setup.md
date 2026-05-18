@@ -76,3 +76,58 @@ curl -X POST "https://guiresende20.netlify.app/api/blog/revalidate?slug=hello" \
 If `GOOGLE_DRIVE_SA_JSON` ever leaks: in Google Cloud Console →
 service account → Keys → delete old key, create new key, update
 Netlify env var, redeploy.
+
+---
+
+## RAG no chatbot
+
+### O que é
+
+O chatbot do site usa RAG (Retrieval-Augmented Generation) sobre os posts do blog. A cada mensagem, ele recupera os trechos mais relevantes dos posts e usa como contexto para responder. Isso permite respostas como "no post X, escrevi que Y..." com citação real do conteúdo — não só recomendação do link.
+
+### Como funciona
+
+Quando um post é publicado/atualizado e você bate em `/api/blog/revalidate?slug=foo`, o sistema também gera embeddings vetoriais do conteúdo (via Gemini `text-embedding-004`) e armazena num índice JSON no Netlify Blobs (`embeddings/posts-index.json`). Quando alguém manda mensagem no chat, a pergunta é convertida em vetor e os top-5 trechos mais similares (cosine ≥ 0.6, no máximo 2 por post) são injetados no prompt.
+
+### Bootstrap inicial (rodar 1 vez após primeiro deploy)
+
+```bash
+curl -X POST https://guiresende20.netlify.app/api/blog/reindex \
+  -H "X-Revalidate-Token: $BLOG_REVALIDATE_TOKEN"
+```
+
+Esperado: `200 { total: N, indexed: N, failed: 0 }`.
+
+### Quando reindexar manualmente
+
+- Após criar um post novo: acontece automático via `/api/blog/revalidate?slug=<novo>`.
+- Após editar um post: idem.
+- **Botão de pânico**: se as respostas começarem a ficar estranhas (ou após mudar configurações), rodar `POST /api/blog/reindex` para regenerar tudo.
+
+### Custo
+
+- Indexação: ~1 chamada de embedding por post (em batch). Free tier do Gemini cobre folgado (1500 req/dia).
+- Consulta: 1 chamada de embedding por mensagem do chat. ~$0.000015 por pergunta — desprezível.
+- Storage: ~5KB por post no Blobs. 100 posts = 500KB. Free tier.
+
+### Como verificar se está funcionando
+
+- No painel Blobs do Netlify: existem `embeddings/posts-index.json` e `embeddings/meta.json`.
+- Pergunta de teste no chat: "o que você escreveu sobre [tópico de um post]?" — a resposta deve citar trecho específico, não apenas recomendar o link.
+- Logs da function `chat` (painel Functions do Netlify): linha `rag.retrieveRelevantChunks: ... hits=N topScore=0.XX`.
+
+### Troubleshooting
+
+| Sintoma | Diagnóstico | Fix |
+|---|---|---|
+| Chatbot só recomenda links, nunca cita trechos | Índice vazio | `POST /api/blog/reindex` |
+| Chatbot cita trechos errados pra perguntas off-topic | Threshold muito baixo | Subir `THRESHOLD` de 0.6 → 0.7 em `netlify/functions/_lib/rag.ts` |
+| Latência do chat aumentou >800ms | Embedding API lenta | Verificar status do Gemini; threshold do timeout interno é 1.5s (degrada gracioso) |
+| Erro `"vector store write failed"` no log | Blobs sem permissão / contexto | Verificar que a function roda em contexto Netlify (não local sem `netlify dev`) |
+| 401 no `/api/blog/reindex` | Token errado ou ausente | Conferir env var `BLOG_REVALIDATE_TOKEN` e header `X-Revalidate-Token` |
+
+### Limitações conhecidas
+
+- Indexação é síncrona dentro do revalidate. Post muito longo (>50 chunks) pode levar 2-3s — aceitável pra blog pessoal.
+- Drafts (`meta.draft === true`) e quaisquer posts em subpastas NÃO são indexados, por design.
+- Cache em memória da function pode ficar até ~1min defasado após reindex (warm function pode segurar índice velho). Não é problema em prática.
