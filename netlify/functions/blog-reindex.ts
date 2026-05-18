@@ -3,6 +3,7 @@ import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { parsePost } from "../../src/lib/blog/frontmatter";
 import { indexPost } from "./_lib/rag";
+import { loadIndex, __resetCacheForTests } from "./_lib/vector-store";
 
 interface ReindexError {
   slug: string;
@@ -61,6 +62,18 @@ export const handler: Handler = async (event) => {
     }
   }
 
+  // Diagnostic readback: bypass memCache and load fresh from blob.
+  __resetCacheForTests();
+  let storedChunks = -1;
+  let storedSlugs: string[] = [];
+  try {
+    const idx = await loadIndex();
+    storedChunks = idx.chunks.length;
+    storedSlugs = [...new Set(idx.chunks.map((c) => c.slug))];
+  } catch (err) {
+    console.error("blog-reindex: diagnostic loadIndex failed", err);
+  }
+
   return {
     statusCode: 200,
     headers: { "content-type": "application/json" },
@@ -69,6 +82,8 @@ export const handler: Handler = async (event) => {
       indexed,
       failed: errors.length,
       errors,
+      storedChunks,
+      storedSlugs,
     }),
   };
 };
