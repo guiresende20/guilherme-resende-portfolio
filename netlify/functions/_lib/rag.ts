@@ -12,7 +12,7 @@ export { removePost } from "./vector-store";
 const RAG_HEADER = "\n\n---\n\nTRECHOS RELEVANTES DO BLOG (use quando responder):\n\n";
 const RAG_SEPARATOR = "\n---\n";
 const TOP_K = 5;
-const THRESHOLD = 0.6;
+const THRESHOLD = 0.5;
 const MAX_PER_POST = 2;
 
 export async function indexPost(
@@ -67,7 +67,16 @@ export async function retrieveRelevantChunks(query: string): Promise<string> {
     return "";
   }
   if (hits.length === 0) {
-    console.log(`rag.retrieveRelevantChunks: hits=0 elapsedMs=${Date.now() - start}`);
+    let bestBelow = 0;
+    try {
+      const probe = await searchSimilar(queryVec, { k: 1, threshold: 0, maxPerPost: MAX_PER_POST });
+      bestBelow = probe[0]?.score ?? 0;
+    } catch {
+      // ignore — diagnostic only
+    }
+    console.log(
+      `rag.retrieveRelevantChunks: hits=0 bestBelowThreshold=${bestBelow.toFixed(3)} threshold=${THRESHOLD} elapsedMs=${Date.now() - start}`,
+    );
     return "";
   }
   const body = hits
