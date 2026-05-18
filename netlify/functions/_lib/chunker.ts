@@ -30,7 +30,6 @@ function takeLastTokens(text: string, tokens: number): string {
 interface Block {
   text: string;
   heading?: { level: number; title: string }; // se a linha for heading
-  isFenceMarker?: boolean;
 }
 
 function parseBlocks(body: string): Block[] {

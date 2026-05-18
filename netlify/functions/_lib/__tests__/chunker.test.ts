@@ -55,6 +55,10 @@ Texto da B.`;
     const result = chunk(body, { targetTokens: 500, overlap: 80 });
     expect(result).toHaveLength(1); // small enough to fit
     expect(result[0].text).toContain("## Seção A");
+    // headingPath reflects the last open heading stack at flush time —
+    // here the file ends inside Seção B, so path ends at "## Seção B".
+    expect(result[0].headingPath).toContain("# Top");
+    expect(result[0].headingPath).toContain("## Seção B");
   });
 
   it("attaches headingPath to chunks inside a section", () => {
@@ -87,6 +91,16 @@ ${longText}`;
       const opens = (c.text.match(/```/g) || []).length;
       expect(opens % 2).toBe(0);
     }
+  });
+
+  it("emits an oversized chunk when a single block exceeds targetTokens (no mid-block splits)", () => {
+    // One paragraph with no newlines that estimates to ~750 tokens (3000 chars).
+    const giant = "palavra ".repeat(375); // 8 chars × 375 = 3000 chars ≈ 750 tokens
+    const result = chunk(giant, { targetTokens: 500, overlap: 80 });
+    expect(result).toHaveLength(1);
+    expect(result[0].idx).toBe(0);
+    // Whole paragraph survives intact — accepted behavior, not splitting mid-block.
+    expect(result[0].text).toContain(giant.trim());
   });
 
   it("assigns sequential idx starting at 0", () => {
