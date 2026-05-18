@@ -7,6 +7,8 @@ import {
   type StoredChunk,
 } from "./vector-store";
 
+export { removePost } from "./vector-store";
+
 const RAG_HEADER = "\n\n---\n\nTRECHOS RELEVANTES DO BLOG (use quando responder):\n\n";
 const RAG_SEPARATOR = "\n---\n";
 const TOP_K = 5;
