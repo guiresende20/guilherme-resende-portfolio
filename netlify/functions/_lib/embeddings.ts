@@ -6,24 +6,11 @@ const MAX_BATCH = 100;
 
 let cachedClient: GoogleGenerativeAI | null = null;
 
-function makeGAI(apiKey: string): GoogleGenerativeAI {
-  try {
-    return new GoogleGenerativeAI(apiKey);
-  } catch (e) {
-    // vi.fn().mockImplementation(arrow) mocks aren't constructable in Vitest 4.x;
-    // fall back to a plain call so unit tests work without changing the test file.
-    if (e instanceof TypeError) {
-      return (GoogleGenerativeAI as unknown as (k: string) => GoogleGenerativeAI)(apiKey);
-    }
-    throw e;
-  }
-}
-
 function getClient(): GoogleGenerativeAI {
   if (cachedClient) return cachedClient;
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY missing");
-  cachedClient = makeGAI(apiKey);
+  cachedClient = new GoogleGenerativeAI(apiKey);
   return cachedClient;
 }
 

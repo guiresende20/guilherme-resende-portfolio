@@ -5,14 +5,15 @@ const embedContentMock = vi.fn();
 const batchEmbedContentsMock = vi.fn();
 
 vi.mock("@google/generative-ai", () => {
-  return {
-    GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
-      getGenerativeModel: vi.fn(() => ({
+  class MockGoogleGenerativeAI {
+    getGenerativeModel() {
+      return {
         embedContent: embedContentMock,
         batchEmbedContents: batchEmbedContentsMock,
-      })),
-    })),
-  };
+      };
+    }
+  }
+  return { GoogleGenerativeAI: MockGoogleGenerativeAI };
 });
 
 beforeEach(() => {
