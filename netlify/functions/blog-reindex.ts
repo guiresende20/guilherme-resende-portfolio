@@ -4,7 +4,7 @@ import { resolveBlogFolders } from "./_lib/blog-folders";
 import { parsePost } from "../../src/lib/blog/frontmatter";
 import { indexPost } from "./_lib/rag";
 import { loadIndex, __resetCacheForTests } from "./_lib/vector-store";
-import { ensureBlobsContext } from "./_lib/blobs-context";
+import { ensureBlobsContext, diagnoseBlobsContext } from "./_lib/blobs-context";
 
 interface ReindexError {
   slug: string;
@@ -12,6 +12,7 @@ interface ReindexError {
 }
 
 export const handler: Handler = async (event) => {
+  const blobsDiag = diagnoseBlobsContext(event);
   ensureBlobsContext(event);
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method not allowed" };
@@ -86,6 +87,7 @@ export const handler: Handler = async (event) => {
       errors,
       storedChunks,
       storedSlugs,
+      blobsDiag,
     }),
   };
 };
