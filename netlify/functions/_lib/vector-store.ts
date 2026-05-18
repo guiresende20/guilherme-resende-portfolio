@@ -1,4 +1,5 @@
 import { getStore } from "@netlify/blobs";
+import { EMBEDDING_MODEL } from "./embeddings";
 
 const STORE_NAME = "blog";
 const INDEX_KEY = "embeddings/posts-index.json";
@@ -98,7 +99,7 @@ async function saveIndex(index: IndexFile, meta: Partial<MetaFile> = {}): Promis
   await s.setJSON(INDEX_KEY, index);
   const fullMeta: MetaFile = {
     lastIndexedAt: Date.now(),
-    modelVersion: meta.modelVersion ?? "text-embedding-004",
+    modelVersion: meta.modelVersion ?? EMBEDDING_MODEL,
     dimension: meta.dimension ?? (index.chunks[0]?.vector.length ?? 768),
   };
   await s.setJSON(META_KEY, fullMeta);

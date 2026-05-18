@@ -1,8 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export const EMBEDDING_MODEL = "text-embedding-004";
+export const EMBEDDING_MODEL = "gemini-embedding-001";
 export const EMBEDDING_DIM = 768;
 const MAX_BATCH = 100;
+
+// gemini-embedding-001 defaults to 3072 dims; we cap at 768 for storage parity.
+// Field is not in the SDK 0.24.1 typings but the SDK forwards unknown fields to the REST body.
+const DIM_CONFIG = { outputDimensionality: EMBEDDING_DIM };
 
 let cachedClient: GoogleGenerativeAI | null = null;
 
@@ -28,13 +32,17 @@ async function sleep(ms: number): Promise<void> {
 
 export async function embedText(text: string): Promise<number[]> {
   const model = getClient().getGenerativeModel({ model: EMBEDDING_MODEL });
+  const request = {
+    content: { role: "user", parts: [{ text }] },
+    ...DIM_CONFIG,
+  } as Parameters<typeof model.embedContent>[0];
   try {
-    const result = await model.embedContent(text);
+    const result = await model.embedContent(request);
     return result.embedding.values;
   } catch (err) {
     if (!isRetryable(err)) throw err;
     await sleep(500);
-    const result = await model.embedContent(text);
+    const result = await model.embedContent(request);
     return result.embedding.values;
   }
 }
@@ -45,7 +53,10 @@ export async function embedBatch(texts: string[]): Promise<number[][]> {
     throw new Error(`embedBatch: input size ${texts.length} exceeds MAX_BATCH=${MAX_BATCH}`);
   }
   const model = getClient().getGenerativeModel({ model: EMBEDDING_MODEL });
-  const requests = texts.map((t) => ({ content: { role: "user", parts: [{ text: t }] } }));
+  const requests = texts.map((t) => ({
+    content: { role: "user", parts: [{ text: t }] },
+    ...DIM_CONFIG,
+  })) as Parameters<typeof model.batchEmbedContents>[0]["requests"];
   try {
     const result = await model.batchEmbedContents({ requests });
     return result.embeddings.map((e) => e.values);
