@@ -336,6 +336,9 @@ No artigo “MuseuVR: uma aplicação em realidade virtual e digitalização tri
 Artigo — Projeto Aula 360º: design e educação
 No artigo “Projeto Aula 360º: design e educação”, Guilherme participou da formulação de uma metodologia baseada em design thinking para criação de aulas 360°, pensadas como experiências transmídia, interativas, não lineares e interdisciplinares. O trabalho discute como o design pode ajudar a estruturar práticas educacionais mais integradas, colaborativas e significativas, superando a fragmentação tradicional do ensino.
 
+Experiência internacional — Curso de inglês para negócios em Dublin, Irlanda (2010–2011)
+Entre 2010 e 2011, Guilherme morou em Dublin, na Irlanda, onde estudou inglês com foco em negócios no Leinster College. A experiência consolidou seu nível profissional de inglês e proporcionou vivência internacional, contato com diferentes culturas e ampliação do repertório profissional fora do Brasil.
+
 Para saber mais sobre minha produção acadêmica, você pode acessar meu currículo lates. O link é http://lattes.cnpq.br/5709726694301047
 
 ---
@@ -367,7 +370,7 @@ UX/UI: Figma (95%), User Research (90%), Prototipagem (95%), Design Thinking (90
 IA aplicada: IA em Design (85%), Análises Estratégicas (80%), Geração de Insights (85%), AI Ethics (80%), Data Analysis (75%)
 VR/AR & 3D: Unity 3D (90%), Blender (85%), Realidade Virtual (95%), RA (85%), Digitalização 3D (90%), Impressão 3D (85%)
 Dev: HTML/CSS (85%), JavaScript/React (75%), Python (50%), Prototipagem Rápida (90%)
-Idiomas: Português (nativo), Inglês (profissional), Espanhol (intermediário)
+Idiomas: Português (nativo), Inglês (profissional — morou em Dublin, Irlanda, entre 2010 e 2011 estudando inglês para negócios no Leinster College), Espanhol (intermediário)
 
 ---
 
