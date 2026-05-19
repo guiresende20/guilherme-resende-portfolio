@@ -23,13 +23,14 @@ export interface DriveFile {
   name: string;
   mimeType: string;
   modifiedTime: string;
+  createdTime: string;
 }
 
 export async function listFolder(folderId: string): Promise<DriveFile[]> {
   const drive = getDrive();
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
-    fields: "files(id, name, mimeType, modifiedTime)",
+    fields: "files(id, name, mimeType, modifiedTime, createdTime)",
     pageSize: 1000,
   });
   return (res.data.files ?? []) as DriveFile[];
