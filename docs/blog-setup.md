@@ -47,6 +47,8 @@ Google account.
 
 ## 5. Write your first post
 
+### 5.1 As a Markdown file
+
 Save a file `hello.md` to the `blog` folder in Drive:
 
 ```markdown
@@ -71,11 +73,61 @@ curl -X POST "https://guiresende20.netlify.app/api/blog/revalidate?slug=hello" \
   -H "X-Revalidate-Token: <your BLOG_REVALIDATE_TOKEN>"
 ```
 
+### 5.2 As a Google Doc
+
+No Drive, dentro da pasta `blog`, crie um novo Google Doc (ou use um existente). **O nome do Doc vira o título do post.**
+
+Conteúdo do Doc:
+
+```
+Tags: meta, ia
+
+Este é o body do post. Escreva normal — parágrafos, headings, listas, links, tudo funciona.
+```
+
+A primeira linha `Tags: ...` é mágica: define as tags e é removida do render. Se não quiser tags, é só não escrever essa linha.
+
+A data do post é o `createdTime` do Doc (não muda com edições posteriores). Se quiser republicar com data nova, duplique o Doc.
+
+Em até 10min o post aparece em `/blog/<slug>`. Mesmo curl da revalidate funciona pra forçar agora.
+
 ## 6. Rotating the key
 
 If `GOOGLE_DRIVE_SA_JSON` ever leaks: in Google Cloud Console →
 service account → Keys → delete old key, create new key, update
 Netlify env var, redeploy.
+
+## 7. Drafts
+
+Posts em produção: arquivos `.md` ou Docs **diretamente em `blog/`**.
+
+Drafts / WIPs: dentro de `blog/drafts/`. O sistema ignora qualquer coisa dentro dessa subpasta (vale pra `.md` e Doc).
+
+Quando o draft estiver pronto: arraste/mova o arquivo de `blog/drafts/` pra `blog/` raiz.
+
+Importante: **apenas children diretos de `blog/`** são considerados. Se você criar `blog/2026/foo.md` esperando organização por ano, o post ficará invisível. Não use nested folders pra posts (exceto `images/` que é convenção pra mídia, e `drafts/`).
+
+## 8. Markdown vs Google Doc — quando usar
+
+| Use `.md` quando | Use Doc quando |
+|---|---|
+| Post é code-heavy (muitos snippets) | Post é mostly prosa |
+| Quer controle exato de markdown | Quer WYSIWYG, editar no celular |
+| Quer override explícito de data (`date:` em frontmatter) | OK com data = criação do Doc |
+| Quer override de slug, excerpt, cover, lang | OK com defaults (slug = slugify do nome, excerpt = primeiro parágrafo, lang = pt) |
+
+Os dois formatos coexistem. Posts antigos não precisam migrar; novos posts podem ser qualquer um.
+
+## 9. Limitações conhecidas do Google Doc como source
+
+- **Linha "Tags:" é mágica.** Se o primeiro parágrafo do seu post literalmente começar com "Tags: ..." em prosa, o parser vai stripar essa linha. Reescreva o início pra evitar.
+- **Renomear o Doc muda o slug** → links externos pro post antigo quebram. Pense duas vezes antes de renomear.
+- **Data congelada em `createdTime`**: editar o Doc depois não muda a data exibida. Se quiser republicar com data nova, duplique o Doc.
+- **Drive MD export tem fragilidades:**
+  - Code blocks: use Insert > Building blocks > Code block. Inline `code` formatting da era pré-2024 pode virar texto puro.
+  - Nested lists 3+ níveis podem embaralhar indentação.
+  - Imagens embedadas no Doc: NÃO embede. Suba pra `blog/images/` e referencie por nome no body, igual o fluxo `.md`.
+- **Editar durante render**: editar um Doc enquanto o sitemap/RSS está gerando pode produzir versão temporariamente desatualizada. Próxima geração corrige.
 
 ---
 
@@ -87,7 +139,7 @@ O chatbot do site usa RAG (Retrieval-Augmented Generation) sobre os posts do blo
 
 ### Como funciona
 
-Quando um post é publicado/atualizado e você bate em `/api/blog/revalidate?slug=foo`, o sistema também gera embeddings vetoriais do conteúdo (via Gemini `text-embedding-004`) e armazena num índice JSON no Netlify Blobs (`embeddings/posts-index.json`). Quando alguém manda mensagem no chat, a pergunta é convertida em vetor e os top-5 trechos mais similares (cosine ≥ 0.6, no máximo 2 por post) são injetados no prompt.
+Quando um post é publicado/atualizado e você bate em `/api/blog/revalidate?slug=foo`, o sistema também gera embeddings vetoriais do conteúdo (via Gemini `gemini-embedding-001`) e armazena num índice JSON no Netlify Blobs (`embeddings/posts-index.json`). Quando alguém manda mensagem no chat, a pergunta é convertida em vetor e os top-5 trechos mais similares (cosine ≥ 0.6, no máximo 2 por post) são injetados no prompt.
 
 ### Bootstrap inicial (rodar 1 vez após primeiro deploy)
 
@@ -129,5 +181,5 @@ Esperado: `200 { total: N, indexed: N, failed: 0 }`.
 ### Limitações conhecidas
 
 - Indexação é síncrona dentro do revalidate. Post muito longo (>50 chunks) pode levar 2-3s — aceitável pra blog pessoal.
-- Drafts (`meta.draft === true`) e quaisquer posts em subpastas NÃO são indexados, por design.
+- Drafts (`meta.draft === true` em `.md`, ou arquivos em `blog/drafts/` pra qualquer formato) e quaisquer posts em outras subpastas NÃO são indexados, por design.
 - Cache em memória da function pode ficar até ~1min defasado após reindex (warm function pode segurar índice velho). Não é problema em prática.
