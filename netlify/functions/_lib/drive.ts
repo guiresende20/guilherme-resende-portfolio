@@ -45,6 +45,15 @@ export async function downloadText(fileId: string): Promise<string> {
   return res.data as string;
 }
 
+export async function exportDocAsMarkdown(fileId: string): Promise<string> {
+  const drive = getDrive();
+  const res = await drive.files.export(
+    { fileId, mimeType: "text/markdown" },
+    { responseType: "text" }
+  );
+  return res.data as string;
+}
+
 export async function downloadBinary(fileId: string): Promise<Buffer> {
   const drive = getDrive();
   const res = await drive.files.get(
