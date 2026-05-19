@@ -18,6 +18,15 @@ export interface ParsedPost {
   body: string;
 }
 
+export function slugify(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // strip combining diacriticals
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function slugFromFilename(filename: string): string {
   return filename.replace(/\.md$/i, "");
 }
