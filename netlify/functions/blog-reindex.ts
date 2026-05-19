@@ -43,6 +43,7 @@ export const handler: Handler = async (event) => {
 
   const errors: ReindexError[] = [];
   const seen = new Set<string>();
+  const perSlug: Record<string, { chunks: number; bodyLen: number; mimeType: string }> = {};
   let indexed = 0;
   for (const f of sources) {
     try {
@@ -53,7 +54,8 @@ export const handler: Handler = async (event) => {
         continue;
       }
       seen.add(meta.slug);
-      await indexPost(meta.slug, body, meta.title);
+      const result = await indexPost(meta.slug, body, meta.title);
+      perSlug[meta.slug] = { chunks: result.chunks, bodyLen: body.length, mimeType: f.mimeType };
       indexed += 1;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -84,6 +86,7 @@ export const handler: Handler = async (event) => {
       errors,
       storedChunks,
       storedSlugs,
+      perSlug,
     }),
   };
 };
