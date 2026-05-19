@@ -23,13 +23,14 @@ export interface DriveFile {
   name: string;
   mimeType: string;
   modifiedTime: string;
+  createdTime: string;
 }
 
 export async function listFolder(folderId: string): Promise<DriveFile[]> {
   const drive = getDrive();
   const res = await drive.files.list({
     q: `'${folderId}' in parents and trashed = false`,
-    fields: "files(id, name, mimeType, modifiedTime)",
+    fields: "files(id, name, mimeType, modifiedTime, createdTime)",
     pageSize: 1000,
   });
   return (res.data.files ?? []) as DriveFile[];
@@ -39,6 +40,15 @@ export async function downloadText(fileId: string): Promise<string> {
   const drive = getDrive();
   const res = await drive.files.get(
     { fileId, alt: "media" },
+    { responseType: "text" }
+  );
+  return res.data as string;
+}
+
+export async function exportDocAsMarkdown(fileId: string): Promise<string> {
+  const drive = getDrive();
+  const res = await drive.files.export(
+    { fileId, mimeType: "text/markdown" },
     { responseType: "text" }
   );
   return res.data as string;

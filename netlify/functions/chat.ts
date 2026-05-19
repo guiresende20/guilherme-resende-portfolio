@@ -3,10 +3,10 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
-import { listFolder, downloadText } from "./_lib/drive";
+import { listFolder } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
-import { parsePost } from "../../src/lib/blog/frontmatter";
+import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
 import { validateChatActions } from "../../src/lib/chat-actions";
 import { retrieveRelevantChunks } from "./_lib/rag";
 import { ensureBlobsContext } from "./_lib/blobs-context";
@@ -69,17 +69,22 @@ async function getPostsForPrompt(): Promise<string> {
   try {
     const folders = await resolveBlogFolders();
     const files = await listFolder(folders.rootId);
-    const mds = files.filter((f) => f.mimeType === "text/markdown" || f.name.endsWith(".md"));
+    const sources = files.filter(isBlogPostSource);
     const lines: string[] = [];
-    for (const f of mds) {
+    const seen = new Set<string>();
+    for (const f of sources) {
       try {
-        const raw = await downloadText(f.id);
-        const { meta } = parsePost(raw, f.name);
+        const { meta } = await fetchAndParse(f);
         if (meta.draft) continue;
+        if (seen.has(meta.slug)) {
+          console.error("blog: duplicate slug, skipping", { slug: meta.slug, name: f.name });
+          continue;
+        }
+        seen.add(meta.slug);
         const excerpt = meta.excerpt ?? "";
         lines.push(`- /blog/${meta.slug} — "${meta.title}" — ${excerpt}`);
       } catch (err) {
-        console.error("getPostsForPrompt: skipping", f.name, err);
+        console.error("blog: skipping", { name: f.name, id: f.id, err });
       }
     }
     const summary = lines.length

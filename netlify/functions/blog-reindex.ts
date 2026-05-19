@@ -1,7 +1,7 @@
 import type { Handler } from "@netlify/functions";
-import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
+import { listFolder, type DriveFile } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
-import { parsePost } from "../../src/lib/blog/frontmatter";
+import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
 import { indexPost } from "./_lib/rag";
 import { loadIndex, __resetCacheForTests } from "./_lib/vector-store";
 import { ensureBlobsContext } from "./_lib/blobs-context";
@@ -39,22 +39,20 @@ export const handler: Handler = async (event) => {
     };
   }
 
-  const mdFiles = files.filter((f) => {
-    if (!f.name.endsWith(".md")) return false;
-    if (f.mimeType.startsWith("application/vnd.google-apps.")) {
-      console.warn(`blog-reindex: skipping "${f.name}" (mimeType=${f.mimeType})`);
-      return false;
-    }
-    return true;
-  });
+  const sources = files.filter(isBlogPostSource);
 
   const errors: ReindexError[] = [];
+  const seen = new Set<string>();
   let indexed = 0;
-  for (const f of mdFiles) {
+  for (const f of sources) {
     try {
-      const raw = await downloadText(f.id);
-      const { meta, body } = parsePost(raw, f.name);
+      const { meta, body } = await fetchAndParse(f);
       if (meta.draft) continue;
+      if (seen.has(meta.slug)) {
+        console.error("blog: duplicate slug, skipping", { slug: meta.slug, name: f.name });
+        continue;
+      }
+      seen.add(meta.slug);
       await indexPost(meta.slug, body, meta.title);
       indexed += 1;
     } catch (err) {
@@ -80,7 +78,7 @@ export const handler: Handler = async (event) => {
     statusCode: 200,
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      total: mdFiles.length,
+      total: sources.length,
       indexed,
       failed: errors.length,
       errors,

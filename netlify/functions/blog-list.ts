@@ -1,9 +1,10 @@
 import type { Handler } from "@netlify/functions";
-import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
+import { listFolder } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { ensureBlobsContext } from "./_lib/blobs-context";
-import { parsePost, type PostMeta } from "../../src/lib/blog/frontmatter";
+import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
+import type { PostMeta } from "../../src/lib/blog/frontmatter";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 
 const TTL_MS = 10 * 60_000; // 10 min
@@ -40,26 +41,22 @@ export const handler: Handler = async (event) => {
 
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
-  const mdFiles: DriveFile[] = [];
-  for (const f of files) {
-    if (!f.name.endsWith(".md")) continue;
-    if (f.mimeType.startsWith("application/vnd.google-apps.")) {
-      // Drive auto-converted this upload to a native Google Doc; cannot be
-      // downloaded as raw text. Owner must re-upload with conversion disabled.
-      console.warn(`Skipping "${f.name}": stored as ${f.mimeType} (Google-converted, not raw markdown)`);
-      continue;
-    }
-    mdFiles.push(f);
-  }
+  const sources = files.filter(isBlogPostSource);
 
   const metas: PostMeta[] = [];
-  for (const file of mdFiles) {
+  const seen = new Set<string>();
+  for (const file of sources) {
     try {
-      const raw = await downloadText(file.id);
-      const { meta } = parsePost(raw, file.name);
-      if (!meta.draft) metas.push(meta);
+      const { meta } = await fetchAndParse(file);
+      if (meta.draft) continue;
+      if (seen.has(meta.slug)) {
+        console.error("blog: duplicate slug, skipping", { slug: meta.slug, name: file.name });
+        continue;
+      }
+      seen.add(meta.slug);
+      metas.push(meta);
     } catch (err) {
-      console.error("Failed to parse", file.name, err);
+      console.error("blog: skipping", { name: file.name, id: file.id, err });
     }
   }
 

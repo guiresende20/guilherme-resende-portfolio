@@ -1,7 +1,7 @@
 import type { Handler, HandlerResponse } from "@netlify/functions";
-import { listFolder, downloadText } from "./_lib/drive";
+import { listFolder } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
-import { parsePost } from "../../src/lib/blog/frontmatter";
+import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
 
 const SITE_URL = "https://guiresende20.netlify.app";
 
@@ -23,21 +23,19 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
   try {
     const folders = await resolveBlogFolders();
     const files = await listFolder(folders.rootId);
-    const mdFiles = files.filter((f) => {
-      if (!f.name.endsWith(".md")) return false;
-      if (f.mimeType.startsWith("application/vnd.google-apps.")) {
-        console.warn(`Skipping "${f.name}": stored as ${f.mimeType} (Google-converted, not raw markdown)`);
-        return false;
-      }
-      return true;
-    });
+    const sources = files.filter(isBlogPostSource);
 
     const entries: Array<{ slug: string; title: string; date: string; excerpt: string }> = [];
-    for (const file of mdFiles) {
+    const seen = new Set<string>();
+    for (const file of sources) {
       try {
-        const raw = await downloadText(file.id);
-        const { meta } = parsePost(raw, file.name);
+        const { meta } = await fetchAndParse(file);
         if (meta.draft) continue;
+        if (seen.has(meta.slug)) {
+          console.error("blog: duplicate slug, skipping", { slug: meta.slug, name: file.name });
+          continue;
+        }
+        seen.add(meta.slug);
         entries.push({
           slug: meta.slug,
           title: meta.title,
@@ -45,7 +43,7 @@ export const handler: Handler = async (event): Promise<HandlerResponse> => {
           excerpt: meta.excerpt ?? "",
         });
       } catch (err) {
-        console.error("blog-rss: failed to process", file.name, err);
+        console.error("blog: skipping", { name: file.name, id: file.id, err });
       }
     }
     entries.sort((a, b) => b.date.localeCompare(a.date));
