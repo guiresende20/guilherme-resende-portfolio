@@ -1,9 +1,10 @@
 import type { Handler } from "@netlify/functions";
-import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
+import { listFolder } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { ensureBlobsContext } from "./_lib/blobs-context";
-import { parsePost, type PostMeta } from "../../src/lib/blog/frontmatter";
+import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
+import type { PostMeta } from "../../src/lib/blog/frontmatter";
 import { rewriteImagePaths } from "../../src/lib/blog/image-paths";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 
@@ -56,26 +57,21 @@ export const handler: Handler = async (event) => {
 
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
-  const mdFiles: DriveFile[] = [];
-  for (const f of files) {
-    if (!f.name.endsWith(".md")) continue;
-    if (f.mimeType.startsWith("application/vnd.google-apps.")) {
-      console.warn(`Skipping "${f.name}": stored as ${f.mimeType} (Google-converted, not raw markdown)`);
-      continue;
-    }
-    mdFiles.push(f);
-  }
+  const sources = files.filter(isBlogPostSource);
 
   let found: PostPayload | null = null;
-  for (const file of mdFiles) {
-    const raw = await downloadText(file.id);
-    const parsed = parsePost(raw, file.name);
-    if (parsed.meta.slug === slug && !parsed.meta.draft) {
-      found = {
-        meta: parsed.meta,
-        body: rewriteImagePaths(parsed.body),
-      };
-      break;
+  for (const file of sources) {
+    try {
+      const parsed = await fetchAndParse(file);
+      if (parsed.meta.slug === slug && !parsed.meta.draft) {
+        found = {
+          meta: parsed.meta,
+          body: rewriteImagePaths(parsed.body),
+        };
+        break;
+      }
+    } catch (err) {
+      console.error("blog: skipping", { name: file.name, id: file.id, err });
     }
   }
 

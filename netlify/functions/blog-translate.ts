@@ -1,10 +1,10 @@
 import type { Handler } from "@netlify/functions";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
+import { listFolder } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { ensureBlobsContext } from "./_lib/blobs-context";
-import { parsePost } from "../../src/lib/blog/frontmatter";
+import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
 import {
   corsHeaders,
   getClientIp,
@@ -96,23 +96,17 @@ export const handler: Handler = async (event) => {
 
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
-  const mdFiles: DriveFile[] = [];
-  for (const f of files) {
-    if (!f.name.endsWith(".md")) continue;
-    if (f.mimeType.startsWith("application/vnd.google-apps.")) {
-      console.warn(`Skipping "${f.name}": stored as ${f.mimeType} (Google-converted, not raw markdown)`);
-      continue;
-    }
-    mdFiles.push(f);
-  }
 
   let originalBody: string | null = null;
-  for (const f of mdFiles) {
-    const raw = await downloadText(f.id);
-    const parsed = parsePost(raw, f.name);
-    if (parsed.meta.slug === slug && !parsed.meta.draft && parsed.meta.lang === "pt") {
-      originalBody = parsed.body;
-      break;
+  for (const f of files.filter(isBlogPostSource)) {
+    try {
+      const parsed = await fetchAndParse(f);
+      if (parsed.meta.slug === slug && !parsed.meta.draft && parsed.meta.lang === "pt") {
+        originalBody = parsed.body;
+        break;
+      }
+    } catch (err) {
+      console.error("blog-translate: skipping", { name: f.name, id: f.id, err });
     }
   }
 
