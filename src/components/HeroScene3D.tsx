@@ -4,6 +4,41 @@ import * as THREE from "three";
 import { usePrefersReducedMotion } from "../lib/motion/usePrefersReducedMotion";
 import { hueFromProgress } from "../lib/motion/hue";
 import { useMotionEnabled } from "../lib/motion/useMotionEnabled";
+import { generateProjectGrid, generateSpiralCloud } from "../lib/scene/shapes";
+
+const POINT_COUNT = 900;
+const LINE_STRIDE = 18;
+const MORPH_THRESHOLD = 0.6;
+const LERP_FACTOR = 0.06;
+
+function buildColors(): Float32Array {
+  const cols = new Float32Array(POINT_COUNT * 3);
+  const neon = new THREE.Color("#00ff87");
+  const electric = new THREE.Color("#4d8cff");
+  const muted = new THREE.Color("#666680");
+  for (let i = 0; i < POINT_COUNT; i++) {
+    const band = i / POINT_COUNT;
+    const color = band % 0.21 < 0.08 ? neon : band % 0.34 < 0.08 ? electric : muted;
+    const i3 = i * 3;
+    cols[i3] = color.r;
+    cols[i3 + 1] = color.g;
+    cols[i3 + 2] = color.b;
+  }
+  return cols;
+}
+
+function buildLinePositions(source: Float32Array): Float32Array {
+  const pairs: number[] = [];
+  for (let i = LINE_STRIDE * 2; i < POINT_COUNT; i += LINE_STRIDE) {
+    const prev = (i - LINE_STRIDE) * 3;
+    const curr = i * 3;
+    pairs.push(
+      source[prev], source[prev + 1], source[prev + 2],
+      source[curr], source[curr + 1], source[curr + 2],
+    );
+  }
+  return new Float32Array(pairs);
+}
 
 function PointCloud() {
   const pointsRef = useRef<THREE.Points>(null);
@@ -63,52 +98,44 @@ function PointCloud() {
     return () => particleTexture?.dispose();
   }, [particleTexture]);
 
-  const { positions, colors, linePositions } = useMemo(() => {
-    const count = 900;
-    const pos = new Float32Array(count * 3);
-    const cols = new Float32Array(count * 3);
-    const linePos: number[] = [];
-    const neon = new THREE.Color("#00ff87");
-    const electric = new THREE.Color("#4d8cff");
-    const muted = new THREE.Color("#666680");
-
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      const band = i / count;
-      const radius = 2.2 + Math.sin(i * 0.17) * 0.55 + Math.random() * 1.2;
-      const angle = band * Math.PI * 8 + Math.random() * 0.35;
-      const height = (Math.random() - 0.5) * 2.8;
-
-      pos[i3] = Math.cos(angle) * radius + (Math.random() - 0.5) * 0.35;
-      pos[i3 + 1] = height + Math.sin(angle * 0.7) * 0.5;
-      pos[i3 + 2] = Math.sin(angle) * radius - 1.4 + (Math.random() - 0.5) * 0.35;
-
-      const color = band % 0.21 < 0.08 ? neon : band % 0.34 < 0.08 ? electric : muted;
-      cols[i3] = color.r;
-      cols[i3 + 1] = color.g;
-      cols[i3 + 2] = color.b;
-
-      if (i % 18 === 0 && i > 18) {
-        const prev = i3 - 18 * 3;
-        linePos.push(pos[prev], pos[prev + 1], pos[prev + 2], pos[i3], pos[i3 + 1], pos[i3 + 2]);
-      }
-    }
-
-    return {
-      positions: pos,
-      colors: cols,
-      linePositions: new Float32Array(linePos),
-    };
-  }, []);
+  const spiralPositions = useMemo(() => generateSpiralCloud(POINT_COUNT), []);
+  const gridPositions = useMemo(() => generateProjectGrid(POINT_COUNT), []);
+  const colors = useMemo(buildColors, []);
+  const currentPositions = useMemo(() => new Float32Array(spiralPositions), [spiralPositions]);
+  const initialLinePositions = useMemo(() => buildLinePositions(spiralPositions), [spiralPositions]);
 
   useFrame(({ clock, pointer }) => {
     const t = clock.getElapsedTime();
+    const progress = scrollProgressRef.current;
+    const target = progress > MORPH_THRESHOLD ? gridPositions : spiralPositions;
+    const lerp = motionEnabled ? LERP_FACTOR : 1;
+
+    for (let i = 0; i < currentPositions.length; i++) {
+      currentPositions[i] += (target[i] - currentPositions[i]) * lerp;
+    }
+
     if (pointsRef.current) {
+      const attr = pointsRef.current.geometry.getAttribute("position") as THREE.BufferAttribute;
+      attr.needsUpdate = true;
       pointsRef.current.rotation.y = t * 0.045 + pointer.x * 0.12;
       pointsRef.current.rotation.x = -0.12 + pointer.y * 0.06;
       pointsRef.current.position.y = Math.sin(t * 0.45) * 0.08;
     }
     if (lineRef.current) {
+      const lineAttr = lineRef.current.geometry.getAttribute("position") as THREE.BufferAttribute;
+      const lines = lineAttr.array as Float32Array;
+      let li = 0;
+      for (let i = LINE_STRIDE * 2; i < POINT_COUNT; i += LINE_STRIDE) {
+        const prev = (i - LINE_STRIDE) * 3;
+        const curr = i * 3;
+        lines[li++] = currentPositions[prev];
+        lines[li++] = currentPositions[prev + 1];
+        lines[li++] = currentPositions[prev + 2];
+        lines[li++] = currentPositions[curr];
+        lines[li++] = currentPositions[curr + 1];
+        lines[li++] = currentPositions[curr + 2];
+      }
+      lineAttr.needsUpdate = true;
       lineRef.current.rotation.y = t * 0.045 + pointer.x * 0.12;
       lineRef.current.rotation.x = -0.12 + pointer.y * 0.06;
       lineRef.current.position.y = Math.sin(t * 0.45) * 0.08;
@@ -128,7 +155,7 @@ function PointCloud() {
     <group position={[1.9, 0.05, 0]} rotation={[0, -0.24, 0]}>
       <points ref={pointsRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+          <bufferAttribute attach="attributes-position" args={[currentPositions, 3]} />
           <bufferAttribute attach="attributes-color" args={[colors, 3]} />
         </bufferGeometry>
         <pointsMaterial
@@ -145,7 +172,7 @@ function PointCloud() {
       </points>
       <lineSegments ref={lineRef}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[linePositions, 3]} />
+          <bufferAttribute attach="attributes-position" args={[initialLinePositions, 3]} />
         </bufferGeometry>
         <lineBasicMaterial ref={lineMaterialRef} color="#00ff87" transparent opacity={0.12} />
       </lineSegments>
