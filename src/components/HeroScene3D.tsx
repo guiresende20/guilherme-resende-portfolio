@@ -1,10 +1,29 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { usePrefersReducedMotion } from "../lib/motion/usePrefersReducedMotion";
+import { hueFromProgress } from "../lib/motion/hue";
+import { useMotionEnabled } from "../lib/motion/useMotionEnabled";
 
 function PointCloud() {
   const pointsRef = useRef<THREE.Points>(null);
   const lineRef = useRef<THREE.LineSegments>(null);
+  const scrollProgressRef = useRef(0);
+  const motionEnabled = useMotionEnabled();
+  const pointsMaterialRef = useRef<THREE.PointsMaterial>(null);
+  const lineMaterialRef = useRef<THREE.LineBasicMaterial>(null);
+
+  useEffect(() => {
+    const update = () => {
+      const scrollTop = document.documentElement.scrollTop;
+      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+      scrollProgressRef.current = scrollable > 0 ? scrollTop / scrollable : 0;
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
   const particleTexture = useMemo(() => {
     const size = 64;
     const canvas = document.createElement("canvas");
@@ -82,6 +101,15 @@ function PointCloud() {
       lineRef.current.rotation.x = -0.12 + pointer.y * 0.06;
       lineRef.current.position.y = Math.sin(t * 0.45) * 0.08;
     }
+    if (motionEnabled) {
+      const hue = hueFromProgress(scrollProgressRef.current);
+      if (pointsMaterialRef.current) {
+        pointsMaterialRef.current.color.setHSL(hue, 0.85, 0.55);
+      }
+      if (lineMaterialRef.current) {
+        lineMaterialRef.current.color.setHSL(hue, 0.85, 0.55);
+      }
+    }
   });
 
   return (
@@ -92,6 +120,7 @@ function PointCloud() {
           <bufferAttribute attach="attributes-color" args={[colors, 3]} />
         </bufferGeometry>
         <pointsMaterial
+          ref={pointsMaterialRef}
           vertexColors
           map={particleTexture ?? undefined}
           size={0.026}
@@ -106,7 +135,7 @@ function PointCloud() {
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[linePositions, 3]} />
         </bufferGeometry>
-        <lineBasicMaterial color="#00ff87" transparent opacity={0.12} />
+        <lineBasicMaterial ref={lineMaterialRef} color="#00ff87" transparent opacity={0.12} />
       </lineSegments>
     </group>
   );
@@ -149,21 +178,6 @@ function useHeroVisibility() {
   }, []);
 
   return visible;
-}
-
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setPrefersReducedMotion(query.matches);
-
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-
-  return prefersReducedMotion;
 }
 
 export default function HeroScene3D() {

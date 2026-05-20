@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import TransitionLink from "../components/TransitionLink";
 import { fetchPost, type PostResponse } from "../lib/blog/api";
 import MarkdownRenderer from "../components/blog/MarkdownRenderer";
 import { formatDate, formatReadingTime, useLocale } from "../lib/blog/format";
@@ -44,19 +45,25 @@ export default function BlogPost() {
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [translatedBody, setTranslatedBody] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;
-    setPost(null);
     setNotFound(false);
     setError(null);
     setTranslatedBody(null);
+    setLoading(true);
     fetchPost(slug)
       .then((p) => {
-        if (!p) setNotFound(true);
-        else setPost(p);
+        if (!p) {
+          setPost(null);
+          setNotFound(true);
+        } else {
+          setPost(p);
+        }
       })
-      .catch((e) => setError(String(e)));
+      .catch((e) => setError(String(e)))
+      .finally(() => setLoading(false));
   }, [slug]);
 
   if (error) {
@@ -64,9 +71,9 @@ export default function BlogPost() {
       <BlogLayout>
         <div className="container mx-auto px-6 py-16 text-foreground">
           <p className="text-red-400">Erro: {error}</p>
-          <Link to="/blog" className="text-neon underline mt-4 inline-block">
+          <TransitionLink to="/blog" className="text-neon underline mt-4 inline-block">
             ← Voltar para o blog
-          </Link>
+          </TransitionLink>
         </div>
       </BlogLayout>
     );
@@ -81,9 +88,9 @@ export default function BlogPost() {
             O post "{slug}" não existe ou foi removido. Quer perguntar sobre o assunto?
           </p>
           <div className="flex gap-3 justify-center flex-wrap">
-            <Link to="/blog" className="font-mono text-xs uppercase tracking-[0.1em] border border-border text-foreground px-4 py-2">
+            <TransitionLink to="/blog" className="font-mono text-xs uppercase tracking-[0.1em] border border-border text-foreground px-4 py-2">
               ← Voltar para o blog
-            </Link>
+            </TransitionLink>
             <a href="/#chat" className="font-mono text-xs uppercase tracking-[0.1em] border border-neon text-neon px-4 py-2 hover:bg-neon/10">
               Falar com a IA
             </a>
@@ -108,19 +115,22 @@ export default function BlogPost() {
 
   return (
     <BlogLayout>
-      <div className="container mx-auto px-6 py-16">
+      <div
+        className="container mx-auto px-6 py-16 transition-opacity duration-200"
+        style={{ opacity: loading ? 0.4 : 1 }}
+      >
         <div className="max-w-3xl mx-auto lg:max-w-none lg:flex lg:items-start lg:justify-center">
           <div className="max-w-3xl mx-auto lg:mx-0">
             <script
               type="application/ld+json"
               dangerouslySetInnerHTML={{ __html: blogPostingJsonLd(post.meta) }}
             />
-            <Link
+            <TransitionLink
               to="/blog"
               className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground hover:text-neon transition-colors"
             >
               ← blog
-            </Link>
+            </TransitionLink>
 
             <header className="mt-8 mb-12">
               <h1 className="font-display text-4xl md:text-5xl text-foreground leading-tight">
@@ -136,13 +146,13 @@ export default function BlogPost() {
                   <>
                     <span>·</span>
                     {post.meta.tags.map((t) => (
-                      <Link
+                      <TransitionLink
                         key={t}
                         to={`/blog/tag/${encodeURIComponent(t)}`}
                         className="hover:text-neon"
                       >
                         #{t}
-                      </Link>
+                      </TransitionLink>
                     ))}
                   </>
                 )}

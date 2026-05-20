@@ -1,5 +1,6 @@
 import { useInView } from "./SectionHeader";
-import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
+import { type ReactNode, type CSSProperties } from "react";
+import { usePrefersReducedMotion } from "../lib/motion/usePrefersReducedMotion";
 
 interface Props {
   children: ReactNode;
@@ -7,21 +8,6 @@ interface Props {
   direction?: "up" | "left" | "right" | "scale";
   className?: string;
   style?: CSSProperties;
-}
-
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setPrefersReducedMotion(query.matches);
-
-    update();
-    query.addEventListener("change", update);
-    return () => query.removeEventListener("change", update);
-  }, []);
-
-  return prefersReducedMotion;
 }
 
 export default function Reveal({ children, delay = 0, direction = "up", className = "", style }: Props) {
