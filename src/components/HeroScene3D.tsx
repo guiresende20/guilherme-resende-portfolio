@@ -14,14 +14,26 @@ function PointCloud() {
   const lineMaterialRef = useRef<THREE.LineBasicMaterial>(null);
 
   useEffect(() => {
+    const hero = document.getElementById("inicio");
     const update = () => {
-      const scrollTop = document.documentElement.scrollTop;
-      const scrollable = document.documentElement.scrollHeight - window.innerHeight;
-      scrollProgressRef.current = scrollable > 0 ? scrollTop / scrollable : 0;
+      if (hero) {
+        const rect = hero.getBoundingClientRect();
+        const range = rect.height;
+        scrollProgressRef.current =
+          range > 0 ? Math.max(0, Math.min(1, -rect.top / range)) : 0;
+      } else {
+        const scrollTop = document.documentElement.scrollTop;
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        scrollProgressRef.current = scrollable > 0 ? scrollTop / scrollable : 0;
+      }
     };
     window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
     update();
-    return () => window.removeEventListener("scroll", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   const particleTexture = useMemo(() => {
