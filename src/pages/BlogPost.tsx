@@ -44,19 +44,25 @@ export default function BlogPost() {
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [translatedBody, setTranslatedBody] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!slug) return;
-    setPost(null);
     setNotFound(false);
     setError(null);
     setTranslatedBody(null);
+    setLoading(true);
     fetchPost(slug)
       .then((p) => {
-        if (!p) setNotFound(true);
-        else setPost(p);
+        if (!p) {
+          setPost(null);
+          setNotFound(true);
+        } else {
+          setPost(p);
+        }
       })
-      .catch((e) => setError(String(e)));
+      .catch((e) => setError(String(e)))
+      .finally(() => setLoading(false));
   }, [slug]);
 
   if (error) {
@@ -108,7 +114,10 @@ export default function BlogPost() {
 
   return (
     <BlogLayout>
-      <div className="container mx-auto px-6 py-16">
+      <div
+        className="container mx-auto px-6 py-16 transition-opacity duration-200"
+        style={{ opacity: loading ? 0.4 : 1 }}
+      >
         <div className="max-w-3xl mx-auto lg:max-w-none lg:flex lg:items-start lg:justify-center">
           <div className="max-w-3xl mx-auto lg:mx-0">
             <script
