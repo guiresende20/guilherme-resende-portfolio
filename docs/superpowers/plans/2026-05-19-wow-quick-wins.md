@@ -506,13 +506,9 @@ Expected: PASS.
 Run: `npx vitest run`
 Expected: PASS (no regression — no test of HeroScene3D exists).
 
-- [ ] **Step 7: Smoke the dev server visually**
+- [ ] **Step 7: Commit**
 
-Run: `npm run dev` (in background). Open `http://localhost:5173/`. Scroll the page; particles should change hue. Stop the server.
-
-Note: visual validation only — no automated test for the WebGL output.
-
-- [ ] **Step 8: Commit**
+Visual validation for this feature happens on the Deploy Preview in Task 13 (owner verifies). Skip local browser smoke.
 
 ```bash
 git add src/components/HeroScene3D.tsx
@@ -926,11 +922,9 @@ And the mobile GPT link near the bottom (around line 215–227):
 Run: `npx tsc --noEmit && npx vitest run`
 Expected: PASS.
 
-- [ ] **Step 5: Smoke locally**
+- [ ] **Step 5: Commit**
 
-Run: `npm run dev` (background). Open `http://localhost:5173/`. Move mouse — neon cursor with trail visible; pulls into navbar links and the GPT CTA; ignores the language pill and hamburger. Open mobile menu (resize browser to mobile width); cursor should not be magnetic to mobile-menu items (because `data-magnetic="off"`). Stop server.
-
-- [ ] **Step 6: Commit**
+Visual validation happens on Deploy Preview (Task 13). Skip local browser smoke.
 
 ```bash
 git add src/components/MagneticCursor.tsx src/App.tsx src/components/Navbar.tsx
@@ -1219,16 +1213,12 @@ return (
     >
 ```
 
-- [ ] **Step 4: Manually test the flash fix locally**
-
-Run: `npm run dev` (background). Open `http://localhost:5173/blog/teste-de-audio`. Click a tag link (e.g. `#audio` if the post has one) — observe: previous content stays visible (faded) until new post arrives; no white flash. Stop the server.
-
-- [ ] **Step 5: Type-check + tests**
+- [ ] **Step 4: Type-check + tests**
 
 Run: `npx tsc --noEmit && npx vitest run`
 Expected: PASS.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add src/pages/BlogPost.tsx
@@ -1329,11 +1319,7 @@ Substitute all `<Link>` for `<TransitionLink>`:
 Run: `npx tsc --noEmit && npx vitest run && npm run build`
 Expected: PASS.
 
-- [ ] **Step 6: Smoke locally**
-
-Run: `npm run dev` (background). Open `http://localhost:5173/`. Click navbar "BLOG" — crossfade should be visible (in Chrome). Click a post card — crossfade. Click a tag link inside a post — crossfade. Stop server.
-
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
 git add src/components/Navbar.tsx src/components/blog/PostCard.tsx src/pages/BlogTag.tsx src/pages/BlogPost.tsx
