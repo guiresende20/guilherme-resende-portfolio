@@ -38,6 +38,12 @@ function pickTranslationTarget(userLang: string, postLang: string): "en" | "es" 
   return null;
 }
 
+const HREFLANG_MAP: Record<string, string> = {
+  pt: "pt-BR",
+  en: "en",
+  es: "es",
+};
+
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const userLang = useLocale();
@@ -65,6 +71,20 @@ export default function BlogPost() {
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (!post) return;
+    const hreflang = HREFLANG_MAP[post.meta.lang] ?? post.meta.lang;
+    const href = `https://guiresende20.netlify.app/blog/${post.meta.slug}`;
+    const link = document.createElement("link");
+    link.setAttribute("rel", "alternate");
+    link.setAttribute("hreflang", hreflang);
+    link.setAttribute("href", href);
+    document.head.appendChild(link);
+    return () => {
+      link.remove();
+    };
+  }, [post]);
 
   if (error) {
     return (
