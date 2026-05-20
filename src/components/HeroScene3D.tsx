@@ -8,7 +8,6 @@ import { generateProjectGrid, generateSpiralCloud } from "../lib/scene/shapes";
 
 const POINT_COUNT = 900;
 const LINE_STRIDE = 18;
-const MORPH_THRESHOLD = 0.6;
 const LERP_FACTOR = 0.06;
 
 function buildColors(): Float32Array {
@@ -44,6 +43,7 @@ function PointCloud() {
   const pointsRef = useRef<THREE.Points>(null);
   const lineRef = useRef<THREE.LineSegments>(null);
   const scrollProgressRef = useRef(0);
+  const gridActiveRef = useRef(false);
   const motionEnabled = useMotionEnabled();
   const pointsMaterialRef = useRef<THREE.PointsMaterial>(null);
   const lineMaterialRef = useRef<THREE.LineBasicMaterial>(null);
@@ -69,6 +69,20 @@ function PointCloud() {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
+  }, []);
+
+  useEffect(() => {
+    const projetosHeader = document.getElementById("projetos");
+    const projetosSection = projetosHeader?.closest("section");
+    if (!projetosSection) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        gridActiveRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(projetosSection);
+    return () => observer.disconnect();
   }, []);
 
   const particleTexture = useMemo(() => {
@@ -106,8 +120,7 @@ function PointCloud() {
 
   useFrame(({ clock, pointer }) => {
     const t = clock.getElapsedTime();
-    const progress = scrollProgressRef.current;
-    const target = progress > MORPH_THRESHOLD ? gridPositions : spiralPositions;
+    const target = gridActiveRef.current ? gridPositions : spiralPositions;
     const lerp = motionEnabled ? LERP_FACTOR : 1;
 
     for (let i = 0; i < currentPositions.length; i++) {
@@ -162,10 +175,10 @@ function PointCloud() {
           ref={pointsMaterialRef}
           vertexColors
           map={particleTexture ?? undefined}
-          size={0.026}
+          size={0.042}
           sizeAttenuation
           transparent
-          opacity={0.82}
+          opacity={0.9}
           alphaTest={0.01}
           depthWrite={false}
         />
@@ -200,20 +213,15 @@ function ScanPlanes() {
   );
 }
 
-function useHeroVisibility() {
-  const [visible, setVisible] = useState(true);
+function useDocumentVisibility() {
+  const [visible, setVisible] = useState(
+    typeof document === "undefined" ? true : document.visibilityState !== "hidden",
+  );
 
   useEffect(() => {
-    const hero = document.getElementById("inicio");
-    if (!hero) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { rootMargin: "120px 0px 120px 0px", threshold: 0.01 }
-    );
-
-    observer.observe(hero);
-    return () => observer.disconnect();
+    const update = () => setVisible(document.visibilityState !== "hidden");
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
   }, []);
 
   return visible;
@@ -221,13 +229,13 @@ function useHeroVisibility() {
 
 export default function HeroScene3D() {
   const prefersReducedMotion = usePrefersReducedMotion();
-  const isHeroVisible = useHeroVisibility();
+  const isVisible = useDocumentVisibility();
 
   if (prefersReducedMotion) {
     return (
       <div
         aria-hidden="true"
-        className="absolute inset-0 pointer-events-none opacity-60"
+        className="fixed inset-0 pointer-events-none opacity-60 z-0"
         style={{
           background:
             "linear-gradient(120deg, transparent 0%, rgba(0,255,135,0.05) 46%, rgba(77,140,255,0.08) 70%, transparent 100%)",
@@ -237,11 +245,11 @@ export default function HeroScene3D() {
   }
 
   return (
-    <div aria-hidden="true" className="absolute inset-0 pointer-events-none">
+    <div aria-hidden="true" className="fixed inset-0 pointer-events-none z-0">
       <Canvas
         camera={{ position: [0, 0, 6.2], fov: 48 }}
         dpr={[1, 1.6]}
-        frameloop={isHeroVisible ? "always" : "never"}
+        frameloop={isVisible ? "always" : "never"}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
       >
         <color attach="background" args={["transparent"]} />
@@ -249,8 +257,6 @@ export default function HeroScene3D() {
         <PointCloud />
         <ScanPlanes />
       </Canvas>
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,#0a0a0f_0%,rgba(10,10,15,0.88)_34%,rgba(10,10,15,0.36)_72%,#0a0a0f_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
     </div>
   );
 }

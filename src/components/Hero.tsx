@@ -1,7 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-
-const HeroScene3D = lazy(() => import("./HeroScene3D"));
 
 
 function AnimatedWord({ text, delay, className }: { text: string; delay: number; className?: string }) {
@@ -20,59 +17,14 @@ function AnimatedWord({ text, delay, className }: { text: string; delay: number;
 
 export default function Hero() {
   const { t } = useTranslation();
-  const [shouldLoadScene, setShouldLoadScene] = useState(false);
   const stats = t('hero.stats', { returnObjects: true }) as {num: string, label: string}[];
   const skills = t('hero.marquee_skills', { returnObjects: true }) as string[];
-
-  useEffect(() => {
-    const win = window as Window & {
-      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number;
-      cancelIdleCallback?: (handle: number) => void;
-    };
-
-    let idleId: number | undefined;
-    let loaded = false;
-
-    const loadScene = () => setShouldLoadScene(true);
-    const removeInteractionListeners = () => {
-      window.removeEventListener("pointermove", scheduleIdleLoad);
-      window.removeEventListener("scroll", scheduleIdleLoad);
-      window.removeEventListener("touchstart", scheduleIdleLoad);
-      window.removeEventListener("keydown", scheduleIdleLoad);
-    };
-    const scheduleIdleLoad = () => {
-      if (loaded) return;
-      loaded = true;
-      removeInteractionListeners();
-
-      if (win.requestIdleCallback) {
-        idleId = win.requestIdleCallback(loadScene, { timeout: 1200 });
-      } else {
-        loadScene();
-      }
-    };
-
-    window.addEventListener("pointermove", scheduleIdleLoad, { passive: true });
-    window.addEventListener("scroll", scheduleIdleLoad, { passive: true });
-    window.addEventListener("touchstart", scheduleIdleLoad, { passive: true });
-    window.addEventListener("keydown", scheduleIdleLoad);
-
-    return () => {
-      removeInteractionListeners();
-      if (idleId !== undefined) win.cancelIdleCallback?.(idleId);
-    };
-  }, []);
 
   return (
     <section id="inicio" className="relative min-h-screen flex flex-col justify-center overflow-hidden">
       {/* Grid */}
       <div className="absolute inset-0 bg-grid pointer-events-none" />
-      {shouldLoadScene && (
-        <Suspense fallback={null}>
-          <HeroScene3D />
-        </Suspense>
-      )}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#0a0a0f_100%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#0a0a0f_100%)] pointer-events-none opacity-70" />
 
       {/* Content */}
       <div className="relative z-10 px-6 md:px-12 max-w-[1400px] mx-auto w-full pt-32">

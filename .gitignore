@@ -21,6 +21,9 @@ deno.lock
 Portifolio pessoal IA.txt
 screenshots-linkedin/
 
+# Smoke test artifacts
+scripts/.smoke-out/
+
 # Local blog post drafts (uploaded to Drive, not committed here)
 /*.md
 !/README.md
