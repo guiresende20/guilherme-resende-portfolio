@@ -108,6 +108,7 @@ export default function Navbar() {
             {/* Language switcher (desktop) */}
             <div className="relative" ref={langMenuRef}>
               <button
+                data-magnetic="off"
                 onClick={() => setLangMenuOpen(!langMenuOpen)}
                 className="hidden md:inline-flex items-center gap-1.5 font-sans text-[12px] font-bold uppercase tracking-[0.06em] text-background bg-[#00ff87] px-4 py-2.5 hover:opacity-90 transition-opacity"
               >
@@ -117,9 +118,9 @@ export default function Navbar() {
               
               {langMenuOpen && (
                 <div className="absolute top-full right-0 mt-2 w-24 bg-card border border-border shadow-lg z-50 rounded-sm overflow-hidden flex flex-col">
-                  <button onClick={() => changeLanguage('pt')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'pt' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>PT</button>
-                  <button onClick={() => changeLanguage('en')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'en' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>EN</button>
-                  <button onClick={() => changeLanguage('es')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'es' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>ES</button>
+                  <button data-magnetic="off" onClick={() => changeLanguage('pt')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'pt' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>PT</button>
+                  <button data-magnetic="off" onClick={() => changeLanguage('en')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'en' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>EN</button>
+                  <button data-magnetic="off" onClick={() => changeLanguage('es')} className={`px-4 py-2 text-left text-[11px] font-sans uppercase font-bold tracking-[0.06em] hover:bg-[#00ff87]/10 ${i18n.language === 'es' ? 'text-[#00ff87]' : 'text-muted-foreground'}`}>ES</button>
                 </div>
               )}
             </div>
@@ -136,6 +137,7 @@ export default function Navbar() {
 
             {/* Hamburger button (mobile) */}
             <button
+              data-magnetic="off"
               onClick={() => setMobileOpen(!mobileOpen)}
               className="md:hidden flex flex-col items-center justify-center w-10 h-10 gap-1.5 relative z-[60]"
               aria-label="Menu"
@@ -160,6 +162,7 @@ export default function Navbar() {
             l.to ? (
               <Link
                 key={l.to}
+                data-magnetic="off"
                 to={l.to}
                 onClick={() => setMobileOpen(false)}
                 className="font-display font-semibold text-2xl text-foreground uppercase tracking-tight hover:text-neon transition-colors"
@@ -174,6 +177,7 @@ export default function Navbar() {
             ) : (
               <a
                 key={l.href}
+                data-magnetic="off"
                 href={l.href}
                 onClick={(e) => handleClick(e, l.href!)}
                 className="font-display font-semibold text-2xl text-foreground uppercase tracking-tight hover:text-neon transition-colors"
@@ -200,6 +204,7 @@ export default function Navbar() {
             {["pt", "en", "es"].map((lng) => (
               <button
                 key={lng}
+                data-magnetic="off"
                 onClick={() => { changeLanguage(lng); setMobileOpen(false); }}
                 className={`font-mono text-[13px] font-bold uppercase tracking-[0.06em] px-4 py-2 border transition-all ${
                   i18n.language === lng
@@ -213,6 +218,7 @@ export default function Navbar() {
           </div>
 
           <a
+            data-magnetic="off"
             href="https://chatgpt.com/g/g-68654885f5c88191b5d2df8265320cce-guilherme-resende-gpt"
             target="_blank"
             rel="noopener noreferrer"
