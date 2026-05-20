@@ -24,7 +24,7 @@ export default function Hero() {
     <section id="inicio" className="relative min-h-screen flex flex-col justify-center overflow-hidden">
       {/* Grid */}
       <div className="absolute inset-0 bg-grid pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,#0a0a0f_100%)] pointer-events-none opacity-70" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background/85 to-transparent pointer-events-none" />
 
       {/* Content */}
       <div className="relative z-10 px-6 md:px-12 max-w-[1400px] mx-auto w-full pt-32">
