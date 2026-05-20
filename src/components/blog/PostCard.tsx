@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import TransitionLink from "../TransitionLink";
 import type { PostMeta } from "../../lib/blog/frontmatter";
 import { formatDate, formatReadingTime, useLocale } from "../../lib/blog/format";
 
@@ -9,7 +9,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
   const lang = useLocale();
   return (
-    <Link
+    <TransitionLink
       to={`/blog/${post.slug}`}
       className="group block border border-border bg-card hover:border-neon/40 transition-colors overflow-hidden"
     >
@@ -49,6 +49,6 @@ export default function PostCard({ post }: PostCardProps) {
           </div>
         )}
       </div>
-    </Link>
+    </TransitionLink>
   );
 }

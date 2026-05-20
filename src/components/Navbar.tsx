@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import TransitionLink from "./TransitionLink";
 
 export default function Navbar() {
   const { t, i18n } = useTranslation();
@@ -83,13 +84,13 @@ export default function Navbar() {
             {LINKS.map((l) => (
               <li key={l.to ?? l.href}>
                 {l.to ? (
-                  <Link
+                  <TransitionLink
                     to={l.to}
                     className="relative font-sans text-[13px] font-medium text-muted-foreground uppercase tracking-[0.06em] hover:text-foreground transition-colors group"
                   >
                     {l.label}
                     <span className="absolute -bottom-1 left-0 w-0 h-px bg-neon transition-all duration-300 group-hover:w-full" />
-                  </Link>
+                  </TransitionLink>
                 ) : (
                   <a
                     href={l.href}
@@ -160,7 +161,7 @@ export default function Navbar() {
         <div className="flex flex-col items-center justify-center h-full gap-6 px-8">
           {LINKS.map((l, i) => (
             l.to ? (
-              <Link
+              <TransitionLink
                 key={l.to}
                 data-magnetic="off"
                 to={l.to}
@@ -173,7 +174,7 @@ export default function Navbar() {
                 }}
               >
                 {l.label}
-              </Link>
+              </TransitionLink>
             ) : (
               <a
                 key={l.href}

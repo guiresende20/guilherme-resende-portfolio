@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import type { PostMeta } from "../lib/blog/frontmatter";
 import { fetchPostList } from "../lib/blog/api";
 import PostCard from "../components/blog/PostCard";
 import BlogLayout from "../components/blog/BlogLayout";
+import TransitionLink from "../components/TransitionLink";
 
 export default function BlogTag() {
   const { tag } = useParams<{ tag: string }>();
@@ -22,9 +23,9 @@ export default function BlogTag() {
   return (
     <BlogLayout>
       <div className="container mx-auto px-6 py-16">
-        <Link to="/blog" className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground hover:text-neon">
+        <TransitionLink to="/blog" className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground hover:text-neon">
           ← blog
-        </Link>
+        </TransitionLink>
         <header className="mt-8 mb-12">
           <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em]">Tag</span>
           <h1 className="font-display text-5xl text-foreground mt-2">#{tag}</h1>
