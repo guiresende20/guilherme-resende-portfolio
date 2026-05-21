@@ -85,7 +85,7 @@ function ActionButton({ action, onVideo }: { action: ChatAction; onVideo: (url: 
           setLoadingCV(true);
           try {
             const { generateCV } = await import("@/lib/generateCV");
-            generateCV(action.cv_type as CVType);
+            await generateCV(action.cv_type as CVType);
           } finally {
             setLoadingCV(false);
           }
