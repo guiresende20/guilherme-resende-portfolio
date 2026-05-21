@@ -104,7 +104,7 @@ function addItem(
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...C.muted);
-  doc.text(period, 195, y + 5, { align: "right" });
+  doc.text(period, 190, y + 5, { align: "right" });
 
   let bulletY = y + 13;
   for (const bullet of bullets) {
@@ -120,9 +120,40 @@ function addItem(
   return y + cardHeight + 4;
 }
 
-export function generateCV(type: CVType): void {
+async function loadCircularPhoto(url: string, size = 256): Promise<string | null> {
+  return new Promise<string | null>((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      // cover-fit (center crop) so non-square photos aren't distorted
+      const ar = img.width / img.height;
+      let dw = size;
+      let dh = size;
+      if (ar > 1) dw = size * ar;
+      else dh = size / ar;
+      ctx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+}
+
+export async function generateCV(type: CVType): Promise<void> {
   const config = CV_CONFIGS[type];
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const photo = await loadCircularPhoto("/guilherme-foto.webp");
 
   // ── Page 1 ──────────────────────────────────────────────────────────────────
   addPageBackground(doc);
@@ -153,19 +184,33 @@ export function generateCV(type: CVType): void {
   doc.setTextColor(...C.electric);
   doc.text(config.subtitle.toUpperCase(), 15, 38);
 
-  // Badge
+  // Photo (top-right) — circular, matching the hero avatar
+  if (photo) {
+    doc.addImage(photo, "PNG", 168, 10, 26, 26);
+    doc.setDrawColor(...C.neon);
+    doc.setLineWidth(0.5);
+    doc.circle(181, 23, 13, "S");
+  }
+
+  // CV type badge — caption under the photo
   doc.setFillColor(...C.neon);
-  doc.roundedRect(130, 15, 65, 10, 1, 1, "F");
+  doc.roundedRect(129, 37, 65, 7, 1, 1, "F");
   doc.setFont("helvetica", "bold");
   doc.setFontSize(6.5);
   doc.setTextColor(...C.bg);
-  doc.text(`CURRÍCULO — ${config.title.toUpperCase()}`, 162.5, 21, { align: "center" });
+  doc.text(`CURRÍCULO — ${config.title.toUpperCase()}`, 161.5, 41.7, { align: "center" });
 
   // Location & links
   doc.setFont("helvetica", "normal");
   doc.setFontSize(7);
   doc.setTextColor(...C.muted);
-  doc.text("Porto Alegre - RS, Brasil", 15, 44);
+  const locText = "Porto Alegre - RS, Brasil   ·   ";
+  doc.text(locText, 15, 44);
+  doc.setTextColor(...C.neon);
+  doc.textWithLink("guiresende20.netlify.app", 15 + doc.getTextWidth(locText), 44, {
+    url: "https://guiresende20.netlify.app/",
+  });
+  doc.setTextColor(...C.muted);
   doc.text("guiresende20@gmail.com  ·  +55 51 99792-5092  ·  linkedin.com/in/guilhermeresende  ·  lattes.cnpq.br/5709726694301047", 15, 49);
 
   // Stats bar
@@ -357,7 +402,7 @@ export function generateCV(type: CVType): void {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(6);
   doc.setTextColor(...C.muted);
-  doc.text("guilherme-resende.netlify.app  ·  guiresende20@gmail.com  ·  wa.me/5551997925092", 105, 290, { align: "center" });
+  doc.text("guiresende20.netlify.app  ·  guiresende20@gmail.com  ·  wa.me/5551997925092", 105, 290, { align: "center" });
   doc.setTextColor(...C.neon);
   doc.text(`[ ${config.title.toUpperCase()} ]`, 195, 290, { align: "right" });
 
