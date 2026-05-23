@@ -528,7 +528,7 @@ const handler: Handler = async (event: HandlerEvent) => {
     if (isSearchQuery) {
       // Modo busca: usa Google Search Grounding, retorna texto simples
       const searchModel = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.1-flash-lite",
         systemInstruction: fullSystemPrompt + "\n\nNeste modo, responda em texto simples sem JSON. Use os resultados de busca para enriquecer sua resposta.",
         // @ts-ignore — googleSearchRetrieval tool
         tools: [{ googleSearchRetrieval: {} }],
@@ -545,7 +545,7 @@ const handler: Handler = async (event: HandlerEvent) => {
     } else {
       // Modo padrão: resposta estruturada em JSON com action cards
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.1-flash-lite",
         systemInstruction: fullSystemPrompt,
         generationConfig: {
           temperature: 0.5,
