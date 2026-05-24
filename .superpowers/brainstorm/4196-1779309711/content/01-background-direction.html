@@ -1,0 +1,52 @@
+<h2>O que "fundo branco" significa pra você?</h2>
+<p class="subtitle">Tô em dúvida se você quer trocar o tema (dark → light) ou só remover a quebra cinza do gradient mantendo o dark theme. Marca qual representa melhor a ideia.</p>
+
+<div class="cards">
+  <div class="card" data-choice="dark-uniform" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0f;display:flex;align-items:center;justify-content:center;height:240px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px"></div>
+      <div style="position:absolute;right:18px;top:30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,#00ff87 0%,transparent 70%);opacity:0.4"></div>
+      <div style="position:relative;background:rgba(20,20,28,0.85);border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:20px;backdrop-filter:blur(6px);max-width:60%">
+        <div style="font-family:monospace;font-size:9px;color:#00ff87;letter-spacing:0.1em;margin-bottom:6px">CRIALAB · TECNOPUC</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#fff;line-height:1;margin-bottom:4px">GUILHERME</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#00ff87;line-height:1">RESENDE</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Dark uniforme + cards translúcidos</h3>
+      <p>Mantém o tema dark do site. Remove o gradient cinza que cria "quebra" visual. Texto fica em containers semi-transparentes com leve blur, dando contraste sem brigar com as partículas atrás.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="light-theme" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#f5f5f0;display:flex;align-items:center;justify-content:center;height:240px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.04) 1px,transparent 1px);background-size:32px 32px"></div>
+      <div style="position:absolute;right:18px;top:30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,#00aa55 0%,transparent 70%);opacity:0.4"></div>
+      <div style="position:relative;background:rgba(255,255,255,0.92);border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.08);max-width:60%">
+        <div style="font-family:monospace;font-size:9px;color:#00aa55;letter-spacing:0.1em;margin-bottom:6px">CRIALAB · TECNOPUC</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#111;line-height:1;margin-bottom:4px">GUILHERME</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#00aa55;line-height:1">RESENDE</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Light theme (mudança radical)</h3>
+      <p>Inverte o site inteiro pra fundo claro/branco. Cards brancos com shadow, texto escuro, neon mais saturado pra funcionar em luz. É uma reformulação grande — afeta TUDO (blog, navbar, todas as seções).</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(180deg,#f5f5f0 0%,#f5f5f0 40%,#0a0a0f 40%,#0a0a0f 100%);display:flex;align-items:center;justify-content:center;height:240px;position:relative;overflow:hidden">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(128,128,128,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(128,128,128,0.05) 1px,transparent 1px);background-size:32px 32px"></div>
+      <div style="position:absolute;right:18px;top:30px;width:90px;height:90px;border-radius:50%;background:radial-gradient(circle,#00aa55 0%,transparent 70%);opacity:0.5"></div>
+      <div style="position:relative;background:rgba(255,255,255,0.95);border:1px solid rgba(0,0,0,0.08);border-radius:6px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,0.1);max-width:60%">
+        <div style="font-family:monospace;font-size:9px;color:#00aa55;letter-spacing:0.1em;margin-bottom:6px">CRIALAB · TECNOPUC</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#111;line-height:1;margin-bottom:4px">GUILHERME</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#00aa55;line-height:1">RESENDE</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Hero claro, resto dark (hybrid)</h3>
+      <p>Só o hero vira light (fundo claro + card branco com texto escuro). Outras seções permanecem dark. Cria uma "entrada" diferenciada mas mantém o resto do site intacto.</p>
+    </div>
+  </div>
+</div>

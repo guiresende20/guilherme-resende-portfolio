@@ -1,0 +1,43 @@
+<h2>Hero sem o gradient radial</h2>
+<p class="subtitle">Screenshot capturado pelo smoke (Playwright) — preview local. Sem o gradient, o canvas aparece inteiro/limpo, mas algumas zonas ficam densas. Olha o resultado e me diz se tá bom.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Hero — preview pós-remoção do gradient radial</div>
+  <div class="mockup-body" style="padding:0">
+    <img src="/files/hero-after.png" style="display:block;width:100%;height:auto" alt="Hero sem gradient"/>
+  </div>
+</div>
+
+<div style="margin-top:24px">
+  <p><strong>O que mudou comparado ao anterior:</strong></p>
+  <ul style="line-height:1.7">
+    <li>Sem zonas mais escuras nas bordas — fundo uniforme em toda altura do hero</li>
+    <li>Partículas + linhas conectoras agora visíveis em toda extensão (antes ficavam ocultas pelas bordas escurecidas)</li>
+    <li>Texto "MUNIZ" e título seguem legíveis (branco/neon bold tem alto contraste natural)</li>
+  </ul>
+  <p><strong>Possível efeito colateral:</strong> o botão "MINHA IA PERSONALIZADA GPT" no canto superior direito pode ficar mais difícil de ler porque o canvas está denso lá. Se for um problema, posso adicionar um leve fade só no topo (sem voltar o gradient radial inteiro), ou deixar como está e seguir.</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="ok" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Tá bom assim, segue (ship)</h3>
+      <p>Aceito o resultado, commit + push.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="top-fade" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Adicionar leve fade só no topo</h3>
+      <p>Pra atenuar canvas atrás do botão "MINHA IA", sem voltar o gradient radial das bordas/quebra.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="other" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Outro problema (descreve no terminal)</h3>
+      <p>Tem algo diferente que você notou e quer ajustar.</p>
+    </div>
+  </div>
+</div>

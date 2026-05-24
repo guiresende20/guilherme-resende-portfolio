@@ -1,0 +1,79 @@
+<h2>Estilo do card translúcido</h2>
+<p class="subtitle">Mockups simplificados do hero — qual treatment funciona melhor? (As partículas atrás são as mesmas em todos)</p>
+
+<div class="cards">
+  <div class="card" data-choice="subtle" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0f;display:flex;align-items:center;justify-content:flex-start;height:280px;position:relative;overflow:hidden;padding:24px">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px"></div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:50%;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(6,1fr);gap:8px;padding:20px">
+        <span style="grid-column:2;grid-row:1;width:3px;height:3px;background:#00ff87;border-radius:50%;box-shadow:0 0 4px #00ff87"></span>
+        <span style="grid-column:5;grid-row:2;width:3px;height:3px;background:#4d8cff;border-radius:50%"></span>
+        <span style="grid-column:7;grid-row:1;width:3px;height:3px;background:#666;border-radius:50%"></span>
+        <span style="grid-column:3;grid-row:3;width:3px;height:3px;background:#00ff87;border-radius:50%;box-shadow:0 0 4px #00ff87"></span>
+        <span style="grid-column:6;grid-row:4;width:3px;height:3px;background:#4d8cff;border-radius:50%"></span>
+        <span style="grid-column:4;grid-row:5;width:3px;height:3px;background:#666;border-radius:50%"></span>
+        <span style="grid-column:2;grid-row:6;width:3px;height:3px;background:#00ff87;border-radius:50%"></span>
+      </div>
+      <div style="position:relative;background:rgba(10,10,15,0.55);border:1px solid rgba(255,255,255,0.06);padding:16px;max-width:55%;backdrop-filter:blur(3px)">
+        <div style="font-family:monospace;font-size:8px;color:#00ff87;letter-spacing:0.1em;margin-bottom:6px">CRIALAB · TECNOPUC · PUC-RS</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#fff;line-height:1;margin-bottom:2px">GUILHERME</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#00ff87;line-height:1;margin-bottom:8px">RESENDE</div>
+        <div style="font-family:sans-serif;font-size:10px;color:#aaa;line-height:1.5">Designer e pesquisador com foco em UX, IA, VR/AR.</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Subtle</h3>
+      <p>Card bem translúcido (55% opacidade), borda quase invisível, blur leve (3px). Quase você só percebe o card pela uniformidade de tom — mantém o fundo respirando. Texto fica legível mas partículas ainda brilham no fundo.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="defined" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0f;display:flex;align-items:center;justify-content:flex-start;height:280px;position:relative;overflow:hidden;padding:24px">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px"></div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:50%;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(6,1fr);gap:8px;padding:20px">
+        <span style="grid-column:2;grid-row:1;width:3px;height:3px;background:#00ff87;border-radius:50%;box-shadow:0 0 4px #00ff87"></span>
+        <span style="grid-column:5;grid-row:2;width:3px;height:3px;background:#4d8cff;border-radius:50%"></span>
+        <span style="grid-column:7;grid-row:1;width:3px;height:3px;background:#666;border-radius:50%"></span>
+        <span style="grid-column:3;grid-row:3;width:3px;height:3px;background:#00ff87;border-radius:50%;box-shadow:0 0 4px #00ff87"></span>
+        <span style="grid-column:6;grid-row:4;width:3px;height:3px;background:#4d8cff;border-radius:50%"></span>
+        <span style="grid-column:4;grid-row:5;width:3px;height:3px;background:#666;border-radius:50%"></span>
+        <span style="grid-column:2;grid-row:6;width:3px;height:3px;background:#00ff87;border-radius:50%"></span>
+      </div>
+      <div style="position:relative;background:rgba(20,20,28,0.78);border:1px solid rgba(0,255,135,0.18);padding:16px;max-width:55%;backdrop-filter:blur(8px);box-shadow:0 0 0 1px rgba(0,0,0,0.4)">
+        <div style="font-family:monospace;font-size:8px;color:#00ff87;letter-spacing:0.1em;margin-bottom:6px">CRIALAB · TECNOPUC · PUC-RS</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#fff;line-height:1;margin-bottom:2px">GUILHERME</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#00ff87;line-height:1;margin-bottom:8px">RESENDE</div>
+        <div style="font-family:sans-serif;font-size:10px;color:#ccc;line-height:1.5">Designer e pesquisador com foco em UX, IA, VR/AR.</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Defined (recomendado)</h3>
+      <p>Card 78% opaco, borda neon suave (rgba 0,255,135,0.18), blur 8px (forte). Partículas atrás ficam levemente difusas pelo blur, criando profundidade. Borda neon casa com a paleta do site. Texto bem legível.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="bold" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:#0a0a0f;display:flex;align-items:center;justify-content:flex-start;height:280px;position:relative;overflow:hidden;padding:24px">
+      <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);background-size:32px 32px"></div>
+      <div style="position:absolute;right:0;top:0;bottom:0;width:50%;display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(6,1fr);gap:8px;padding:20px">
+        <span style="grid-column:2;grid-row:1;width:3px;height:3px;background:#00ff87;border-radius:50%;box-shadow:0 0 4px #00ff87"></span>
+        <span style="grid-column:5;grid-row:2;width:3px;height:3px;background:#4d8cff;border-radius:50%"></span>
+        <span style="grid-column:7;grid-row:1;width:3px;height:3px;background:#666;border-radius:50%"></span>
+        <span style="grid-column:3;grid-row:3;width:3px;height:3px;background:#00ff87;border-radius:50%;box-shadow:0 0 4px #00ff87"></span>
+        <span style="grid-column:6;grid-row:4;width:3px;height:3px;background:#4d8cff;border-radius:50%"></span>
+        <span style="grid-column:4;grid-row:5;width:3px;height:3px;background:#666;border-radius:50%"></span>
+        <span style="grid-column:2;grid-row:6;width:3px;height:3px;background:#00ff87;border-radius:50%"></span>
+      </div>
+      <div style="position:relative;background:rgba(20,20,28,0.92);border:1px solid rgba(0,255,135,0.4);padding:16px;max-width:55%;box-shadow:0 8px 30px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05)">
+        <div style="font-family:monospace;font-size:8px;color:#00ff87;letter-spacing:0.1em;margin-bottom:6px">CRIALAB · TECNOPUC · PUC-RS</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#fff;line-height:1;margin-bottom:2px">GUILHERME</div>
+        <div style="font-family:sans-serif;font-weight:700;font-size:18px;color:#00ff87;line-height:1;margin-bottom:8px">RESENDE</div>
+        <div style="font-family:sans-serif;font-size:10px;color:#ddd;line-height:1.5">Designer e pesquisador com foco em UX, IA, VR/AR.</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Bold</h3>
+      <p>Card 92% opaco (quase opaco), borda neon mais marcada, drop shadow forte. Atua quase como um "painel" sobre o canvas. Máximo contraste — partículas vão aparecer só fora do card.</p>
+    </div>
+  </div>
+</div>

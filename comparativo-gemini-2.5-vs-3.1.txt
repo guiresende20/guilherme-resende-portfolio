@@ -1,0 +1,115 @@
+COMPARATIVO GEMINI 2.5 vs 3.1 — TEXTO E ÁUDIO
+Gerado em 2026-05-23 · Contexto: portfolio guiresende20.netlify.app
+===============================================================
+
+===============================================================
+1) TEXTO — gemini-2.5-flash vs gemini-3.1-flash-lite
+===============================================================
+
+Medição empírica feita neste projeto (3 prompts × 2 rodadas,
+config idêntica à de netlify/functions/chat.ts: temp 0.5, topP 0.9,
+maxOutputTokens 1500, responseMimeType: application/json).
+
+  Métrica               | 2.5-flash     | 3.1-flash-lite
+  ----------------------|---------------|----------------------
+  Latência média        | 4260 ms       | 1071 ms  (~4× mais rápido)
+  Latência mín / máx    | 2355 / 7201   | 951 / 1200 ms
+  Variância             | Alta (outlier | Baixa (~250 ms de spread)
+                        | de 7,2 s)     |
+  JSON estruturado      | OK            | OK
+  Chars médios          | 265           | 368
+
+PRÓS DO 3.1-FLASH-LITE
+- Latência drasticamente menor e — mais importante — previsível.
+  Chat percebido como instantâneo.
+- Custo menor por token (~$0.25/1M input vs ~$0.30 do 2.5-flash).
+- Mantém responseMimeType "application/json" e googleSearchRetrieval
+  sem mudança de código.
+- Migração drop-in: trocar a string do modelo, nada mais.
+
+CONTRAS / CUIDADOS
+- Sem reasoning nativo — é "lite". Tarefas que dependem de
+  raciocínio em múltiplos passos (cadeias longas, math) tendem a
+  regredir vs. um 2.5-flash com thinkingBudget. Pra Q&A de portfolio
+  é irrelevante; pra outros usos pode pesar.
+- Respostas levemente mais verbosas (368 vs 265 chars) — controlável
+  via prompt.
+- Ainda é preview do ponto de vista de SLA; Google pode mudar
+  comportamento.
+
+
+===============================================================
+2) ÁUDIO — gemini-2.5-flash-native-audio vs gemini-3.1-flash-live-preview
+===============================================================
+
+Comparação documental (não medi com mic real — Live API cobra por
+minuto e não traria ganho de insight vs. specs publicadas).
+
+  Aspecto                          | 2.5 Flash Native Audio | 3.1 Flash Live Preview
+  ---------------------------------|------------------------|------------------------
+  TTFT                             | baseline               | ~2.5× mais rápido (claim Google)
+  Idiomas                          | ~24 nativos            | 90+
+  Reconhecimento acústico          | básico                 | melhorado (pitch, ritmo)
+  Filtro de ruído de fundo         | padrão                 | mais agressivo
+  Barge-in                         | sim                    | sim
+  Controle de thinking             | thinkingBudget         | thinkingLevel (default "low")
+  Eventos do servidor              | 1 part por evento      | múltiplas parts/evento
+  Janela de contexto               | 32K                    | 128K
+  Proactive audio                  | sim                    | NÃO suportado ainda
+  Affective dialogue               | sim                    | NÃO suportado ainda
+  Limite sessão (áudio-only)       | 15 min                 | 15 min
+  Status                           | mais estável           | preview
+
+PRÓS DO 3.1 FLASH LIVE PARA ESTE CASO DE USO
+- TTFT 2,5× menor — conversa flui mais natural, menos "buracos"
+  depois que o usuário cala a boca.
+- 90+ idiomas — relevante pro portfolio multilíngue (PT/EN/ES já no site).
+- Melhor filtro de ruído ambiente — usuários no celular em cafés/rua.
+- Janela 128K — não importa pra conversa curta de portfolio, mas dá
+  margem pra acumular contexto de RAG sem truncar.
+- Reconhecimento de pitch/ritmo melhor — voz percebida como menos
+  "robótica".
+
+CONTRAS / O QUE SE ABRE MÃO VS. 2.5
+- Proactive audio sumiu — em 2.5 dava pra deixar o modelo iniciar
+  fala (ex.: "vejo que você parou de digitar, posso ajudar?").
+  Em 3.1 ainda não. Não era usado, então sem impacto.
+- Affective dialogue sumiu — modelo não ajusta tom em resposta a
+  emoção do usuário. Mesmo caso: não era usado.
+- API surface mudou entre 2.5 e 3.1 (formato de eventos, naming de
+  configs como thinkingBudget → thinkingLevel).
+- Preview = sem SLA forte. Code defensivo (try/catch nos parsers de
+  evento) é obrigatório.
+
+
+===============================================================
+3) VEREDITO
+===============================================================
+
+Pra Q&A conversacional curto de portfolio (este caso), 3.1 Flash
+Live é estritamente melhor que 2.5 — latência menor, mais idiomas,
+melhor robustez acústica, e as features que 3.1 perde (proactive /
+affective) não eram usadas. O src/lib/gemini-live.ts já está em
+gemini-3.1-flash-live-preview desde antes desta sessão; não há
+migração pendente do lado do modelo.
+
+Pra texto, a migração 2.5-flash → 3.1-flash-lite foi aplicada nesta
+sessão (commit 963d204) em:
+  - netlify/functions/chat.ts (×2)
+  - netlify/functions/blog-translate.ts (×1)
+Smoke em prod (POST /api/chat) retornou 200 com JSON válido.
+
+
+===============================================================
+FONTES
+===============================================================
+- Gemini 3.1 Flash Live — blog.google launch post:
+  https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-1-flash-live/
+- Live API capabilities guide:
+  https://ai.google.dev/gemini-api/docs/live-api/capabilities
+- Gemini 3.1 Flash Live Preview — model page:
+  https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-live-preview
+- Gemini 3.1 Flash-Lite — model page:
+  https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite
+- Notas de migração de app de voz em produção (Google AI Forum):
+  https://discuss.ai.google.dev/t/gemini-3-1-flash-live-great-upgrade-from-2-5-two-model-behavior-observations-from-production-voice-app/136670
