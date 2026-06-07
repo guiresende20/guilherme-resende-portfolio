@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /aerolito
 
 Sitemap: https://guiresende20.netlify.app/sitemap.xml
