@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getStore } from "@netlify/blobs";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { ensureBlobsContext } from "./_lib/blobs-context";
+import { dumpAllAerolitoChunks, resetAerolitoIndex } from "./_lib/aerolito-vector";
 
 export function isAuthorized(authHeader: string | undefined | null): boolean {
   if (!authHeader) return false;
@@ -170,6 +171,44 @@ async function actionPublish(
   return { ok: true, bullets };
 }
 
+async function actionReset(supabaseUrl: string, supabaseKey: string) {
+  // 1. Fetch everything for backup
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const { data: rows } = await supabase.from("aerolito_responses").select("*");
+  const chunks = await dumpAllAerolitoChunks();
+  let publishedBullets: unknown = null;
+  const s = adminStore();
+  if (s) {
+    try { publishedBullets = await s.get(BULLETS_KEY, { type: "json" }); }
+    catch { /* tolerate missing */ }
+  }
+  const backup = {
+    exported_at: new Date().toISOString(),
+    aerolito_responses: rows ?? [],
+    vector_chunks: chunks,
+    published_bullets: publishedBullets,
+  };
+
+  // 2. Write backup file
+  if (s) {
+    const ts = backup.exported_at.replace(/[:.]/g, "-");
+    await s.setJSON(`aerolito/backups/${ts}.json`, backup);
+  }
+
+  // 3. Delete everything
+  // Supabase: hard delete all rows using a filter that matches all
+  await supabase.from("aerolito_responses").delete().gte("question_idx", 1);
+  // Vector index: delete the file
+  await resetAerolitoIndex();
+  // Published bullets: delete the blob
+  if (s) {
+    try { await s.delete(BULLETS_KEY); }
+    catch (err) { console.error("aerolito-admin: bullets delete failed", err); }
+  }
+
+  return { ok: true, backup };
+}
+
 const handler: Handler = async (event: HandlerEvent) => {
   ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
@@ -216,7 +255,10 @@ const handler: Handler = async (event: HandlerEvent) => {
       return { statusCode: 200, headers, body: JSON.stringify(result) };
     }
 
-    // Other actions are added in Task 13.
+    if (action === "reset" && event.httpMethod === "POST") {
+      const result = await actionReset(supabaseUrl, supabaseKey);
+      return { statusCode: 200, headers, body: JSON.stringify(result) };
+    }
 
     return { statusCode: 400, headers, body: JSON.stringify({ error: "invalid action or method" }) };
   } catch (err) {
