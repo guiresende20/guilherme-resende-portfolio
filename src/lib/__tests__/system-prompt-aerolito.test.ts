@@ -23,7 +23,13 @@ describe("SYSTEM_PROMPT_AEROLITO", () => {
     expect(SYSTEM_PROMPT_AEROLITO).toMatch(/no máximo 300 caracteres|máximo 300 caracteres/i);
   });
 
+  it("removes the old 450 char limit (must be 300, not 450)", () => {
+    expect(SYSTEM_PROMPT_AEROLITO).not.toMatch(/450 caracteres/);
+  });
+
   it("includes rule referencing the new blocks for relevant questions", () => {
     expect(SYSTEM_PROMPT_AEROLITO).toMatch(/CONTEXTO AEROLITO.*HEAD DE PESQUISA/s);
   });
+
+  it.todo("no TODO owner preencher placeholders (turn on this test once owner fills the blocks)");
 });
