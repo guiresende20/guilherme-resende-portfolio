@@ -1,6 +1,7 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getStore } from "@netlify/blobs";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { ensureBlobsContext } from "./_lib/blobs-context";
 
@@ -135,6 +136,40 @@ async function actionConsolidate(supabaseUrl: string, supabaseKey: string): Prom
   return { bullets };
 }
 
+const BLOG_STORE = "blog";
+const BULLETS_KEY = "aerolito/published-bullets.json";
+
+function adminStore() {
+  try { return getStore(BLOG_STORE); }
+  catch (e) {
+    if (e instanceof Error && e.name === "MissingBlobsEnvironmentError") return null;
+    throw e;
+  }
+}
+
+async function actionPublish(
+  payload: unknown,
+  supabaseUrl: string,
+  supabaseKey: string,
+): Promise<{ ok: true; bullets: string[] }> {
+  const bullets = validateBulletsPayload(payload);
+  if (!bullets) throw new Error("invalid bullets payload");
+
+  const s = adminStore();
+  if (!s) throw new Error("blob store unavailable");
+
+  await s.setJSON(BULLETS_KEY, {
+    bullets,
+    published_at: new Date().toISOString(),
+  });
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  // Mark all rows as published. (Not strictly required, but keeps audit trail accurate.)
+  await supabase.from("aerolito_responses").update({ published: true }).gte("question_idx", 1);
+
+  return { ok: true, bullets };
+}
+
 const handler: Handler = async (event: HandlerEvent) => {
   ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
@@ -173,7 +208,15 @@ const handler: Handler = async (event: HandlerEvent) => {
       return { statusCode: 200, headers, body: JSON.stringify(result) };
     }
 
-    // Other actions are added in Tasks 12-13.
+    if (action === "publish" && event.httpMethod === "POST") {
+      let body: unknown;
+      try { body = JSON.parse(event.body || "{}"); }
+      catch { return { statusCode: 400, headers, body: JSON.stringify({ error: "invalid json" }) }; }
+      const result = await actionPublish(body, supabaseUrl, supabaseKey);
+      return { statusCode: 200, headers, body: JSON.stringify(result) };
+    }
+
+    // Other actions are added in Task 13.
 
     return { statusCode: 400, headers, body: JSON.stringify({ error: "invalid action or method" }) };
   } catch (err) {
