@@ -35,11 +35,11 @@ Criar uma experiência one-shot em `/aerolito` (rota escondida, `noindex`) que:
 | 7 | Idioma do `/aerolito`: só português (sem detecção en/es) |
 | 8 | Toggle "🤝 Contribuir como colega Aerolito" entra em modo entrevista; padrão é modo normal |
 | 9 | 5 perguntas fixas (lista abaixo), anônimas, sem identificação |
-| 10 | Respostas salvas no Supabase + auto-indexadas em vector store isolado (`rag/aerolito_responses/*`) |
+| 10 | Respostas salvas no Supabase + auto-indexadas em vector store isolado (`embeddings/aerolito-index.json`) |
 | 11 | Admin via `/aerolito/admin?token=XXX` com auth via `Authorization: Bearer` (404 se inválido) |
 | 12 | Consolidação via IA: botão "Gerar proposta de bullets" → editor inline → publish |
 | 13 | Card "Head de Pesquisa" na trajetória oculto até publicação; aparece em todas as 3 locales com bullets em PT + disclaimer em en/es |
-| 14 | Reset exporta backup JSON antes de deletar (Supabase + Blobs `rag/aerolito_responses/*` + `aerolito/published-bullets.json`) |
+| 14 | Reset exporta backup JSON antes de deletar (Supabase + Blobs `embeddings/aerolito-index.json` + `aerolito/published-bullets.json`) |
 | 15 | Card metadata: role="Head de Pesquisa", org="Aeroli.to", period="JUN 2026 — presente", loc="Porto Alegre, RS", type="Profissional" |
 
 ## As 5 perguntas (fixas, hardcoded no frontend)
@@ -244,7 +244,7 @@ Uma função, vários endpoints via `?action=`. Auth: `Authorization: Bearer ${A
 | `list` | GET | SELECT no Supabase, agrupa por `session_id`, retorna `{ sessions: [...], totalSessions, totalResponses }` |
 | `consolidate` | POST | Chama Gemini com prompt definido abaixo. Retorna `{ bullets: string[] }` |
 | `publish` | POST `{ bullets }` | Valida (4-6 itens, cada `length ≤ 200` — limite acima do gerado pela IA pra dar margem ao owner editar se quiser), salva blob `aerolito/published-bullets.json` com `{ bullets, published_at }`, UPDATE `published=true` em todas as rows |
-| `reset` | POST | Exporta backup → salva em `aerolito/backups/<iso-ts>.json` E retorna no response. Depois: DELETE all rows do Supabase + DELETE blobs `rag/aerolito_responses/*` + DELETE blob `aerolito/published-bullets.json` |
+| `reset` | POST | Exporta backup → salva em `aerolito/backups/<iso-ts>.json` E retorna no response. Depois: DELETE all rows do Supabase + DELETE blobs `embeddings/aerolito-index.json` + DELETE blob `aerolito/published-bullets.json` |
 
 **Prompt da consolidação:**
 
@@ -336,7 +336,7 @@ create index aerolito_responses_indexed_idx on aerolito_responses (indexed);
 
 | Key pattern | Conteúdo |
 |---|---|
-| `rag/aerolito_responses/<uuid>.json` | `{ embedding: number[], text: string, metadata: { question_idx, created_at } }` |
+| `embeddings/aerolito-index.json` | `{ chunks: [{ id, text, vector, questionIdx, createdAt }] }` (mesmo padrão do `posts-index.json` — um único arquivo facilita reset e busca) |
 | `aerolito/published-bullets.json` | `{ bullets: string[], published_at: ISO timestamp }` |
 | `aerolito/backups/<iso-ts>.json` | Backup completo gerado no reset |
 
