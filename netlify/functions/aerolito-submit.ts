@@ -4,6 +4,8 @@ import { createHash } from "node:crypto";
 import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
 import { ensureBlobsContext } from "./_lib/blobs-context";
+import { embedText } from "./_lib/embeddings";
+import { appendAerolitoChunk } from "./_lib/aerolito-vector";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -46,6 +48,25 @@ const SUBMIT_RATE_LIMITS = [
 function hashIp(ip: string): string {
   const salt = process.env.AEROLITO_IP_HASH_SALT ?? "default-salt-change-me";
   return createHash("sha256").update(`${salt}:${ip}`).digest("hex").slice(0, 32);
+}
+
+async function indexResponseAsync(id: string, payload: SubmitPayload, supabaseUrl: string, supabaseKey: string): Promise<void> {
+  try {
+    const text = `P: ${payload.question_text}\nR: ${payload.answer_text}`;
+    const vector = await embedText(text);
+    await appendAerolitoChunk({
+      id,
+      text,
+      vector,
+      questionIdx: payload.question_idx,
+      createdAt: new Date().toISOString(),
+    });
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    await supabase.from("aerolito_responses").update({ indexed: true }).eq("id", id);
+  } catch (err) {
+    console.error("aerolito-submit: async indexing failed", err);
+    // intentional: do not throw — user already got 200
+  }
 }
 
 const handler: Handler = async (event: HandlerEvent) => {
@@ -108,7 +129,9 @@ const handler: Handler = async (event: HandlerEvent) => {
     return { statusCode: 500, headers, body: JSON.stringify({ error: "save failed" }) };
   }
 
-  // (async indexing comes in Task 8 — leave this comment as a marker)
+  // Fire-and-forget: respondemos OK ao colega imediatamente; indexação roda em background.
+  // Erros são logados mas não afetam UX (admin pode reindexar depois).
+  indexResponseAsync(data.id, payload, supabaseUrl, supabaseKey).catch(() => {});
 
   return { statusCode: 200, headers, body: JSON.stringify({ ok: true, id: data.id }) };
 };
