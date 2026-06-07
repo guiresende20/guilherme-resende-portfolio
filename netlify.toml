@@ -38,6 +38,26 @@
   status = 200
 
 [[redirects]]
+  from = "/api/aerolito-chat"
+  to = "/.netlify/functions/aerolito-chat"
+  status = 200
+
+[[redirects]]
+  from = "/api/aerolito-submit"
+  to = "/.netlify/functions/aerolito-submit"
+  status = 200
+
+[[redirects]]
+  from = "/api/aerolito-bullets"
+  to = "/.netlify/functions/aerolito-bullets"
+  status = 200
+
+[[redirects]]
+  from = "/api/aerolito-admin"
+  to = "/.netlify/functions/aerolito-admin"
+  status = 200
+
+[[redirects]]
   from = "/sitemap.xml"
   to = "/.netlify/functions/sitemap"
   status = 200
