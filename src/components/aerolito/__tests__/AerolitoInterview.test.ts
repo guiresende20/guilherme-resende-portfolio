@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createInterviewController } from "../AerolitoInterview";
+import { createInterviewController, type InterviewSubmitPayload } from "../AerolitoInterview";
 import { AEROLITO_QUESTIONS } from "../QUESTIONS";
 
 describe("createInterviewController", () => {
-  let mockSay: ReturnType<typeof vi.fn>;
-  let mockSubmit: ReturnType<typeof vi.fn>;
+  let mockSay: ((text: string) => void) & ReturnType<typeof vi.fn>;
+  let mockSubmit: ((payload: InterviewSubmitPayload) => Promise<void>) & ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    mockSay = vi.fn();
-    mockSubmit = vi.fn().mockResolvedValue(undefined);
+    mockSay = vi.fn() as typeof mockSay;
+    mockSubmit = vi.fn().mockResolvedValue(undefined) as typeof mockSubmit;
   });
 
   it("starts at step 1 with a sessionId after start()", () => {
@@ -58,7 +58,7 @@ describe("createInterviewController", () => {
       calls++;
       if (calls === 1) return Promise.reject(new Error("network"));
       return Promise.resolve();
-    });
+    }) as typeof mockSubmit;
     const ctrl = createInterviewController({ sayFixed: mockSay, submitAnswer: mockSubmit });
     ctrl.start();
     await ctrl.onAnswer("ok");
