@@ -4,7 +4,7 @@ import { createInterviewController, type InterviewController } from "./AerolitoI
 
 interface Message { role: "user" | "model"; text: string }
 
-const WELCOME = "Olá! Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Vou começar com 5 perguntas rápidas pra entender o que vocês esperam de mim — depois a gente fica livre pra conversar sobre o que quiser sobre o Gui.";
+const WELCOME = "Olá! Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Como é o meu primeiro dia, gostaria de começar com 5 perguntas rápidas pra entender o que vocês esperam de mim — depois a gente fica livre pra conversar sobre o que quiser sobre o Gui.\n\nAs suas respostas serão salvas num banco de dados — totalmente anônimas. Então elas serão compiladas e, com a ajuda da IA, ajudarão a compor no meu site minhas funções aqui na aeroli.to :)\n\nDepois a gnt fica livre para conversar! pode perguntar qualquer coisa sobre mim :)";
 
 const MAX_MESSAGES = 30;
 
@@ -138,7 +138,7 @@ export default function AerolitoChatWidget() {
       <div className="flex-1 overflow-y-auto px-4 py-4 bg-background/50">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} mb-3`}>
-            <div className={`max-w-[78%] px-3.5 py-2.5 rounded-md text-[13px] leading-relaxed font-sans ${msg.role === "user" ? "bg-neon text-background font-medium" : "bg-card border border-border text-muted-foreground"}`}>
+            <div className={`max-w-[78%] px-3.5 py-2.5 rounded-md text-[13px] leading-relaxed font-sans whitespace-pre-line ${msg.role === "user" ? "bg-neon text-background font-medium" : "bg-card border border-border text-muted-foreground"}`}>
               {msg.text}
             </div>
           </div>
