@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { AerolitoLiveChat, type AerolitoLiveStatus } from "@/lib/aerolito-live";
 import { createInterviewController, type InterviewController } from "./AerolitoInterview";
+import { AEROLITO_QUESTIONS } from "./QUESTIONS";
 
 interface Message { role: "user" | "model"; text: string }
 
-const WELCOME = "Sou o RAG do Gui, agora Head de Pesquisa na Aeroli.to. Pergunta o que quiser — ou clique abaixo pra deixar a sua expectativa sobre o que eu deveria entregar.";
+const WELCOME = "Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Pergunta o que quiser — ou clique numa das sugestões abaixo pra ouvir o que eu penso sobre cada tema.";
 
-const SUGGESTIONS = [
-  "Quem é o Gui?",
-  "O que é Head de Pesquisa?",
-  "Por que Aerolito?",
-];
+// As mesmas 5 perguntas usadas no modo entrevista — agora também aparecem
+// como sugestões iniciais. Clicar envia a pergunta à minha IA (modo normal).
+const SUGGESTIONS = AEROLITO_QUESTIONS;
 
 const MAX_MESSAGES = 30;
 
