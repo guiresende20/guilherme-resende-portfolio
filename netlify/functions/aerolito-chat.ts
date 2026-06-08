@@ -1,4 +1,5 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
+import { getStore } from "@netlify/blobs";
 import { SYSTEM_PROMPT_AEROLITO } from "../../src/lib/system-prompt-aerolito";
 import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
@@ -23,6 +24,34 @@ async function getRagContextSafe(message: string): Promise<string> {
       new Promise<string>((resolve) => setTimeout(() => resolve(""), RAG_TIMEOUT_MS)),
     ]);
   } catch {
+    return "";
+  }
+}
+
+// Atribuições validadas pelo owner via painel admin (botão "Publicar na trajetória").
+// Lê o blob `aerolito/published-bullets.json` (mesma key usada por aerolito-bullets.ts
+// e aerolito-admin.ts) e injeta como bloco contextual no system prompt. Só ativo
+// quando o blob existe (= após o owner clicar Publicar). Antes disso, retorna string
+// vazia e a IA cai no contexto bruto via RAG (getAerolitoContextSafe).
+async function getPublishedBulletsContext(): Promise<string> {
+  try {
+    let store;
+    try {
+      store = getStore("blog");
+    } catch (e) {
+      if (e instanceof Error && e.name === "MissingBlobsEnvironmentError") return "";
+      throw e;
+    }
+    const raw = await store.get("aerolito/published-bullets.json", { type: "json" });
+    if (!raw || typeof raw !== "object") return "";
+    const candidate = raw as { bullets?: unknown };
+    if (!Array.isArray(candidate.bullets) || candidate.bullets.length === 0) return "";
+    const bullets = candidate.bullets.filter((b): b is string => typeof b === "string" && b.trim().length > 0);
+    if (bullets.length === 0) return "";
+    const list = bullets.map((b) => `- ${b}`).join("\n");
+    return `\n\n---\n\n## ATRIBUIÇÕES VALIDADAS DO MEU PAPEL\n(consolidadas a partir das expectativas do time da Aerolito, publicadas pelo Guilherme após curadoria no painel admin)\n\n${list}\n\nQuando perguntarem sobre meu papel, meus focos ou meus 90 primeiros dias na Aerolito, use esses bullets como referência principal. Eles representam o que o time validou que eu devo entregar.`;
+  } catch (err) {
+    console.error("aerolito-chat: getPublishedBulletsContext failed", err);
     return "";
   }
 }
@@ -105,13 +134,14 @@ const handler: Handler = async (event: HandlerEvent) => {
   }
 
   try {
-    const [{ token, expiresAt }, blogContext, aerolitoContext] = await Promise.all([
+    const [{ token, expiresAt }, blogContext, aerolitoContext, bulletsContext] = await Promise.all([
       issueLiveToken(apiKey),
       getRagContextSafe(message),
       getAerolitoContextSafe(message),
+      getPublishedBulletsContext(),
     ]);
 
-    const fullSystemPrompt = SYSTEM_PROMPT_AEROLITO + blogContext + aerolitoContext;
+    const fullSystemPrompt = SYSTEM_PROMPT_AEROLITO + blogContext + aerolitoContext + bulletsContext;
 
     return {
       statusCode: 200,

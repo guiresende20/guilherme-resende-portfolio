@@ -31,5 +31,12 @@ describe("SYSTEM_PROMPT_AEROLITO", () => {
     expect(SYSTEM_PROMPT_AEROLITO).toMatch(/CONTEXTO AEROLITO.*HEAD DE PESQUISA/s);
   });
 
-  it.todo("no TODO owner preencher placeholders (turn on this test once owner fills the blocks)");
+  it("no TODO owner preencher placeholders remain (deploy gate)", () => {
+    expect(SYSTEM_PROMPT_AEROLITO).not.toMatch(/\[TODO owner preencher/);
+  });
+
+  it("CONTEXTO AEROLITO has real company description", () => {
+    expect(SYSTEM_PROMPT_AEROLITO).toMatch(/Aerolito é uma empresa brasileira/);
+    expect(SYSTEM_PROMPT_AEROLITO).toMatch(/Três Ondas/);
+  });
 });
