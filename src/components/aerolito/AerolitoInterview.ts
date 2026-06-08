@@ -15,7 +15,8 @@ export interface InterviewDeps {
 }
 
 export interface InterviewController {
-  start: () => void;
+  /** Inicia a entrevista. startStep é 1-indexed (1..5); default 1 (início). */
+  start: (startStep?: number) => void;
   onAnswer: (text: string) => Promise<void>;
   getStep: () => Step;
   getSessionId: () => string;
@@ -54,9 +55,10 @@ export function createInterviewController(deps: InterviewDeps): InterviewControl
   }
 
   return {
-    start() {
+    start(startStep: number = 1) {
+      const clamped = Math.max(1, Math.min(AEROLITO_QUESTIONS.length, Math.floor(startStep)));
       sessionId = makeUuidV4();
-      step = 1;
+      step = clamped;
       speakCurrent();
     },
     async onAnswer(text: string) {

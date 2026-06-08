@@ -5,7 +5,7 @@ import { AEROLITO_QUESTIONS } from "./QUESTIONS";
 
 interface Message { role: "user" | "model"; text: string }
 
-const WELCOME = "Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Pergunta o que quiser — ou clique numa das sugestões abaixo pra ouvir o que eu penso sobre cada tema.";
+const WELCOME = "Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Pergunta o que quiser — ou clique numa das 5 perguntas abaixo pra começar uma contribuição rápida sobre o que você espera de mim.";
 
 // As mesmas 5 perguntas usadas no modo entrevista — agora também aparecem
 // como sugestões iniciais. Clicar envia a pergunta à minha IA (modo normal).
@@ -74,7 +74,7 @@ export default function AerolitoChatWidget() {
     live.sendUserText(text);
   }
 
-  async function startInterview() {
+  async function startInterview(startStep: number = 1) {
     if (mode === "interview") return;
     const live = await ensureLiveReady();
     if (!live) return;
@@ -90,7 +90,7 @@ export default function AerolitoChatWidget() {
         if (!r.ok) throw new Error(`status ${r.status}`);
       },
     });
-    interviewRef.current.start();
+    interviewRef.current.start(startStep);
   }
 
   async function handleSend() {
@@ -141,11 +141,13 @@ export default function AerolitoChatWidget() {
         ))}
         {messages.length === 1 && mode === "normal" && (
           <div className="mt-2">
-            <p className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.08em] mb-2">Sugestões</p>
+            <p className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.08em] mb-2">
+              Clique pra começar a contribuir nessa pergunta (entrevista de 5)
+            </p>
             <div className="flex flex-col gap-1.5">
-              {SUGGESTIONS.map((s) => (
-                <button key={s} onClick={() => sendUserMessage(s)} className="text-left font-mono text-[10px] text-muted-foreground border border-dim/60 px-3 py-1.5 rounded-sm hover:border-neon/30 hover:text-foreground transition-all">
-                  {s}
+              {SUGGESTIONS.map((s, i) => (
+                <button key={s} onClick={() => startInterview(i + 1)} className="text-left font-mono text-[10px] text-muted-foreground border border-dim/60 px-3 py-1.5 rounded-sm hover:border-neon/30 hover:text-foreground transition-all">
+                  <span className="text-neon mr-2">{i + 1}.</span>{s}
                 </button>
               ))}
             </div>
