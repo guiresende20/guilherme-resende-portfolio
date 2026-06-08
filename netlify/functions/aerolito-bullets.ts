@@ -23,12 +23,16 @@ const handler: Handler = async (event: HandlerEvent) => {
   ensureBlobsContext(event);
   const origin = getRequestOrigin(event);
   const allowed = isOriginAllowed(origin);
+  // Same-origin GET nao manda Origin (per fetch spec). Cross-origin sempre manda
+  // → so bloqueia se Origin estiver presente E for invalido. Endpoint e read-only
+  // e publico, entao mesmo curl/script sem Origin pode ler.
+  const originBlocked = origin !== "" && !allowed;
 
   if (event.httpMethod === "OPTIONS") {
-    if (!allowed) return { statusCode: 403, body: "" };
+    if (originBlocked) return { statusCode: 403, body: "" };
     return { statusCode: 204, headers: corsHeaders(origin, "GET"), body: "" };
   }
-  if (!allowed) return { statusCode: 403, body: JSON.stringify({ error: "Origem não autorizada" }) };
+  if (originBlocked) return { statusCode: 403, body: JSON.stringify({ error: "Origem não autorizada" }) };
 
   const headers = {
     ...corsHeaders(origin, "GET"),
