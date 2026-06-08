@@ -158,7 +158,7 @@ export default function AerolitoChatWidget() {
 
       <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-card/40">
         {mode === "normal" && (
-          <button onClick={startInterview} className="w-full mb-2 font-mono text-[11px] uppercase tracking-[0.06em] text-neon border border-neon/40 px-3 py-2 rounded-sm hover:bg-neon/10 transition-all">
+          <button onClick={() => startInterview(1)} className="w-full mb-2 font-mono text-[11px] uppercase tracking-[0.06em] text-neon border border-neon/40 px-3 py-2 rounded-sm hover:bg-neon/10 transition-all">
             🤝 Contribuir como colega Aerolito
           </button>
         )}
