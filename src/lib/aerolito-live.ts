@@ -19,6 +19,9 @@ export class AerolitoLiveChat {
   private nextPlayTime = 0;
   private scheduledSources: AudioBufferSourceNode[] = [];
   private currentTranscript = "";
+  private setupResolve: (() => void) | null = null;
+  private setupReject: ((err: Error) => void) | null = null;
+  private setupTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private ephemeralToken: string,
@@ -26,60 +29,86 @@ export class AerolitoLiveChat {
     private systemInstruction: string,
   ) {}
 
-  public async start(): Promise<void> {
+  public start(): Promise<void> {
     this.callbacks.onStatusChange("connecting");
-    try {
-      this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)({
-        sampleRate: 24000,
-      });
-
-      const wssUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(this.ephemeralToken)}`;
-      this.ws = new WebSocket(wssUrl);
-
-      this.ws.onopen = () => {
-        const setup = {
-          setup: {
-            model: "models/gemini-3.1-flash-live-preview",
-            generationConfig: {
-              responseModalities: ["AUDIO"],
-              speechConfig: {
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } },
-                languageCode: "pt-BR",
-              },
-            },
-            systemInstruction: { parts: [{ text: this.systemInstruction }] },
-            outputAudioTranscription: {},
-          },
-        };
-        this.ws?.send(JSON.stringify(setup));
-      };
-
-      this.ws.onmessage = async (event) => {
-        let msg: unknown;
-        try {
-          const text = event.data instanceof Blob ? await event.data.text() : (event.data as string);
-          msg = JSON.parse(text);
-        } catch (e) {
-          console.error("aerolito-live: parse failed", e);
-          return;
+    return new Promise<void>((resolve, reject) => {
+      this.setupResolve = resolve;
+      this.setupReject = reject;
+      // Hard timeout: se setupComplete não chegar em 10s, falha.
+      this.setupTimeout = setTimeout(() => {
+        if (this.setupReject) {
+          const err = new Error("setupComplete timeout");
+          this.setupReject(err);
+          this.setupResolve = null;
+          this.setupReject = null;
+          this.callbacks.onError?.("Tempo esgotado ao conectar com a voz.");
+          this.stop();
         }
-        this.handleMessage(msg);
-      };
+      }, 10000);
 
-      this.ws.onerror = (e) => {
-        console.error("aerolito-live: ws error", e);
-        this.callbacks.onError?.("Erro de conexão");
+      try {
+        this.audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)({
+          sampleRate: 24000,
+        });
+
+        const wssUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContentConstrained?access_token=${encodeURIComponent(this.ephemeralToken)}`;
+        this.ws = new WebSocket(wssUrl);
+
+        this.ws.onopen = () => {
+          const setup = {
+            setup: {
+              model: "models/gemini-3.1-flash-live-preview",
+              generationConfig: {
+                responseModalities: ["AUDIO"],
+                speechConfig: {
+                  voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } },
+                  languageCode: "pt-BR",
+                },
+              },
+              systemInstruction: { parts: [{ text: this.systemInstruction }] },
+              outputAudioTranscription: {},
+            },
+          };
+          this.ws?.send(JSON.stringify(setup));
+        };
+
+        this.ws.onmessage = async (event) => {
+          let msg: unknown;
+          try {
+            const text = event.data instanceof Blob ? await event.data.text() : (event.data as string);
+            msg = JSON.parse(text);
+          } catch (e) {
+            console.error("aerolito-live: parse failed", e);
+            return;
+          }
+          this.handleMessage(msg);
+        };
+
+        this.ws.onerror = (e) => {
+          console.error("aerolito-live: ws error", e);
+          this.callbacks.onError?.("Erro de conexão");
+          if (this.setupReject) {
+            this.setupReject(new Error("ws error before setupComplete"));
+            this.setupResolve = null;
+            this.setupReject = null;
+          }
+          this.stop();
+        };
+
+        this.ws.onclose = () => {
+          this.callbacks.onStatusChange("disconnected");
+        };
+      } catch (e) {
+        console.error("aerolito-live: start failed", e);
+        this.callbacks.onError?.("Não foi possível iniciar a voz.");
+        if (this.setupReject) {
+          this.setupReject(e instanceof Error ? e : new Error(String(e)));
+          this.setupResolve = null;
+          this.setupReject = null;
+        }
         this.stop();
-      };
-
-      this.ws.onclose = () => {
-        this.callbacks.onStatusChange("disconnected");
-      };
-    } catch (e) {
-      console.error("aerolito-live: start failed", e);
-      this.callbacks.onError?.("Não foi possível iniciar a voz.");
-      this.stop();
-    }
+      }
+    });
   }
 
   private handleMessage(msg: unknown): void {
@@ -95,6 +124,10 @@ export class AerolitoLiveChat {
     if (obj.setupComplete) {
       this.callbacks.onStatusChange("connected");
       this.callbacks.onStatusChange("idle");
+      if (this.setupTimeout) { clearTimeout(this.setupTimeout); this.setupTimeout = null; }
+      this.setupResolve?.();
+      this.setupResolve = null;
+      this.setupReject = null;
       return;
     }
 
@@ -189,6 +222,9 @@ export class AerolitoLiveChat {
   }
 
   public stop(): void {
+    if (this.setupTimeout) { clearTimeout(this.setupTimeout); this.setupTimeout = null; }
+    this.setupResolve = null;
+    this.setupReject = null;
     if (this.ws) {
       try { this.ws.close(); } catch { /* ignore */ }
       this.ws = null;
