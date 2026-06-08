@@ -44,6 +44,13 @@
     "header_label": "Experiencia Profesional",
     "header_title": "Trayectoria",
     "header_outline": "profesional",
+    "aerolito": {
+      "role": "Head de Investigación",
+      "type": "Profesional",
+      "period": "JUN 2026 — presente",
+      "loc": "Porto Alegre, Brasil",
+      "bullets_disclaimer": "(comentarios del equipo en portugués)"
+    },
     "jobs": [
       {
         "role": "Diseñador e Investigador de Innovación", "type": "Actual", "org": "CriaLab - Tecnopuc", "period": "2021 - Presente", "loc": "Porto Alegre, Brasil",

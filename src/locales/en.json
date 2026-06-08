@@ -44,6 +44,13 @@
     "header_label": "Professional Experience",
     "header_title": "Trajectory",
     "header_outline": "professional",
+    "aerolito": {
+      "role": "Head of Research",
+      "type": "Professional",
+      "period": "JUN 2026 — present",
+      "loc": "Porto Alegre, Brazil",
+      "bullets_disclaimer": "(team feedback in Portuguese)"
+    },
     "jobs": [
       {
         "role": "Innovation Designer and Researcher", "type": "Current", "org": "CriaLab - Tecnopuc", "period": "2021 - Present", "loc": "Porto Alegre, Brazil",

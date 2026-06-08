@@ -1,7 +1,7 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
-
 
 interface Job {
   role: string;
@@ -10,24 +10,49 @@ interface Job {
   period: string;
   loc: string;
   items: string[];
+  disclaimer?: string;
 }
 
 export default function Experience() {
   const { t } = useTranslation();
-  const jobs = t('experience.jobs', { returnObjects: true }) as Job[];
+  const jobs = t("experience.jobs", { returnObjects: true }) as Job[];
+  const [aerolitoBullets, setAerolitoBullets] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/aerolito-bullets")
+      .then((r) => r.ok ? r.json() : Promise.reject(new Error(`status ${r.status}`)))
+      .then((data: { bullets: string[] | null }) => {
+        if (!cancelled) setAerolitoBullets(data.bullets);
+      })
+      .catch(() => { if (!cancelled) setAerolitoBullets(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const aerolitoJob: Job | null = aerolitoBullets && aerolitoBullets.length > 0 ? {
+    role: t("experience.aerolito.role"),
+    type: t("experience.aerolito.type"),
+    org: "Aeroli.to",
+    period: t("experience.aerolito.period"),
+    loc: t("experience.aerolito.loc"),
+    items: aerolitoBullets,
+    disclaimer: t("experience.aerolito.bullets_disclaimer"),
+  } : null;
+
+  const allJobs: Job[] = aerolitoJob ? [aerolitoJob, ...jobs] : jobs;
 
   return (
     <section className="relative py-24 md:py-32 bg-card/30">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-30" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
-        <SectionHeader id="experiencia" label={t('experience.header_label')} title={t('experience.header_title')} titleOutline={t('experience.header_outline')} />
+        <SectionHeader id="experiencia" label={t("experience.header_label")} title={t("experience.header_title")} titleOutline={t("experience.header_outline")} />
 
         <div className="relative">
           {/* Timeline line */}
           <div className="absolute left-0 md:left-6 top-0 bottom-0 w-px bg-gradient-to-b from-neon/40 via-dim to-transparent" />
 
           <div className="space-y-8">
-            {jobs.map((job, i) => (
+            {allJobs.map((job, i) => (
               <Reveal key={i} delay={i * 0.08}>
                 <div className="relative pl-8 md:pl-16 group">
                   {/* Dot */}
@@ -53,6 +78,9 @@ export default function Experience() {
                         </li>
                       ))}
                     </ul>
+                    {job.disclaimer && (
+                      <p className="mt-3 font-mono text-[10px] text-muted-foreground/60 italic">{job.disclaimer}</p>
+                    )}
                   </div>
                 </div>
               </Reveal>
