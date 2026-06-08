@@ -124,12 +124,21 @@ export class AerolitoLiveChat {
     }
   }
 
+  /**
+   * Normaliza pronúncia: "Aeroli.to" / "aeroli.to" -> "Aerolito" / "aerolito".
+   * O ponto entre Aeroli e to faz o TTS pausar como se fosse "Aeroli ponto to";
+   * removendo, sai natural. Aplicado em todo texto enviado ao Live API.
+   */
+  private normalizePronunciation(text: string): string {
+    return text.replace(/aeroli\.to/gi, (match) => match[0] === "A" ? "Aerolito" : "aerolito");
+  }
+
   /** Envia texto do colega como user turn (modo normal). */
   public sendUserText(text: string): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
     this.ws.send(JSON.stringify({
       clientContent: {
-        turns: [{ role: "user", parts: [{ text }] }],
+        turns: [{ role: "user", parts: [{ text: this.normalizePronunciation(text) }] }],
         turnComplete: true,
       },
     }));
@@ -138,12 +147,13 @@ export class AerolitoLiveChat {
   /** Faz a IA falar exatamente este texto (sem geração — usado para as 5 perguntas fixas). */
   public sayFixed(text: string): void {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    const spoken = this.normalizePronunciation(text);
     // Instrução literal para a IA reproduzir o texto sem alterar.
     this.ws.send(JSON.stringify({
       clientContent: {
         turns: [{
           role: "user",
-          parts: [{ text: `Diga exatamente este texto, sem adicionar nada, sem comentar, sem trocar palavras: "${text}"` }],
+          parts: [{ text: `Diga exatamente este texto, sem adicionar nada, sem comentar, sem trocar palavras: "${spoken}"` }],
         }],
         turnComplete: true,
       },
