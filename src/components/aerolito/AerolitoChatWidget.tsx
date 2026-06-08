@@ -4,7 +4,7 @@ import { createInterviewController, type InterviewController } from "./AerolitoI
 
 interface Message { role: "user" | "model"; text: string }
 
-const WELCOME = "Olá! Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Vou começar com 5 perguntas rápidas pra entender o que vocês esperam de mim — depois a gente fica livre pra conversar sobre o que quiser sobre o Gui.";
+const WELCOME = "Olá! Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Como é o meu primeiro dia, gostaria de começar com 5 perguntas rápidas (leva uns 2 minutos) pra entender o que vocês esperam de mim — depois a gente fica livre pra conversar sobre o que quiser sobre o Gui.\n\nAs suas respostas serão salvas num banco de dados — totalmente anônimas. Então elas serão compiladas e, com a ajuda da IA, ajudarão a compor no meu site minhas funções aqui na aeroli.to :)\n\nDepois a gnt fica livre para conversar! pode perguntar qualquer coisa sobre mim :)";
 
 const MAX_MESSAGES = 30;
 
@@ -13,6 +13,7 @@ export default function AerolitoChatWidget() {
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<AerolitoLiveStatus>("disconnected");
   const [mode, setMode] = useState<"normal" | "interview">("normal");
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const liveRef = useRef<AerolitoLiveChat | null>(null);
   const interviewRef = useRef<InterviewController | null>(null);
   const currentModelMsgIdx = useRef<number | null>(null);
@@ -77,12 +78,21 @@ export default function AerolitoChatWidget() {
     interviewRef.current = createInterviewController({
       sayFixed: (t) => live.sayFixed(t),
       submitAnswer: async (payload) => {
-        const r = await fetch("/api/aerolito-submit", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!r.ok) throw new Error(`status ${r.status}`);
+        setSubmitStatus("saving");
+        try {
+          const r = await fetch("/api/aerolito-submit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!r.ok) throw new Error(`status ${r.status}`);
+          setSubmitStatus("saved");
+          setTimeout(() => setSubmitStatus((s) => (s === "saved" ? "idle" : s)), 2500);
+        } catch (err) {
+          setSubmitStatus("error");
+          setTimeout(() => setSubmitStatus((s) => (s === "error" ? "idle" : s)), 4500);
+          throw err;
+        }
       },
     });
     interviewRef.current.start(startStep);
@@ -138,7 +148,7 @@ export default function AerolitoChatWidget() {
       <div className="flex-1 overflow-y-auto px-4 py-4 bg-background/50">
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"} mb-3`}>
-            <div className={`max-w-[78%] px-3.5 py-2.5 rounded-md text-[13px] leading-relaxed font-sans ${msg.role === "user" ? "bg-neon text-background font-medium" : "bg-card border border-border text-muted-foreground"}`}>
+            <div className={`max-w-[78%] px-3.5 py-2.5 rounded-md text-[13px] leading-relaxed font-sans whitespace-pre-line ${msg.role === "user" ? "bg-neon text-background font-medium" : "bg-card border border-border text-muted-foreground"}`}>
               {msg.text}
             </div>
           </div>
@@ -147,7 +157,17 @@ export default function AerolitoChatWidget() {
       </div>
 
       <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-card/40">
-
+        {submitStatus !== "idle" && (
+          <p className={`font-mono text-[10px] uppercase tracking-[0.08em] mb-2 transition-opacity ${
+            submitStatus === "saving" ? "text-muted-foreground"
+              : submitStatus === "saved" ? "text-neon"
+              : "text-destructive"
+          }`}>
+            {submitStatus === "saving" && "⏳ Salvando resposta…"}
+            {submitStatus === "saved" && "✓ Resposta anônima salva"}
+            {submitStatus === "error" && "⚠ Não foi possível salvar. Tente novamente."}
+          </p>
+        )}
         <div className="flex items-center gap-2">
           <input
             type="text"

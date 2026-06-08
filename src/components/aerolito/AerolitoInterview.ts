@@ -76,7 +76,7 @@ export function createInterviewController(deps: InterviewDeps): InterviewControl
       if (idx >= AEROLITO_QUESTIONS.length) {
         step = "done";
         deps.sayFixed(
-          "Obrigado. Suas respostas vão me ajudar a desenhar como atuar nessa nova função. Quer continuar a conversa?",
+          "Pronto! Suas respostas vão me ajudar a desenhar como atuar na Aerolito. Agora pode me perguntar o que quiser sobre o Gui — pesquisa, trajetória, gostos, projetos. Manda ver.",
         );
         return;
       }
