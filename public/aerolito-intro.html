@@ -1042,16 +1042,16 @@
   }
   /* Pre-roll só aparece enquanto a classe phase-preroll está ativa */
   .slide.intro.phase-preroll .intro-preroll-1 {
-    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0s forwards;
+    animation: prerollWord 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0s forwards;
   }
   .slide.intro.phase-preroll .intro-preroll-2 {
-    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 1.8s forwards;
+    animation: prerollWord 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) 2.4s forwards;
   }
   .slide.intro.phase-preroll .intro-preroll-3 {
-    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 3.6s forwards;
+    animation: prerollWord 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) 4.8s forwards;
   }
   .slide.intro.phase-preroll .intro-preroll-4 {
-    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 5.4s forwards;
+    animation: prerollWord 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) 7.2s forwards;
   }
   @keyframes prerollWord {
     0%   { opacity: 0; transform: translateY(24px) scale(0.96); }
@@ -1844,7 +1844,7 @@
     }
 
     // === Partículas ===
-    const COUNT = window.innerWidth < 720 ? 900 : 1800;
+    const COUNT = window.innerWidth < 720 ? 600 : 1200;
     const positions  = new Float32Array(COUNT * 3);
     const prevPos    = new Float32Array(COUNT * 3); // pra trails na explosão
     const initials   = new Float32Array(COUNT * 3);
@@ -1918,7 +1918,7 @@
     // === Orquestração das fases ===
     // Pré-roll roda antes via CSS (4 frases × 1.8s = 7.2s).
     // Quando phase-preroll é removido, start() é chamado e animate() conta t=0 daqui.
-    const PRE_ROLL_DURATION = 7200;
+    const PRE_ROLL_DURATION = 9600;
     const T_FORM_END  = 8000;    // 0–8s:   convergir
     const T_HOLD_END  = 11000;   // 8–11s:  texto vibra (tensão antes do bang)
     const EXPLODE_END = 15000;   // 11–15s: BIG BANG
