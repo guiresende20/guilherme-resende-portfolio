@@ -1514,22 +1514,6 @@
     <div class="intro-shockwave" id="introShockwave"></div>
     <div class="intro-shockwave intro-shockwave-2" id="introShockwave2"></div>
     <div class="intro-shockwave intro-shockwave-3" id="introShockwave3"></div>
-    <div class="intro-manifest">
-      <h1 class="intro-title">IA do Gui</h1>
-      <p class="intro-tagline">Inovação como verbo transitivo direto.</p>
-      <div class="intro-body">
-        <div class="intro-stanza">
-          Um agente vivo, treinado na trajetória do Gui.<br>
-          Pesquisa, projetos, referências, jeito de pensar —<br>
-          tudo cabendo numa conversa.
-        </div>
-        <div class="intro-stanza">
-          Que <strong>escuta</strong> antes de responder.<br>
-          Que <strong>conecta, propõe e provoca</strong>.<br>
-          Que <strong>aterrissa</strong> no time da Aeroli.to.
-        </div>
-      </div>
-    </div>
   </section>
 
   <!-- ============ SLIDE 2 — CAPA ============ -->
@@ -1589,7 +1573,7 @@
   const introObserver = new MutationObserver(() => {
     if (introSlide.classList.contains('phase-fadeout') && current === 0) {
       // Aguarda o fade do canvas terminar antes de trocar de slide
-      setTimeout(() => { if (current === 0) show(1); }, 1200);
+      setTimeout(() => { if (current === 0) show(1); }, 2600);
       introObserver.disconnect();
     }
   });
@@ -1845,7 +1829,7 @@
       mctx.fillText(TEXT, MASK_W / 2, MASK_H / 2);
 
       const imgData = mctx.getImageData(0, 0, MASK_W, MASK_H).data;
-      const STEP = 4; // sample stride — menor = mais pontos
+      const STEP = 6; // sample stride — menor = mais pontos (4 era denso demais)
       for (let py = 0; py < MASK_H; py += STEP) {
         for (let px = 0; px < MASK_W; px += STEP) {
           const alpha = imgData[(py * MASK_W + px) * 4 + 3];
