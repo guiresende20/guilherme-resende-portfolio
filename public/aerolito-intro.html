@@ -1829,7 +1829,7 @@
       mctx.fillText(TEXT, MASK_W / 2, MASK_H / 2);
 
       const imgData = mctx.getImageData(0, 0, MASK_W, MASK_H).data;
-      const STEP = 6; // sample stride — menor = mais pontos (4 era denso demais)
+      const STEP = 8; // sample stride — menor = mais pontos (6 ainda denso)
       for (let py = 0; py < MASK_H; py += STEP) {
         for (let px = 0; px < MASK_W; px += STEP) {
           const alpha = imgData[(py * MASK_W + px) * 4 + 3];

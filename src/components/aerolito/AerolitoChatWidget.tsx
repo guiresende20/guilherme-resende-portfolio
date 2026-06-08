@@ -1,15 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { AerolitoLiveChat, type AerolitoLiveStatus } from "@/lib/aerolito-live";
 import { createInterviewController, type InterviewController } from "./AerolitoInterview";
-import { AEROLITO_QUESTIONS } from "./QUESTIONS";
 
 interface Message { role: "user" | "model"; text: string }
 
-const WELCOME = "Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Pergunta o que quiser — ou clique numa das 5 perguntas abaixo pra começar uma contribuição rápida sobre o que você espera de mim.";
-
-// As mesmas 5 perguntas usadas no modo entrevista — agora também aparecem
-// como sugestões iniciais. Clicar envia a pergunta à minha IA (modo normal).
-const SUGGESTIONS = AEROLITO_QUESTIONS;
+const WELCOME = "Olá! Sou o RAG do Gui, agora Head de Pesquisa na Aerolito. Vou começar com 5 perguntas rápidas pra entender o que vocês esperam de mim — depois a gente fica livre pra conversar sobre o que quiser sobre o Gui.";
 
 const MAX_MESSAGES = 30;
 
@@ -108,8 +103,17 @@ export default function AerolitoChatWidget() {
     }
   }
 
+  // Auto-start: assim que o chat monta, dispara a entrevista (Q1) sem precisar de
+  // botão. AudioContext é criado em startInterview→ensureLiveReady; o gesture
+  // que abriu o overlay (CTA da intro) ainda conta como user activation.
   useEffect(() => {
-    return () => { liveRef.current?.stop(); };
+    let cancelled = false;
+    (async () => {
+      if (cancelled) return;
+      await startInterview(1);
+    })();
+    return () => { cancelled = true; liveRef.current?.stop(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const interviewProgress = mode === "interview" && interviewRef.current
@@ -139,29 +143,11 @@ export default function AerolitoChatWidget() {
             </div>
           </div>
         ))}
-        {messages.length === 1 && mode === "normal" && (
-          <div className="mt-2">
-            <p className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-[0.08em] mb-2">
-              Clique pra começar a contribuir nessa pergunta (entrevista de 5)
-            </p>
-            <div className="flex flex-col gap-1.5">
-              {SUGGESTIONS.map((s, i) => (
-                <button key={s} onClick={() => startInterview(i + 1)} className="text-left font-mono text-[10px] text-muted-foreground border border-dim/60 px-3 py-1.5 rounded-sm hover:border-neon/30 hover:text-foreground transition-all">
-                  <span className="text-neon mr-2">{i + 1}.</span>{s}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
         <div ref={bottomRef} />
       </div>
 
       <div className="flex-shrink-0 px-4 py-3 border-t border-border bg-card/40">
-        {mode === "normal" && (
-          <button onClick={() => startInterview(1)} className="w-full mb-2 font-mono text-[11px] uppercase tracking-[0.06em] text-neon border border-neon/40 px-3 py-2 rounded-sm hover:bg-neon/10 transition-all">
-            🤝 Contribuir como colega Aerolito
-          </button>
-        )}
+
         <div className="flex items-center gap-2">
           <input
             type="text"
