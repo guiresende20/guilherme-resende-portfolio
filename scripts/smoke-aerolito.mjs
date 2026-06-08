@@ -41,7 +41,7 @@ async function main() {
   });
 
   await check("GET /api/aerolito-bullets returns JSON (bullets: null or array)", async () => {
-    const r = await fetch(`${baseUrl}/api/aerolito-bullets`);
+    const r = await fetch(`${baseUrl}/api/aerolito-bullets`, { headers: { "Origin": baseUrl } });
     if (!r.ok) throw new Error(`status ${r.status}`);
     const data = await r.json();
     if (!("bullets" in data)) throw new Error("missing bullets field");
