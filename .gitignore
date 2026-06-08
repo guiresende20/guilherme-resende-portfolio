@@ -24,3 +24,6 @@ screenshots-linkedin/
 # Local blog post drafts (uploaded to Drive, not committed here)
 /*.md
 !/README.md
+
+# Local reference HTML used to build /aerolito-intro.html (not committed)
+scripts/_aerolito-reference.html

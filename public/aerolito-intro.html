@@ -1,0 +1,2158 @@
+<!DOCTYPE html>
+<!-- saved from url=(0041)https://magical-bunny-7e2de0.netlify.app/ -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IA do Gui — Aerolito</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2300ff87'/%3E%3Cstop offset='0.5' stop-color='%2300aa55'/%3E%3Cstop offset='1' stop-color='%23003322'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='56' height='56' rx='12' fill='url(%23g)'/%3E%3Ctext x='32' y='46' font-family='Space Grotesk,Arial,sans-serif' font-weight='700' font-size='40' text-anchor='middle' fill='%23fff'%3EG%3C/text%3E%3C/svg%3E">
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./apresentacao_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #08080e;
+    --bg2: #0d0d18;
+    --blue: #00aa55;
+    --cyan: #00ff87;
+    --glass: rgba(20, 12, 28, 0.7);
+    --glass-border: rgba(0, 255, 135, 0.32);
+    --t-text: #FFFCFB;
+    --t-text-dim: rgba(227, 227, 228, 0.55);
+    --color-ocre: #ea982f;
+    --color-ocre-light: #f2b04d;
+    --color-purple-deep: #003322;
+    --color-purple-mid: #006644;
+    --color-purple-light: #00aa55;
+    --color-lilac: #00ff87;
+    --gradient-brand: linear-gradient(135deg, #003322 0%, #006644 55%, #00aa55 100%);
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 32px;
+    --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.45);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--t-text);
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ── Background hologáfico (network grid + glow) ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(0, 170, 85, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 70%, rgba(0, 170, 85, 0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 100%, rgba(0, 255, 135, 0.10) 0%, transparent 60%),
+      var(--bg);
+    z-index: -2;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 170, 85, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 170, 85, 0.04) 1px, transparent 1px);
+    background-size: 64px 64px;
+    z-index: -1;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  }
+
+  /* ── Deck ── */
+  .deck {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 56px 88px;
+    opacity: 0;
+    transform: translateX(40px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    pointer-events: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+  }
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  /* ── Header de cada slide ── */
+  .slide-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    animation: header-in 0.6s ease both;
+  }
+  @keyframes header-in {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .brand-t {
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    background: var(--gradient-brand);
+    display: grid;
+    place-items: center;
+    box-shadow: 0 0 24px rgba(0, 170, 85, 0.55), inset 0 0 12px rgba(255, 255, 255, 0.12);
+    position: relative;
+    overflow: hidden;
+  }
+  .brand-t::before {
+    content: 'T';
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    color: #fff;
+    text-shadow: 0 0 12px rgba(0, 255, 135, 0.65);
+  }
+  .brand-name {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .brand-name strong {
+    font-size: 18px;
+    letter-spacing: 0.02em;
+    color: var(--t-text);
+    font-weight: 600;
+  }
+  .brand-name span {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--cyan);
+    font-weight: 500;
+  }
+
+  .slide-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 12px;
+    color: var(--t-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+  }
+  .slide-meta .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    animation: dotPulse 2.4s ease infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+  }
+
+  /* ── Título ── */
+  .slide-title {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+    margin-bottom: 10px;
+    background: linear-gradient(120deg, #fff 0%, #00ff87 60%, #00aa55 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .slide-subtitle {
+    font-size: 18px;
+    color: var(--t-text-dim);
+    margin-bottom: 36px;
+    max-width: 760px;
+    line-height: 1.55;
+  }
+
+  /* ── Grids ── */
+  .grid {
+    display: grid;
+    gap: 18px;
+    flex: 1;
+    align-content: start;
+  }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+  /* ── Card ── */
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    animation: cardIn 0.55s ease both;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.6;
+  }
+  @media (hover: hover) {
+    .card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(0, 255, 135, 0.55);
+      box-shadow: 0 0 28px rgba(0, 170, 85, 0.18);
+    }
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .card:nth-child(1) { animation-delay: 0.05s; }
+  .card:nth-child(2) { animation-delay: 0.10s; }
+  .card:nth-child(3) { animation-delay: 0.15s; }
+  .card:nth-child(4) { animation-delay: 0.20s; }
+  .card:nth-child(5) { animation-delay: 0.25s; }
+  .card:nth-child(6) { animation-delay: 0.30s; }
+
+  .card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(0, 170, 85, 0.25), rgba(0, 170, 85, 0.25));
+    border: 1px solid rgba(0, 255, 135, 0.35);
+    display: grid;
+    place-items: center;
+    color: var(--cyan);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+  .card p {
+    font-size: 14px;
+    color: var(--t-text-dim);
+    line-height: 1.55;
+  }
+  .card ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .card ul li {
+    font-size: 13.5px;
+    color: var(--t-text-dim);
+    line-height: 1.7;
+    padding-left: 14px;
+    position: relative;
+  }
+  .card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 10px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(234, 152, 47, 0.12);
+    color: var(--color-ocre-light);
+    border: 1px solid rgba(234, 152, 47, 0.3);
+    margin-bottom: 12px;
+  }
+  .tag.purple {
+    background: rgba(0, 170, 85, 0.18);
+    color: var(--color-lilac);
+    border-color: rgba(0, 170, 85, 0.4);
+  }
+  .tag.cyan {
+    background: rgba(0, 255, 135, 0.10);
+    color: var(--cyan);
+    border-color: rgba(0, 255, 135, 0.35);
+  }
+
+  /* ── Stack tabela ── */
+  .stack-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    align-items: center;
+    padding: 16px 22px;
+    border-bottom: 1px solid rgba(0, 170, 85, 0.12);
+    gap: 24px;
+  }
+  .stack-row:last-child { border-bottom: 0; }
+  .stack-row .label {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--cyan);
+    font-weight: 500;
+  }
+  .stack-row .value {
+    font-size: 15px;
+    color: var(--t-text);
+    line-height: 1.55;
+  }
+  .stack-row code {
+    font-family: 'Space Grotesk', monospace;
+    background: rgba(0, 170, 85, 0.10);
+    border: 1px solid rgba(0, 170, 85, 0.20);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 13px;
+    color: #FFFCFB;
+    margin: 0 4px 4px 0;
+    display: inline-block;
+  }
+
+  /* ── Footer / nav ── */
+  .nav {
+    position: fixed;
+    bottom: 24px;
+    right: 32px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10;
+  }
+  .nav button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--t-text);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s ease;
+    font-size: 18px;
+    display: grid;
+    place-items: center;
+  }
+  .nav button:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 0 16px rgba(0, 255, 135, 0.35);
+  }
+  .nav .counter {
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    color: var(--t-text-dim);
+    text-transform: uppercase;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .progress {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: rgba(0, 170, 85, 0.08);
+    z-index: 20;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--cyan));
+    transition: width 0.4s ease;
+    box-shadow: 0 0 12px var(--cyan);
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 32px;
+    left: 32px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--t-text-dim);
+    z-index: 10;
+  }
+  .hint kbd {
+    background: rgba(0, 170, 85, 0.12);
+    border: 1px solid rgba(0, 170, 85, 0.25);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin: 0 4px;
+    font-family: inherit;
+    color: var(--cyan);
+  }
+
+  /* ── Layout específico do slide de stack ── */
+  .stack-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+    animation: cardIn 0.55s ease both;
+  }
+
+  /* ── Glossário ── */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+    flex: 1;
+    align-content: start;
+  }
+  .glossary-col {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: cardIn 0.55s ease both;
+  }
+  .glossary-col:nth-child(1) { animation-delay: 0.05s; }
+  .glossary-col:nth-child(2) { animation-delay: 0.10s; }
+  .glossary-col:nth-child(3) { animation-delay: 0.15s; }
+  .glossary-cat {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+    font-weight: 600;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 255, 135, 0.18);
+    margin-bottom: 4px;
+  }
+  .glossary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(0, 170, 85, 0.10);
+  }
+  .glossary-item:last-child { border-bottom: 0; }
+  .glossary-item dt {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -0.005em;
+  }
+  .glossary-item dt em {
+    font-size: 11px;
+    color: var(--t-text-dim);
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 400;
+    margin-left: 6px;
+  }
+  .glossary-item dd {
+    font-size: 12.5px;
+    color: var(--t-text-dim);
+    line-height: 1.55;
+  }
+
+  /* ── Card com detalhamento ── */
+  .card[data-detail] {
+    cursor: pointer;
+  }
+  .card[data-detail]::after {
+    content: '+';
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 135, 0.4);
+    color: var(--cyan);
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    background: rgba(0, 255, 135, 0.06);
+    transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+  }
+  @media (hover: hover) {
+    .card[data-detail]:hover::after {
+      transform: rotate(90deg) scale(1.1);
+      background: rgba(0, 255, 135, 0.18);
+      box-shadow: 0 0 14px rgba(0, 255, 135, 0.45);
+    }
+  }
+
+  /* ── Detail overlay ── */
+  .detail-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    pointer-events: none;
+  }
+  .detail-overlay.open {
+    display: flex;
+    pointer-events: auto;
+  }
+  .detail-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 14, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: backdropIn 0.28s ease both;
+  }
+  @keyframes backdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .detail-modal {
+    position: relative;
+    max-width: 640px;
+    width: 100%;
+    max-height: calc(100vh - 64px);
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(58, 36, 95, 0.94) 0%, rgba(8, 11, 22, 0.96) 100%);
+    border: 1px solid rgba(0, 255, 135, 0.32);
+    border-radius: var(--radius-xl);
+    padding: 36px 40px 32px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), 0 0 60px rgba(0, 170, 85, 0.18);
+    animation: modalIn 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)    scale(1); }
+  }
+  .detail-modal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.7;
+  }
+  .detail-tag {
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: rgba(0, 255, 135, 0.10);
+    color: var(--cyan);
+    border: 1px solid rgba(0, 255, 135, 0.35);
+    margin-bottom: 16px;
+  }
+  .detail-title {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    color: #fff;
+    margin-bottom: 18px;
+    background: linear-gradient(120deg, #fff 0%, #00ff87 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .detail-body {
+    font-size: 14.5px;
+    color: var(--t-text-dim);
+    line-height: 1.7;
+    margin-bottom: 22px;
+  }
+  .detail-body p { margin-bottom: 12px; }
+  .detail-body p:last-child { margin-bottom: 0; }
+  .detail-body code {
+    font-family: 'Space Grotesk', monospace;
+    background: rgba(0, 170, 85, 0.10);
+    border: 1px solid rgba(0, 170, 85, 0.20);
+    border-radius: 5px;
+    padding: 1px 7px;
+    font-size: 13px;
+    color: #FFFCFB;
+  }
+  .detail-body strong { color: #FFFCFB; font-weight: 600; }
+  .detail-why {
+    margin-top: 8px;
+    padding: 18px 20px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, rgba(234, 152, 47, 0.10), rgba(0, 170, 85, 0.10));
+    border: 1px solid rgba(234, 152, 47, 0.32);
+  }
+  .detail-why-label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--color-ocre-light);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .detail-why-text {
+    font-size: 14px;
+    color: #F9D4C5;
+    line-height: 1.65;
+  }
+  .detail-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #E3E3E4;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s ease;
+  }
+  .detail-close:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 255, 135, 0.12);
+  }
+
+  /* ── Zoom modal: amplia qualquer card clicado (cards sem data-detail) ── */
+  .zoom-trigger { cursor: pointer; }
+  .zoom-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    pointer-events: none;
+  }
+  .zoom-overlay.open {
+    display: flex;
+    pointer-events: auto;
+  }
+  .zoom-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 14, 0.78);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    animation: zoomBackdropIn 0.32s ease both;
+  }
+  @keyframes zoomBackdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .zoom-card {
+    position: relative;
+    max-width: 780px;
+    width: 100%;
+    max-height: calc(100vh - 96px);
+    max-height: calc(100dvh - 96px);
+    overflow-y: auto;
+    background: linear-gradient(180deg, rgba(58, 36, 95, 0.96) 0%, rgba(8, 11, 22, 0.97) 100%);
+    border: 1px solid rgba(0, 255, 135, 0.42);
+    border-radius: var(--radius-xl);
+    padding: 56px 60px 48px;
+    box-shadow:
+      0 40px 100px rgba(0, 0, 0, 0.65),
+      0 0 80px rgba(0, 170, 85, 0.32);
+    animation: zoomCardIn 0.42s cubic-bezier(0.18, 0.85, 0.25, 1.08) both;
+  }
+  @keyframes zoomCardIn {
+    from { opacity: 0; transform: scale(0.55) translateY(32px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0); }
+  }
+  .zoom-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.8;
+  }
+  /* Conteúdo clonado renderizado em tamanho ampliado */
+  .zoom-card .card-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    font-size: 28px;
+    margin-bottom: 24px;
+  }
+  .zoom-card .tag {
+    font-size: 14px;
+    padding: 6px 16px;
+    letter-spacing: 0.22em;
+    margin-bottom: 20px;
+  }
+  .zoom-card h3 {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin-bottom: 18px;
+    line-height: 1.1;
+    background: linear-gradient(120deg, #FFFCFB 0%, #00ff87 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .zoom-card p {
+    font-size: 20px;
+    line-height: 1.65;
+    color: #E3E3E4;
+    margin-bottom: 14px;
+    animation: none !important;
+  }
+  .zoom-card ul {
+    margin-top: 18px;
+    list-style: none;
+  }
+  .zoom-card ul li {
+    font-size: 18px;
+    line-height: 1.7;
+    padding-left: 22px;
+    position: relative;
+    color: #E3E3E4;
+    margin-bottom: 6px;
+  }
+  .zoom-card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 13px;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+  .zoom-card strong, .zoom-card b {
+    color: #FFFCFB;
+    font-weight: 600;
+  }
+  .zoom-card code {
+    font-family: 'Space Grotesk', monospace;
+    background: rgba(0, 170, 85, 0.12);
+    border: 1px solid rgba(0, 170, 85, 0.22);
+    border-radius: 6px;
+    padding: 2px 10px;
+    font-size: 17px;
+    color: #FFFCFB;
+  }
+  .zoom-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #E3E3E4;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.25s ease, background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+    z-index: 2;
+  }
+  .zoom-close:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: rgba(0, 255, 135, 0.18);
+    transform: rotate(90deg);
+  }
+
+  /* ── Cover slide (capa) ── */
+  .slide.cover {
+    align-items: center;
+    justify-content: center;
+    padding: 0 48px;
+    overflow: hidden;
+  }
+  .cover-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .cover-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 22px;
+    animation: coverIn 0.9s ease both;
+  }
+  @keyframes coverIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .cover-t {
+    width: 140px;
+    height: 140px;
+    border-radius: 28px;
+    background: var(--gradient-brand);
+    display: grid;
+    place-items: center;
+    box-shadow:
+      0 0 80px rgba(0, 170, 85, 0.55),
+      0 0 32px rgba(0, 255, 135, 0.4),
+      inset 0 0 24px rgba(255, 255, 255, 0.12);
+    animation: coverTPulse 4.2s ease-in-out infinite;
+  }
+  .cover-t::before {
+    content: 'T';
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 96px;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(0, 255, 135, 0.75), 0 0 40px rgba(0, 170, 85, 0.55);
+  }
+  @keyframes coverTPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.04); }
+  }
+  .cover-title {
+    font-size: 84px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    background: linear-gradient(120deg, #fff 0%, #00ff87 50%, #00aa55 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-top: 6px;
+  }
+  .cover-subtitle {
+    font-size: 19px;
+    color: var(--t-text-dim);
+    max-width: 600px;
+    line-height: 1.55;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--t-text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    margin-top: 10px;
+  }
+  .cover-meta .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+    animation: dotPulse 2.4s ease infinite;
+  }
+  .cover-cta {
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.28em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0.92;
+  }
+  .cover-cta kbd {
+    background: rgba(0, 255, 135, 0.12);
+    border: 1px solid rgba(0, 255, 135, 0.4);
+    border-radius: 4px;
+    padding: 2px 10px;
+    color: var(--cyan);
+    font-family: inherit;
+    letter-spacing: 0;
+    font-size: 13px;
+    animation: ctaArrow 1.6s ease-in-out infinite;
+  }
+  @keyframes ctaArrow {
+    0%, 100% { transform: translateX(0); }
+    50%      { transform: translateX(5px); }
+  }
+
+  /* ── Network global de fundo (atrás dos slides, acima do body bg) ── */
+  .bg-network {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  body[data-mode] .bg-network { opacity: 0.42; }
+  /* Deck precisa ficar acima do canvas pra conteúdo aparecer na frente */
+  .deck { z-index: 1; }
+
+  /* ── T 3D na capa (CSS extrudado) ── */
+  .cover-t-3d {
+    width: 180px;
+    height: 180px;
+    perspective: 900px;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  /* Halo radial pulsante */
+  .cover-t-3d::after {
+    content: '';
+    position: absolute;
+    inset: -90px;
+    background: radial-gradient(circle, rgba(0, 255, 135, 0.45) 0%, rgba(0, 170, 85, 0.28) 30%, rgba(85, 37, 131, 0.18) 55%, transparent 75%);
+    pointer-events: none;
+    z-index: -1;
+    animation: tHaloPulse 3.8s ease-in-out infinite;
+    filter: blur(2px);
+  }
+  /* Anel orbital rotativo (halo "sólido") */
+  .cover-t-3d::before {
+    content: '';
+    position: absolute;
+    inset: -28px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 255, 135, 0.5);
+    box-shadow:
+      0 0 24px rgba(0, 170, 85, 0.4) inset,
+      0 0 36px rgba(0, 255, 135, 0.35);
+    pointer-events: none;
+    animation: tRingSpin 9s linear infinite;
+    mask: conic-gradient(from 0deg, transparent 0deg, #000 40deg, #000 320deg, transparent 360deg);
+    -webkit-mask: conic-gradient(from 0deg, transparent 0deg, #000 40deg, #000 320deg, transparent 360deg);
+  }
+  @keyframes tHaloPulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.12); }
+  }
+  @keyframes tRingSpin {
+    from { transform: rotate(0deg);   }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ── Slide intro (manifesto + Three.js) ── */
+  .slide.intro {
+    padding: 0;
+    overflow: hidden;
+  }
+  .intro-three-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  /* Flash do big bang: clarão central que expande e some */
+  .intro-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: radial-gradient(circle at center,
+      rgba(255,255,255,0.95) 0%,
+      rgba(255, 252, 251,0.85) 8%,
+      rgba(0, 255, 135,0.55) 22%,
+      rgba(0, 170, 85,0.25) 40%,
+      transparent 70%);
+    opacity: 0;
+    transform: scale(0.15);
+    pointer-events: none;
+    mix-blend-mode: screen;
+    filter: blur(2px);
+  }
+  .slide.intro.phase-bang .intro-flash {
+    animation: introFlash 1.6s cubic-bezier(0.15, 0.7, 0.25, 1) forwards;
+  }
+  @keyframes introFlash {
+    0%   { opacity: 0;   transform: scale(0.15); }
+    8%   { opacity: 1;   transform: scale(1.0); }
+    28%  { opacity: 0.85; transform: scale(1.6); }
+    100% { opacity: 0;   transform: scale(2.8); }
+  }
+  /* Pre-roll: 3 frases gigantes antes da animação começar */
+  .intro-preroll {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .intro-preroll-word {
+    position: absolute;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: clamp(28px, 5.2vw, 72px);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-align: center;
+    max-width: 90vw;
+    background: linear-gradient(120deg, #fff 0%, #00ff87 50%, #00aa55 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    transform: translateY(24px);
+    text-shadow: 0 0 80px rgba(0, 255, 135, 0.45);
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+  }
+  /* Pre-roll só aparece enquanto a classe phase-preroll está ativa */
+  .slide.intro.phase-preroll .intro-preroll-1 {
+    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 0s forwards;
+  }
+  .slide.intro.phase-preroll .intro-preroll-2 {
+    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 1.8s forwards;
+  }
+  .slide.intro.phase-preroll .intro-preroll-3 {
+    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 3.6s forwards;
+  }
+  .slide.intro.phase-preroll .intro-preroll-4 {
+    animation: prerollWord 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) 5.4s forwards;
+  }
+  @keyframes prerollWord {
+    0%   { opacity: 0; transform: translateY(24px) scale(0.96); }
+    18%  { opacity: 1; transform: translateY(0)    scale(1); }
+    78%  { opacity: 1; transform: translateY(0)    scale(1); }
+    100% { opacity: 0; transform: translateY(-12px) scale(1.02); }
+  }
+  .slide.intro:not(.phase-preroll) .intro-preroll {
+    display: none;
+  }
+
+  /* Shockwaves: anéis em expansão */
+  .intro-shockwave {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 120px;
+    height: 120px;
+    margin: -60px 0 0 -60px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 255, 135, 0.9);
+    box-shadow:
+      0 0 50px rgba(0, 255, 135, 0.55),
+      0 0 100px rgba(0, 170, 85, 0.3),
+      inset 0 0 30px rgba(255, 255, 255, 0.35);
+    opacity: 0;
+    transform: scale(0.05);
+    pointer-events: none;
+    z-index: 2;
+    will-change: transform, opacity;
+  }
+  .slide.intro.phase-bang .intro-shockwave {
+    animation: shockwave 2.4s cubic-bezier(0.15, 0.85, 0.3, 1) forwards;
+  }
+  .slide.intro.phase-bang .intro-shockwave-2 {
+    animation: shockwave 2.8s cubic-bezier(0.2, 0.9, 0.3, 1) 0.25s forwards;
+    border-color: rgba(0, 170, 85, 0.7);
+    border-width: 1.5px;
+  }
+  /* Onda secundária: eco da detonação, sutil e mais lenta */
+  .slide.intro.phase-bang .intro-shockwave-3 {
+    animation: shockwave 3.2s cubic-bezier(0.25, 0.95, 0.35, 1) 0.7s forwards;
+    border-color: rgba(0, 255, 135, 0.5);
+    border-width: 1px;
+    box-shadow:
+      0 0 30px rgba(0, 255, 135, 0.4),
+      inset 0 0 18px rgba(255, 255, 255, 0.2);
+  }
+  @keyframes shockwave {
+    0%   { opacity: 0;    transform: scale(0.05); }
+    12%  { opacity: 1;    transform: scale(1.0); }
+    100% { opacity: 0;    transform: scale(50); }
+  }
+  .intro-manifest {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 56px 88px;
+    pointer-events: none;
+  }
+  .intro-title {
+    font-size: 78px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    background: linear-gradient(120deg, #fff 0%, #00ff87 50%, #00aa55 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    margin-bottom: 18px;
+  }
+  .intro-tagline {
+    font-size: 22px;
+    font-style: italic;
+    color: var(--cyan);
+    letter-spacing: 0.005em;
+    line-height: 1.4;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    margin-bottom: 36px;
+    max-width: 720px;
+    text-shadow: 0 0 18px rgba(0, 255, 135, 0.4);
+  }
+  .intro-body {
+    font-size: 17px;
+    color: var(--t-text-dim);
+    line-height: 1.75;
+    max-width: 640px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .intro-body strong {
+    color: #FFFCFB;
+    font-weight: 600;
+  }
+  .intro-body .intro-stanza {
+    margin-bottom: 14px;
+  }
+  .intro-body .intro-stanza:last-child {
+    margin-bottom: 0;
+  }
+  .intro-anywhere {
+    margin-top: 26px;
+    font-size: 13px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #00ff87;
+    text-shadow: 0 0 14px rgba(0, 255, 135, 0.45);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  /* Fases reveladas progressivamente via classes adicionadas pelo JS */
+  .slide.intro.phase-title  .intro-title    { opacity: 1; transform: translateY(0); }
+  .slide.intro.phase-tag    .intro-tagline  { opacity: 1; transform: translateY(0); }
+  .slide.intro.phase-body   .intro-body     { opacity: 1; transform: translateY(0); }
+  .slide.intro.phase-any    .intro-anywhere { opacity: 1; transform: translateY(0); }
+  .intro-three-canvas {
+    transition: opacity 1.4s ease;
+  }
+  .slide.intro.phase-fadeout .intro-three-canvas { opacity: 0; }
+
+  @media (max-width: 720px) {
+    .intro-manifest { padding: 22px 18px 96px; }
+    .intro-title    { font-size: 44px; }
+    .intro-tagline  { font-size: 16px; margin-bottom: 22px; }
+    .intro-body     { font-size: 14px; line-height: 1.65; }
+    .intro-anywhere { font-size: 11px; letter-spacing: 0.22em; }
+  }
+
+  /* ── Toggle de modo fixo (top-right, visível em todos os slides) ── */
+  .mode-toggle {
+    position: fixed;
+    top: 16px;
+    right: 24px;
+    z-index: 30;
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+  .mode-toggle-btn {
+    border: 0;
+    background: transparent;
+    color: var(--t-text-dim);
+    font-family: inherit;
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease;
+    white-space: nowrap;
+  }
+  .mode-toggle-btn:hover {
+    color: var(--t-text);
+  }
+  .mode-toggle-btn.is-active {
+    background: linear-gradient(135deg, rgba(0, 170, 85, 0.35), rgba(0, 255, 135, 0.25));
+    color: #fff;
+    box-shadow: 0 0 14px rgba(0, 255, 135, 0.3);
+  }
+  @media (max-width: 720px) {
+    .mode-toggle { top: 10px; right: 10px; }
+    .mode-toggle-btn { font-size: 10px; padding: 6px 10px; letter-spacing: 0.04em; }
+  }
+  .cover-t-3d-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform: rotateY(-12deg) rotateX(8deg);
+    transition: transform 0.22s cubic-bezier(0.2, 0.7, 0.2, 1);
+    animation: coverTFloat 6s ease-in-out infinite alternate;
+  }
+  .cover-t-3d-inner.tilting {
+    animation: none;
+  }
+  @keyframes coverTFloat {
+    from { transform: rotateY(-18deg) rotateX(10deg); }
+    to   { transform: rotateY(14deg)  rotateX(-4deg); }
+  }
+  .t-face {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 152px;
+    line-height: 1;
+    color: rgba(0, 255, 135, var(--o, 0.5));
+    text-shadow: 0 0 10px rgba(0, 255, 135, calc(var(--o, 0.5) * 0.55));
+    transform: translateZ(var(--z, 0px));
+    user-select: none;
+    pointer-events: none;
+  }
+  .t-face-front {
+    color: #fff;
+    text-shadow:
+      0 0 22px rgba(0, 255, 135, 0.85),
+      0 0 50px rgba(0, 170, 85, 0.55),
+      0 0 80px rgba(0, 170, 85, 0.45);
+  }
+
+  /* ── Seletor de modo (capa) ── */
+  .mode-selector {
+    display: flex;
+    gap: 18px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: coverIn 1.1s ease both;
+    animation-delay: 0.3s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  .mode-button {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 18px 26px;
+    border-radius: 14px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    text-align: left;
+    min-width: 270px;
+    font-family: inherit;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+  }
+  .mode-button::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0.55;
+  }
+  .mode-button:hover {
+    transform: translateY(-3px);
+    border-color: var(--cyan);
+    box-shadow: 0 0 32px rgba(0, 255, 135, 0.28);
+  }
+  .mode-button-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .mode-button-icon {
+    color: var(--cyan);
+    font-size: 18px;
+  }
+  .mode-button-title {
+    color: #fff;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .mode-button-desc {
+    color: var(--t-text-dim);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .mode-button-kbd {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    opacity: 0.75;
+  }
+
+  /* ── CTA da capa ── */
+  .aerolito-cta {
+    display: inline-block;
+    margin-top: 28px;
+    padding: 14px 32px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #00ff87;
+    background: transparent;
+    border: 1px solid rgba(0, 255, 135, 0.4);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: coverIn 1.1s ease both;
+    animation-delay: 0.35s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+  }
+  .aerolito-cta:hover {
+    background: rgba(0, 255, 135, 0.08);
+    border-color: rgba(0, 255, 135, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 0 24px rgba(0, 255, 135, 0.2);
+  }
+
+  /* ── Mobile do seletor + T 3D ── */
+  @media (max-width: 720px) {
+    .cover-t-3d { width: 130px; height: 130px; }
+    .t-face { font-size: 108px; }
+    .mode-selector { flex-direction: column; gap: 12px; margin-top: 22px; }
+    .mode-button { min-width: 0; width: 100%; padding: 14px 18px; }
+  }
+
+  /* ── Tablet ── */
+  @media (max-width: 1024px) {
+    .slide {
+      padding: 40px 48px 96px;
+    }
+    .slide-title { font-size: 44px; }
+    .slide-subtitle { font-size: 16px; margin-bottom: 28px; }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .glossary-grid { grid-template-columns: repeat(2, 1fr); gap: 22px; }
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 720px) {
+    .slide {
+      padding: 22px 18px 96px;
+    }
+    .slide-header {
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .brand { gap: 10px; }
+    .brand-t { width: 36px; height: 36px; border-radius: 8px; }
+    .brand-t::before { font-size: 22px; }
+    .brand-name strong { font-size: 14px; letter-spacing: 0.04em; }
+    .brand-name span { font-size: 9px; letter-spacing: 0.16em; }
+
+    .slide-meta {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      gap: 10px;
+    }
+
+    .slide-title {
+      font-size: 30px;
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .slide-subtitle {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .grid { gap: 14px; }
+    .grid-2,
+    .grid-3,
+    .grid-4 { grid-template-columns: 1fr; }
+    .glossary-grid { grid-template-columns: 1fr; gap: 18px; }
+
+    .card { padding: 18px 18px 20px; border-radius: 16px; }
+    .card-icon { width: 34px; height: 34px; font-size: 16px; margin-bottom: 12px; }
+    .card h3 { font-size: 16px; margin-bottom: 6px; }
+    .card p { font-size: 13.5px; line-height: 1.55; }
+    .card ul li { font-size: 13px; line-height: 1.6; }
+    .tag { font-size: 10px; letter-spacing: 0.14em; padding: 3px 8px; }
+
+    .stack-row {
+      grid-template-columns: 1fr;
+      gap: 6px;
+      padding: 14px 16px;
+    }
+    .stack-row .label { font-size: 11px; letter-spacing: 0.16em; }
+    .stack-row .value { font-size: 13.5px; line-height: 1.6; }
+    .stack-row code { font-size: 12px; }
+
+    .nav {
+      bottom: 16px;
+      right: 50%;
+      transform: translateX(50%);
+      gap: 10px;
+    }
+    .nav button { width: 44px; height: 44px; font-size: 20px; }
+    .nav .counter { font-size: 11px; min-width: 50px; }
+
+    .hint {
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      white-space: nowrap;
+    }
+    .hint kbd { display: none; }
+    .hint::before { content: 'Deslize para navegar'; }
+    .hint .kbd-only { display: none; }
+
+    /* Cover mobile */
+    .slide.cover { padding: 0 22px; }
+    .cover-content { gap: 16px; }
+    .cover-t { width: 92px; height: 92px; border-radius: 20px; }
+    .cover-t::before { font-size: 60px; }
+    .cover-title { font-size: 42px; }
+    .cover-subtitle { font-size: 14px; line-height: 1.5; max-width: 100%; }
+    .cover-meta { font-size: 10px; letter-spacing: 0.18em; gap: 10px; }
+    .cover-cta { font-size: 10px; letter-spacing: 0.22em; margin-top: 20px; }
+  }
+
+  /* Print */
+  @media print {
+    body::before, body::after, .nav, .hint, .progress { display: none !important; }
+    .deck { height: auto; }
+    .slide {
+      position: relative;
+      page-break-after: always;
+      opacity: 1 !important;
+      transform: none !important;
+      height: 100vh;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas class="bg-network" id="bgNetwork"></canvas>
+
+<div class="deck" id="deck">
+
+  <!-- ============ SLIDE 1 — INTRO / MANIFESTO ============ -->
+  <section class="slide intro active phase-preroll" data-slide="1" id="introSlide">
+    <div class="intro-preroll" id="introPreroll">
+      <span class="intro-preroll-word intro-preroll-1">Oi, eu sou o Gui.</span>
+      <span class="intro-preroll-word intro-preroll-2">Para mim, inovação deveria ser um verbo transitivo direto,</span>
+      <span class="intro-preroll-word intro-preroll-3">tem que ser posta em prática.</span>
+      <span class="intro-preroll-word intro-preroll-4">Estou muito empolgado por entrar no time da Aeroli.to.</span>
+    </div>
+    <canvas class="intro-three-canvas" id="introCanvas"></canvas>
+    <div class="intro-flash" id="introFlash"></div>
+    <div class="intro-shockwave" id="introShockwave"></div>
+    <div class="intro-shockwave intro-shockwave-2" id="introShockwave2"></div>
+    <div class="intro-shockwave intro-shockwave-3" id="introShockwave3"></div>
+    <div class="intro-manifest">
+      <h1 class="intro-title">IA do Gui</h1>
+      <p class="intro-tagline">Inovação como verbo transitivo direto.</p>
+      <div class="intro-body">
+        <div class="intro-stanza">
+          Um agente vivo, treinado na trajetória do Gui.<br>
+          Pesquisa, projetos, referências, jeito de pensar —<br>
+          tudo cabendo numa conversa.
+        </div>
+        <div class="intro-stanza">
+          Que <strong>escuta</strong> antes de responder.<br>
+          Que <strong>conecta, propõe e provoca</strong>.<br>
+          Que <strong>aterrissa</strong> no time da Aeroli.to.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2 — CAPA ============ -->
+  <section class="slide cover" data-slide="2">
+    <div class="cover-content">
+      <div class="cover-t-3d" id="coverT3D">
+        <div class="cover-t-3d-inner" id="coverT3DInner">
+          <span class="t-face" style="--z:-24px; --o:0.16;">G</span>
+          <span class="t-face" style="--z:-18px; --o:0.26;">G</span>
+          <span class="t-face" style="--z:-12px; --o:0.38;">G</span>
+          <span class="t-face" style="--z:-6px;  --o:0.55;">G</span>
+          <span class="t-face" style="--z:0px;   --o:0.78;">G</span>
+          <span class="t-face t-face-front" style="--z:6px; --o:1;">G</span>
+        </div>
+      </div>
+      <h1 class="cover-title">IA do Gui</h1>
+      <p class="cover-subtitle">
+        Sou uma IA baseada na trajetória, no pensamento e na forma de atuação do Gui. Pergunta o que quiser — minha voz é o RAG dele, alimentado por anos de pesquisa, projetos e referências. Você também pode contribuir com 5 perguntas curtas sobre o que espera de mim como Head de Pesquisa na Aeroli.to.
+      </p>
+      <div class="cover-meta">
+        <span class="dot"></span>
+        <span>Apresentação · time Aeroli.to · 2026</span>
+      </div>
+      <button class="aerolito-cta" id="aerolitoCTA" type="button">
+        ↓ Iniciar conversa
+      </button>
+    </div>
+  </section>
+
+
+</div>
+
+
+<script>
+  /* ── Navegação simplificada: só intro → capa ── */
+  const introSlide = document.getElementById('introSlide');
+  const coverSlide = document.querySelector('section.cover');
+  const visible = [introSlide, coverSlide];
+  let current = 0;
+
+  function show(i) {
+    const total = visible.length;
+    current = Math.max(0, Math.min(total - 1, i));
+    visible.forEach((s, idx) => s.classList.toggle('active', idx === current));
+  }
+
+  function advance() {
+    // Se animação ainda não chegou no fim, pula direto pro estado final
+    if (current === 0 && introSlide && !introSlide.classList.contains('phase-cta')) {
+      if (typeof window.__introSkip === 'function') window.__introSkip();
+      return;
+    }
+    show(current + 1);
+  }
+
+  // Auto-transição: assim que o slide intro entra em phase-fadeout, ativa a capa
+  const introObserver = new MutationObserver(() => {
+    if (introSlide.classList.contains('phase-fadeout') && current === 0) {
+      // Aguarda o fade do canvas terminar antes de trocar de slide
+      setTimeout(() => { if (current === 0) show(1); }, 1200);
+      introObserver.disconnect();
+    }
+  });
+  introObserver.observe(introSlide, { attributes: true, attributeFilter: ['class'] });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { advance(); return; }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(current - 1);
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(visible.length - 1);
+  });
+
+  // Swipe horizontal em telas com toque
+  let touchStartX = 0;
+  let touchStartY = 0;
+  const deck = document.getElementById('deck');
+  deck.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+  deck.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    const dy = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) advance();
+      else show(current - 1);
+    }
+  }, { passive: true });
+
+  show(0);
+
+  // CTA → posta evento pro parent (React wrapper escuta e dispara onDone)
+  document.getElementById('aerolitoCTA')?.addEventListener('click', () => {
+    window.parent?.postMessage({ type: 'aerolito-intro-done' }, '*');
+  });
+
+  /* ── T 3D: tilt no mouse (capa) ── */
+  (function () {
+    const inner = document.getElementById('coverT3DInner');
+    if (!inner) return;
+    let resetTimer = null;
+
+    coverSlide.addEventListener('mousemove', (e) => {
+      const rect = coverSlide.getBoundingClientRect();
+      const dx = (e.clientX - (rect.left + rect.width / 2)) / rect.width;
+      const dy = (e.clientY - (rect.top + rect.height / 2)) / rect.height;
+      const ry = Math.max(-30, Math.min(30, dx * 38));
+      const rx = Math.max(-22, Math.min(22, -dy * 26));
+      inner.classList.add('tilting');
+      inner.style.transform = 'rotateY(' + ry + 'deg) rotateX(' + rx + 'deg)';
+      clearTimeout(resetTimer);
+    });
+    coverSlide.addEventListener('mouseleave', () => {
+      resetTimer = setTimeout(() => {
+        inner.classList.remove('tilting');
+        inner.style.transform = '';
+      }, 200);
+    });
+  })();
+
+  /* ── Network global de partículas (sempre rodando, fundo) ── */
+  (function () {
+    const canvas = document.getElementById('bgNetwork');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    // Mouse reactivity: atração sutil + damping pra não acumular momento.
+    // O `mouseMoving` é setado a true por ~120ms a cada mousemove, depois cai
+    // pra false. Sem isso, parar o mouse não pararia a "perseguição" — o cursor
+    // continuaria atraindo até a partícula chegar perto.
+    let mouseX = -9999, mouseY = -9999;
+    let mouseMoving = false;
+    let mouseMoveTimer = null;
+    const MOUSE_RADIUS    = 110;
+    const MOUSE_RADIUS_SQ = MOUSE_RADIUS * MOUSE_RADIUS;
+    const MOUSE_FORCE     = 0.035;    // ~5x mais fraca que antes (0.18 → 0.035)
+    const NATURAL_SPEED   = 0.40;     // velocidade-alvo de cruzeiro
+    const DAMPING         = 0.96;     // só aplicado quando partícula tá acima da natural
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      mouseMoving = true;
+      clearTimeout(mouseMoveTimer);
+      mouseMoveTimer = setTimeout(() => { mouseMoving = false; }, 120);
+    });
+    window.addEventListener('mouseleave', () => { mouseMoving = false; });
+    window.addEventListener('blur',       () => { mouseMoving = false; });
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = window.innerWidth * dpr;
+      canvas.height = window.innerHeight * dpr;
+      canvas.style.width = window.innerWidth + 'px';
+      canvas.style.height = window.innerHeight + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function init() {
+      // ~3× mais partículas que antes (38→100 mobile, 72→180 desktop)
+      const w = window.innerWidth;
+      const count = w < 720 ? 100 : (w < 1280 ? 140 : 180);
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        vx: (Math.random() - 0.5) * 0.32,
+        vy: (Math.random() - 0.5) * 0.32,
+        r: Math.random() * 1.6 + 0.6,
+      }));
+    }
+
+    function tick() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      ctx.clearRect(0, 0, w, h);
+      const linkDist = w < 720 ? 120 : 160;
+      const linkDistSq = linkDist * linkDist;
+
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        // Mouse reactivity: só aplica força enquanto o mouse está se MOVENDO.
+        // Quando para, força some — partícula desacelera naturalmente via damping.
+        if (mouseMoving) {
+          const mdx = mouseX - p.x;
+          const mdy = mouseY - p.y;
+          const md2 = mdx * mdx + mdy * mdy;
+          if (md2 < MOUSE_RADIUS_SQ && md2 > 1) {
+            const md = Math.sqrt(md2);
+            const force = (1 - md / MOUSE_RADIUS) * MOUSE_FORCE;
+            p.vx += (mdx / md) * force;
+            p.vy += (mdy / md) * force;
+          }
+        }
+        // Damping: quando partícula está ACIMA da velocidade natural, desacelera.
+        // Partículas em cruzeiro natural não são afetadas. Isso evita acumular
+        // momento ao longo do tempo (queixa de performance).
+        const vmag2 = p.vx * p.vx + p.vy * p.vy;
+        if (vmag2 > NATURAL_SPEED * NATURAL_SPEED) {
+          p.vx *= DAMPING;
+          p.vy *= DAMPING;
+        }
+
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const q = particles[j];
+          const dx = q.x - p.x;
+          const dy = q.y - p.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < linkDistSq) {
+            const op = (1 - Math.sqrt(d2) / linkDist) * 0.42;
+            ctx.strokeStyle = 'rgba(0, 255, 135, ' + op + ')';
+            ctx.lineWidth = 0.7;
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(q.x, q.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      ctx.shadowColor = 'rgba(0, 255, 135, 0.55)';
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = 'rgba(0, 255, 135, 0.85)';
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      requestAnimationFrame(tick);
+    }
+
+    resize();
+    init();
+    tick();
+
+    window.addEventListener('resize', () => {
+      resize();
+      init();
+    });
+  })();
+
+  /* ── Intro Three.js: partículas formando T → explodem → fade ── */
+  (function () {
+    const canvas = document.getElementById('introCanvas');
+    const slide = document.getElementById('introSlide');
+    if (!canvas || !slide || typeof THREE === 'undefined') {
+      // Fallback: sem Three.js, revela texto direto
+      if (slide) {
+        slide.classList.add('phase-title', 'phase-tag', 'phase-body', 'phase-any', 'phase-cta', 'phase-fadeout');
+      }
+      return;
+    }
+
+    // === Setup cena ===
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const scene = new THREE.Scene();
+    const FOV = 50;
+    const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 100);
+    // Posição base da câmera — recalculada por resize() em função do aspect ratio
+    // pra T ocupar sempre ~70% da menor dimensão do viewport (relativo, não absoluto).
+    let CAM_BASE_Z = 7;
+    camera.position.set(0, 0, CAM_BASE_Z);
+
+    function resize() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      // updateStyle=true: força canvas CSS == buffer interno → sem mismatch de aspect.
+      renderer.setSize(w, h, true);
+      const aspect = w / h;
+      camera.aspect = aspect;
+
+      // AEROLI.TO bounding box: 9.0 × 1.5 (texto wide). Calcula distância da câmera
+      // pra ocupar ~72% da menor dimensão visível, em qualquer aspect ratio.
+      const tanFovHalf = Math.tan((FOV * Math.PI / 180) / 2);
+      const T_WIDTH = 9.0;
+      const T_HEIGHT = 1.5;
+      const TARGET_FILL = 0.72;
+      const zForVertical   = (T_HEIGHT / TARGET_FILL) / (2 * tanFovHalf);
+      const zForHorizontal = (T_WIDTH  / TARGET_FILL) / (2 * tanFovHalf * aspect);
+      CAM_BASE_Z = Math.max(zForVertical, zForHorizontal);
+
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // === Pontos-alvo: amostragem de "AEROLI.TO" via canvas offscreen ===
+    const targets = [];
+    {
+      const TEXT = "AEROLI.TO";
+      const MASK_W = 1200;
+      const MASK_H = 200;
+      // Bounding box em coordenadas de cena: x ∈ [-4.5, 4.5], y ∈ [-0.75, 0.75]
+      const SCENE_W = 9.0;
+      const SCENE_H = 1.5;
+
+      const maskCanvas = document.createElement("canvas");
+      maskCanvas.width = MASK_W;
+      maskCanvas.height = MASK_H;
+      const mctx = maskCanvas.getContext("2d");
+      mctx.fillStyle = "#fff";
+      mctx.textAlign = "center";
+      mctx.textBaseline = "middle";
+      mctx.font = "900 160px 'Space Grotesk', system-ui, sans-serif";
+      mctx.fillText(TEXT, MASK_W / 2, MASK_H / 2);
+
+      const imgData = mctx.getImageData(0, 0, MASK_W, MASK_H).data;
+      const STEP = 4; // sample stride — menor = mais pontos
+      for (let py = 0; py < MASK_H; py += STEP) {
+        for (let px = 0; px < MASK_W; px += STEP) {
+          const alpha = imgData[(py * MASK_W + px) * 4 + 3];
+          if (alpha > 100) {
+            // Mapeia pixel → coordenada de cena (y invertido — pixel y cresce pra baixo)
+            const x = (px / MASK_W - 0.5) * SCENE_W;
+            const y = -(py / MASK_H - 0.5) * SCENE_H;
+            targets.push([x, y]);
+          }
+        }
+      }
+    }
+
+    // === Partículas ===
+    const COUNT = window.innerWidth < 720 ? 900 : 1800;
+    const positions  = new Float32Array(COUNT * 3);
+    const prevPos    = new Float32Array(COUNT * 3); // pra trails na explosão
+    const initials   = new Float32Array(COUNT * 3);
+    const finals     = new Float32Array(COUNT * 3);
+    const velocities = new Float32Array(COUNT * 3);
+
+    for (let i = 0; i < COUNT; i++) {
+      // Posição inicial: espalhada num "shell" externo
+      const r = 6 + Math.random() * 4;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = (Math.random() - 0.5) * Math.PI * 0.6;
+      initials[i * 3 + 0] = r * Math.cos(theta) * Math.cos(phi);
+      initials[i * 3 + 1] = r * Math.sin(phi) * 2;
+      initials[i * 3 + 2] = r * Math.sin(theta) * Math.cos(phi) * 0.4;
+
+      // Posição alvo: um dos pontos do T + offset compacto
+      const t = targets[i % targets.length];
+      finals[i * 3 + 0] = t[0] + (Math.random() - 0.5) * 0.08;
+      finals[i * 3 + 1] = t[1] + (Math.random() - 0.5) * 0.08;
+      finals[i * 3 + 2] = (Math.random() - 0.5) * 0.12;
+
+      positions[i * 3 + 0] = initials[i * 3 + 0];
+      positions[i * 3 + 1] = initials[i * 3 + 1];
+      positions[i * 3 + 2] = initials[i * 3 + 2];
+    }
+
+    // Textura de brilho radial (criada em canvas inline)
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = glowCanvas.height = 64;
+    const gctx = glowCanvas.getContext('2d');
+    const grad = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0,    'rgba(255,255,255,1)');
+    grad.addColorStop(0.2,  'rgba(0, 255, 135,0.95)');
+    grad.addColorStop(0.5,  'rgba(0,255,135,0.7)');
+    grad.addColorStop(1,    'rgba(0,170,85,0)');
+    gctx.fillStyle = grad;
+    gctx.fillRect(0, 0, 64, 64);
+    const glowTexture = new THREE.CanvasTexture(glowCanvas);
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 0.22,
+      map: glowTexture,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: 1.0,
+      color: 0xffffff,
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    // === Trails: LineSegments do prevPos → pos, visíveis só na explosão ===
+    const trailPositions = new Float32Array(COUNT * 2 * 3); // 2 vértices por linha
+    const trailGeometry = new THREE.BufferGeometry();
+    trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+    const trailMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.7,
+      color: 0x00ff87,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const trails = new THREE.LineSegments(trailGeometry, trailMaterial);
+    trails.visible = false;
+    scene.add(trails);
+
+    // === Orquestração das fases ===
+    // Pré-roll roda antes via CSS (4 frases × 1.8s = 7.2s).
+    // Quando phase-preroll é removido, start() é chamado e animate() conta t=0 daqui.
+    const PRE_ROLL_DURATION = 7200;
+    const T_FORM_END  = 8000;    // 0–8s:   convergir
+    const T_HOLD_END  = 11000;   // 8–11s:  texto vibra (tensão antes do bang)
+    const EXPLODE_END = 15000;   // 11–15s: BIG BANG
+    const FADE_END    = 19000;   // 15–19s: fade do canvas + texto surge
+
+    // Cores por fase — todas direto da DESIGN.md (seções 8–10)
+    const COLOR_FORM  = new THREE.Color(0x66ffaa); // Verde claro
+    const COLOR_HOLD  = new THREE.Color(0xFFFCFB); // Título dark mode
+    const COLOR_BANG  = new THREE.Color(0xEA982F); // Ocre (cor de acento sustentada)
+    const COLOR_DRIFT = new THREE.Color(0x00ff87); // Neon green
+    const COLOR_FADE  = new THREE.Color(0x006644); // Verde institucional
+
+    let startTime = null;
+    let rafId = null;
+    let exploded = false;
+    let stopped = false;
+    let preRollTimeout = null;
+
+    function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+    function easeInQuad(x)   { return x * x; }
+
+    function updatePhases(t) {
+      // Texto SÓ surge depois do big bang (t > EXPLODE_END), sequência rápida
+      if (t > 15500) slide.classList.add('phase-title');
+      if (t > 16200) slide.classList.add('phase-tag');
+      if (t > 17000) slide.classList.add('phase-body');
+      if (t > 17800) slide.classList.add('phase-any');
+      if (t > 18500) slide.classList.add('phase-cta', 'phase-fadeout');
+    }
+
+    function animate(now) {
+      if (stopped) return;
+      if (startTime === null) startTime = now;
+      const t = now - startTime;
+      updatePhases(t);
+
+      const pos = geometry.attributes.position.array;
+      // Salva posição prévia pra trails (lines do prev → current)
+      for (let i = 0; i < COUNT * 3; i++) prevPos[i] = pos[i];
+
+      let camZ = CAM_BASE_Z;       // posição da câmera nessa fase
+      const color = material.color;
+
+      if (t < T_FORM_END) {
+        // Fase 1: convergir suave (ease-out)
+        const k = easeOutCubic(t / T_FORM_END);
+        for (let i = 0; i < COUNT; i++) {
+          const i3 = i * 3;
+          pos[i3]     = initials[i3]     + (finals[i3]     - initials[i3])     * k;
+          pos[i3 + 1] = initials[i3 + 1] + (finals[i3 + 1] - initials[i3 + 1]) * k;
+          pos[i3 + 2] = initials[i3 + 2] + (finals[i3 + 2] - initials[i3 + 2]) * k;
+        }
+        material.size = 0.22 + k * 0.06;
+        // Dolly: câmera puxa pra trás conforme T se forma (mostra escala)
+        camZ = (CAM_BASE_Z + 2) - 2 * k;     // (base+2) → base
+        // Cor: azul-frio → branco
+        color.lerpColors(COLOR_FORM, COLOR_HOLD, k);
+        trails.visible = false;
+      } else if (t < T_HOLD_END) {
+        // Fase 2: T vibra
+        const localT = (t - T_FORM_END) / (T_HOLD_END - T_FORM_END);
+        const jitterMag = 0.02 + localT * localT * 0.12;
+        const pulseHz = 4 + localT * 16;
+        const brightPulse = (Math.sin(t * pulseHz * 0.001 * Math.PI * 2) * 0.5 + 0.5);
+        for (let i = 0; i < COUNT; i++) {
+          const i3 = i * 3;
+          const seed = i * 0.37;
+          pos[i3]     = finals[i3]     + Math.sin(t * 0.04 + seed)        * jitterMag;
+          pos[i3 + 1] = finals[i3 + 1] + Math.sin(t * 0.045 + seed * 1.3) * jitterMag;
+          pos[i3 + 2] = finals[i3 + 2] + Math.sin(t * 0.05 + seed * 2.1)  * jitterMag * 0.6;
+        }
+        material.size = 0.30 + brightPulse * 0.18 + localT * 0.10;
+        material.opacity = 0.95 + brightPulse * 0.05;
+        camZ = CAM_BASE_Z + Math.sin(t * 0.012) * 0.08; // pequena oscilação na câmera
+        color.copy(COLOR_HOLD); // mantém branco
+        trails.visible = false;
+      } else if (t < EXPLODE_END) {
+        // Fase 3: BIG BANG
+        if (!exploded) {
+          for (let i = 0; i < COUNT; i++) {
+            const i3 = i * 3;
+            const dx = finals[i3];
+            const dy = finals[i3 + 1];
+            const dz = finals[i3 + 2];
+            const mag = Math.sqrt(dx * dx + dy * dy + dz * dz) || 1;
+            const speed = 0.06 + Math.random() * 0.10;
+            velocities[i3]     = (dx / mag) * speed + (Math.random() - 0.5) * 0.02;
+            velocities[i3 + 1] = (dy / mag) * speed + (Math.random() - 0.5) * 0.02;
+            velocities[i3 + 2] = (Math.random() - 0.5) * 0.12;
+          }
+          exploded = true;
+          slide.classList.add('phase-bang');
+        }
+        const explodeT = (t - T_HOLD_END) / (EXPLODE_END - T_HOLD_END);
+        material.size = 0.50 - explodeT * 0.30;
+        for (let i = 0; i < COUNT; i++) {
+          const i3 = i * 3;
+          pos[i3]     += velocities[i3];
+          pos[i3 + 1] += velocities[i3 + 1];
+          pos[i3 + 2] += velocities[i3 + 2];
+          velocities[i3]     *= 0.992;
+          velocities[i3 + 1] *= 0.992;
+          velocities[i3 + 2] *= 0.995;
+        }
+        // Dolly impact: câmera salta pra perto no bang, depois recua
+        if (explodeT < 0.12) {
+          camZ = (CAM_BASE_Z - 2.5) + 2.5 * (explodeT / 0.12);          // (base-2.5) → base
+        } else {
+          camZ = CAM_BASE_Z + 1.5 * easeOutCubic((explodeT - 0.12) / 0.88); // base → base+1.5
+        }
+        // Cor: bang amarelo quente nos primeiros 18%, depois drift cyan
+        if (explodeT < 0.18) {
+          color.copy(COLOR_BANG);
+        } else {
+          const k = (explodeT - 0.18) / 0.82;
+          color.lerpColors(COLOR_BANG, COLOR_DRIFT, easeOutCubic(k));
+        }
+        // Trails visíveis e brilhando — atualiza geometry com prev → current
+        trails.visible = true;
+        trailMaterial.opacity = 0.7 * (1 - explodeT * 0.5); // 0.7 → 0.35
+        const tp = trailGeometry.attributes.position.array;
+        for (let i = 0; i < COUNT; i++) {
+          const i6 = i * 6;
+          const i3 = i * 3;
+          tp[i6]     = prevPos[i3];
+          tp[i6 + 1] = prevPos[i3 + 1];
+          tp[i6 + 2] = prevPos[i3 + 2];
+          tp[i6 + 3] = pos[i3];
+          tp[i6 + 4] = pos[i3 + 1];
+          tp[i6 + 5] = pos[i3 + 2];
+        }
+        trailGeometry.attributes.position.needsUpdate = true;
+      } else if (t < FADE_END) {
+        // Fase 4: drift + fade + dolly out + cor pra roxo
+        const fadeK = (t - EXPLODE_END) / (FADE_END - EXPLODE_END);
+        material.opacity = 1 - easeInQuad(fadeK);
+        for (let i = 0; i < COUNT; i++) {
+          const i3 = i * 3;
+          pos[i3]     += velocities[i3];
+          pos[i3 + 1] += velocities[i3 + 1];
+          pos[i3 + 2] += velocities[i3 + 2];
+        }
+        camZ = (CAM_BASE_Z + 1.5) + fadeK * 1.5;   // (base+1.5) → (base+3)
+        color.lerpColors(COLOR_DRIFT, COLOR_FADE, fadeK);
+        trailMaterial.opacity = 0.35 * (1 - fadeK);
+        // Continua atualizando trails durante o fade (até sumirem)
+        const tp = trailGeometry.attributes.position.array;
+        for (let i = 0; i < COUNT; i++) {
+          const i6 = i * 6;
+          const i3 = i * 3;
+          tp[i6]     = prevPos[i3];
+          tp[i6 + 1] = prevPos[i3 + 1];
+          tp[i6 + 2] = prevPos[i3 + 2];
+          tp[i6 + 3] = pos[i3];
+          tp[i6 + 4] = pos[i3 + 1];
+          tp[i6 + 5] = pos[i3 + 2];
+        }
+        trailGeometry.attributes.position.needsUpdate = true;
+      } else {
+        cleanup();
+        return;
+      }
+
+      camera.position.z = camZ;
+      geometry.attributes.position.needsUpdate = true;
+      renderer.render(scene, camera);
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function start() {
+      if (rafId !== null) return;
+      stopped = false;
+      startTime = null;
+      rafId = requestAnimationFrame(animate);
+    }
+
+    function cleanup() {
+      stopped = true;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      // Mantém o canvas vazio (transparente) — textos manifesto continuam visíveis
+      renderer.clear();
+    }
+
+    // Skip: pula pro estado final (encerra pré-roll + textos visíveis + canvas vazio)
+    function skip() {
+      if (stopped) return;
+      slide.classList.remove('phase-preroll');
+      slide.classList.add('phase-title', 'phase-tag', 'phase-body', 'phase-any', 'phase-cta', 'phase-fadeout');
+      if (preRollTimeout) { clearTimeout(preRollTimeout); preRollTimeout = null; }
+      cleanup();
+    }
+
+    // Observer: se usuário sair do slide antes da animação terminar, pula pro final
+    // (evita voltar e ver uma animação congelada no meio).
+    // NÃO reinicia ao voltar — uma vez feita, permanece no estado final pelo resto da sessão.
+    const observer = new MutationObserver(() => {
+      if (!slide.classList.contains('active') && !stopped) {
+        skip();
+      }
+    });
+    observer.observe(slide, { attributes: true, attributeFilter: ['class'] });
+
+    // Expor skip pro keydown handler
+    window.__introSkip = skip;
+
+    // Inicia o pré-roll (CSS via classe phase-preroll já presente no HTML).
+    // Quando termina (5.4s), remove a classe e dispara a animação Three.js.
+    preRollTimeout = setTimeout(() => {
+      slide.classList.remove('phase-preroll');
+      start();
+    }, PRE_ROLL_DURATION);
+  })();
+
+</script>
+
+
+
+</body></html>
