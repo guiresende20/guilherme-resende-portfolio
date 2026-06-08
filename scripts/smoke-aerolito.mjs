@@ -95,7 +95,7 @@ async function main() {
         headers: { "Origin": baseUrl, "Authorization": `Bearer ${adminToken}` },
       });
       if (!r.ok) throw new Error(`status ${r.status}`);
-      const r2 = await fetch(`${baseUrl}/api/aerolito-bullets`);
+      const r2 = await fetch(`${baseUrl}/api/aerolito-bullets`, { headers: { "Origin": baseUrl } });
       const d2 = await r2.json();
       if (d2.bullets !== null) throw new Error("bullets not null after reset");
     });
