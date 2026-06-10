@@ -211,7 +211,7 @@ se quiser mais infos, sobre meu gosto musical, meu perfil no spotify é https://
 
 **Nome:** Guilherme Resende Muniz
 **Localização:** Porto Alegre - RS, Brasil
-**Cargo atual:** Designer e Pesquisador de Inovação — CriaLab - Tecnopuc / PUC-RS (desde 2021)
+**Cargo atual:** Head de Pesquisa — Aeroli.to (desde junho de 2026), em Porto Alegre/RS. Anteriormente fui Designer e Pesquisador de Inovação no CriaLab - Tecnopuc / PUC-RS (2021–2026); não atuo mais lá.
 **Pesquisa:** Doutorando em Design na UFRGS (bolsista CAPES, pesquisador do LdSM)
 **Contatos:**
 - LinkedIn: https://www.linkedin.com/in/guilhermeresende/
@@ -221,6 +221,15 @@ se quiser mais infos, sobre meu gosto musical, meu perfil no spotify é https://
 **Números:** 12+ publicações · 1 patente · 20+ projetos digitais · 15+ anos de experiência
 
 ---
+
+AEROLI.TO – HEAD DE PESQUISA (JUN 2026 – PRESENTE) — EMPREGO ATUAL
+Atuação como Head de Pesquisa na Aeroli.to, em Porto Alegre/RS. Este é o meu cargo atual, desde junho de 2026.
+Principais responsabilidades:
+Atuar como ponte entre a visão estratégica e a execução, garantindo clareza operacional e a profundidade das entregas.
+Estruturar o conhecimento dos projetos como um ativo replicável para alimentar metodologias, cursos e novos negócios.
+Capacitar o time em letramento de futuros e aplicação prática de IA, otimizando fluxos e processos de trabalho.
+Garantir a qualidade e o rigor intelectual das entregas, atuando como guardião da profundidade técnica da empresa.
+Construir relações de confiança com clientes e times internos, focando em integração e comunicação proativa.
 
 REPOSITÓRIO 3D DE PATRIMÔNIO HISTÓRICO – UFRGS
 Projeto de pesquisa de mestrado voltado à criação de um repositório digital de elementos arquitetônicos históricos utilizando tecnologias 3D.
@@ -270,8 +279,8 @@ Desenvolvimento de aplicação em AR
 Integração com contexto urbano e institucional
 Resultados: aplicação utilizada em evento internacional, conectando tecnologia e território.
 
-TECNOPUC / CRIALAB – PROJETOS DE INOVAÇÃO E UX
-Atuação como designer e pesquisador em projetos de inovação corporativa.
+TECNOPUC / CRIALAB – PROJETOS DE INOVAÇÃO E UX (2021–2026, EXPERIÊNCIA ANTERIOR — NÃO ATUO MAIS LÁ)
+Atuei como designer e pesquisador em projetos de inovação corporativa. Importante: não trabalho mais no Tecnopuc/CriaLab; saí em 2026 para assumir como Head de Pesquisa na Aeroli.to.
 Objetivo: desenvolver soluções centradas no usuário para empresas e ecossistemas de inovação.
 Atividades realizadas:
 Pesquisa com usuários (qualitativa e quantitativa)
