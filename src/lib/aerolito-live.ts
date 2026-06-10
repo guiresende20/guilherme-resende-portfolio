@@ -158,12 +158,14 @@ export class AerolitoLiveChat {
   }
 
   /**
-   * Normaliza pronúncia: "Aeroli.to" / "aeroli.to" -> "Aerolito" / "aerolito".
-   * O ponto entre Aeroli e to faz o TTS pausar como se fosse "Aeroli ponto to";
-   * removendo, sai natural. Aplicado em todo texto enviado ao Live API.
+   * Normaliza pronúncia: "Aeroli.to" / "aeroli.to" -> "Aérolito" / "aérolito".
+   * Dois problemas que isso resolve: (1) o ponto entre Aeroli e to faz o TTS
+   * pausar como "Aeroli ponto to"; (2) sem acento a tônica cai errada (ae-ro-LI-to).
+   * Com "aérolito" a voz diz "a-É-ro-li-to", a pronúncia correta da empresa.
+   * Aplicado em todo texto enviado ao Live API.
    */
   private normalizePronunciation(text: string): string {
-    return text.replace(/aeroli\.to/gi, (match) => match[0] === "A" ? "Aerolito" : "aerolito");
+    return text.replace(/aeroli\.to/gi, (match) => match[0] === "A" ? "Aérolito" : "aérolito");
   }
 
   /** Envia texto do colega como user turn (modo normal). */
