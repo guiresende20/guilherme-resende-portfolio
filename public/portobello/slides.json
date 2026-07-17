@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "title": "Aeroli.to · Portobello",
+    "deck": "portobello"
+  },
+  "slides": [
+    {
+      "id": "intro",
+      "type": "intro",
+      "eyebrow": "Aeroli.to",
+      "title": "Portobello",
+      "lead": "Deck em construção. Navegue pelas miniaturas ou gere o report completo em PDF.",
+      "accent": "violet"
+    }
+  ]
+}

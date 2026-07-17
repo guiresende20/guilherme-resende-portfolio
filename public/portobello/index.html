@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Aeroli.to · Territórios de Futuros</title>
-<meta name="description" content="Apresentação Aeroli.to — sinais e territórios de futuros.">
+<title>Aeroli.to · Portobello</title>
+<meta name="description" content="Apresentação Aeroli.to — Portobello.">
 <meta name="theme-color" content="#000000">
 
 <!-- favicon: logo Aerolito -->
@@ -23,8 +23,8 @@
 <canvas id="starfield" aria-hidden="true"></canvas>
 <canvas id="index-particles" class="particle-bg" aria-hidden="true"></canvas>
 
-<!-- ============ DECK (atrás da capa) ============ -->
-<main id="deck" aria-roledescription="apresentação" aria-label="Territórios de Futuros">
+<!-- ============ DECK ============ -->
+<main id="deck" aria-roledescription="apresentação" aria-label="Portobello">
   <div id="deck-stage"></div>
 
   <!-- progresso de leitura (acompanha o slide atual) -->
@@ -84,37 +84,9 @@
   </aside>
 </main>
 
-<!-- ============ LOGIN (por cima de tudo) ============ -->
-<div id="login">
-  <canvas id="login-particles" class="particle-bg" aria-hidden="true"></canvas>
-  <video class="login-video" id="login-video" autoplay muted loop playsinline></video>
-  <div class="login-video-ovl"></div>
-  <img class="login-intro-logo" id="login-intro-logo" src="assets/login/aerolito-logo.png" alt="Aerolito" aria-hidden="true">
-  <form class="login-card" id="login-form" autocomplete="off">
-    <img class="login-logo" src="assets/login/aerolito-logo.png" alt="Aerolito">
-    <div class="login-title">Login</div>
-    <input class="login-input" id="login-email" type="text" name="ni-user" placeholder="Email"
-           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
-           data-1p-ignore data-lpignore="true" required>
-    <div class="login-pass">
-      <input class="login-input masked" id="login-pass" type="text" name="ni-pass" placeholder="Senha"
-             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
-             data-1p-ignore data-lpignore="true" required>
-      <button class="eye" id="login-eye" type="button" aria-label="Mostrar senha">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
-    </div>
-    <button class="login-btn" type="submit">Entrar</button>
-    <p class="login-error" id="login-error"></p>
-  </form>
-</div>
-
 <script src="js/starfield.js"></script>
-<script src="js/vendor/qrcode.js"></script>
-<script src="js/constellation.js"></script>
 <script type="module" src="js/lib/print-doc.mjs"></script>
 <script type="module" src="js/lib/pptx-doc.mjs"></script>
 <script src="js/deck.js"></script>
-<script src="js/particles.js"></script>
-<script src="js/login.js"></script></body>
+<script src="js/particles.js"></script></body>
 </html>
