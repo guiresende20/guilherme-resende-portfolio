@@ -35,7 +35,7 @@
     { value: "media",     name: "GIF / Vídeo",         desc: "GIF ou MP4 em loop, centralizado" }
   ];
 
-  // "Território" de verdade = só o layout clássico (sem s.layout). Intro, votação
+  // "Território" de verdade = só o layout clássico (sem s.layout). Intro
   // e os layouts-base novos (grade/wordmark/hero/manifesto) NÃO contam como
   // território — usado na numeração e na contagem do índice.
   function isTerritorySlide(s) {
@@ -76,11 +76,8 @@
   var els = [];
   var deckMeta = null;   // meta do deck (slides.json) p/ o nome do arquivo PPTX
   var thumbs = [];
-  var fullAccess = false;   // perfil @aeroli.to (login): vê todos os slides + controles de edição
+  var fullAccess = false;   // chave de edição na sessão: controles de edição visíveis
   var publishedHidden = [];   // ids ocultados publicados (servidor): somem para todos
-  var clientVisible = null;   // allowlist publicada (servidor): ids visíveis p/ @caixa; null = nunca salvo (usa seed)
-  var clientVisPending = null;   // edição em memória: ids visíveis p/ cliente (null = ainda não semeado nesta sessão)
-  var clientVisSave = null, clientVisRevert = null;   // botões no cabeçalho do índice
   var index = 0;
   var ready = false;
   var overviewOpen = false;
@@ -186,9 +183,7 @@
         (s.epigraph.cite ? '<cite>— ' + esc(s.epigraph.cite) + "</cite>" : "") +
       "</blockquote>" : "";
 
-    // botão X (canto sup. esquerdo): volta para o índice (visão geral).
-    // só o perfil completo (@aeroli.to) recebe o botão, e em todos os slides;
-    // @caixa não recebe o botão em nenhum.
+    // botão X (canto sup. esquerdo): volta para o índice — só no modo edição.
     var closeHtml = fullAccess ?
       '<button type="button" class="slide-close" data-slide-close ' +
         'aria-label="Voltar ao índice" title="Voltar ao índice">×</button>' : "";
@@ -361,7 +356,7 @@
         generatePDF(pdfOrientation);
       });
 
-      // exportar PPTX — só os slides visíveis ao cliente (sem intro/votação)
+      // exportar PPTX — todos os slides de conteúdo (sem intro)
       var pptxGo = pdfMenu.querySelector("[data-pptx-go]");
       if (pptxGo) {
         pptxGo.addEventListener("click", function () {
@@ -795,7 +790,7 @@
   // (p/ travar + rótulo "Gerando…").
   function exportPPTX(btn) {
     if (!window.PptxDoc) { window.alert("Exportação indisponível."); return; }
-    var sel = window.PptxDoc.selectPptxSlides(slides, isClientVisible, publishedHidden);
+    var sel = window.PptxDoc.selectPptxSlides(slides, null, publishedHidden);
     if (!sel.length) { window.alert("Nenhum slide visível para exportar."); return; }
 
     var DIMS = window.PptxDoc.PPTX_DIMS;
@@ -933,7 +928,7 @@
       var g = Array.isArray(s.gallery) ? s.gallery : [];
       if (g.length) return thumbImg(g[0], false);
     }
-    // sem conteúdo próprio: placeholder (logo), ícone da intro ou ✦ da votação
+    // sem conteúdo próprio: placeholder (logo), ícone da intro ou ✦ genérico
     if (s.image) return thumbImg(s.image, s.image === PLACEHOLDER_IMAGE);
     if (s.type === "intro") {
       return '<span class="thumb-figure-intro" aria-hidden="true">' +
@@ -956,10 +951,6 @@
   function buildOverview() {
     if (!overviewGrid) return;
     overviewGrid.innerHTML = "";   // re-renderizável (após reordenar)
-
-    if (fullAccess && clientVisPending === null) {
-      clientVisPending = slides.filter(isClientVisible).map(idOf);
-    }
 
     thumbs = slides.map(function (s, i) {
       var b = document.createElement("button");
@@ -1000,27 +991,6 @@
           }
         });
         b.appendChild(del);
-      }
-
-      // toggle de visibilidade p/ cliente (canto sup. esquerdo), só @aeroli.to e territórios
-      if (fullAccess && s.type !== "intro") {
-        var eye = document.createElement("span");
-        eye.className = "thumb-eye";
-        eye.setAttribute("role", "button");
-        eye.setAttribute("tabindex", "0");
-        applyEyeState(eye, b, clientVisPending.indexOf(s.id) !== -1);
-        var toggleEye = function (ev) {
-          ev.stopPropagation();
-          var at = clientVisPending.indexOf(s.id);
-          if (at === -1) clientVisPending.push(s.id); else clientVisPending.splice(at, 1);
-          applyEyeState(eye, b, at === -1);
-          updateClientVisBar();
-        };
-        eye.addEventListener("click", toggleEye);
-        eye.addEventListener("keydown", function (ev) {
-          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggleEye(ev); }
-        });
-        b.appendChild(eye);
       }
 
       overviewGrid.appendChild(b);
@@ -1415,23 +1385,6 @@
       if (closeBtn) ovHead.insertBefore(addWrap, closeBtn);
       else ovHead.appendChild(addWrap);
 
-      clientVisSave = document.createElement("button");
-      clientVisSave.type = "button";
-      clientVisSave.className = "nav-btn overview-savevis";
-      clientVisSave.textContent = "Salvar visibilidade";
-      clientVisSave.setAttribute("aria-label", "Salvar visibilidade do cliente");
-      clientVisSave.addEventListener("click", saveClientVisible);
-
-      clientVisRevert = document.createElement("button");
-      clientVisRevert.type = "button";
-      clientVisRevert.className = "nav-btn overview-revertvis";
-      clientVisRevert.textContent = "Reverter";
-      clientVisRevert.hidden = true;
-      clientVisRevert.addEventListener("click", revertClientVisible);
-
-      ovHead.insertBefore(clientVisSave, addWrap);
-      ovHead.insertBefore(clientVisRevert, clientVisSave);
-      updateClientVisBar();
     }
   }
 
@@ -1526,34 +1479,9 @@
         postContent({ action: "hideSlide", slideId: s.id })
           .then(function () {
             spliceSlideLive(s);
-            // território deletado sai do deck p/ todos: não deve sobrar id obsoleto
-            // no pendente (evita "sujo" falso e payload com id inexistente ao salvar)
-            if (clientVisPending) {
-              var pi = clientVisPending.indexOf(s.id);
-              if (pi !== -1) clientVisPending.splice(pi, 1);
-              updateClientVisBar();
-            }
           })
           .catch(reportSaveError);
       });
-  }
-
-  function saveClientVisible() {
-    if (!fullAccess) return;
-    var ids = (clientVisPending || []).slice();
-    postContent({ action: "setClientVisible", ids: ids })
-      .then(function (res) {
-        clientVisible = (res && Array.isArray(res.clientVisible)) ? res.clientVisible : ids;
-        clientVisPending = clientVisible.slice();
-        updateClientVisBar();
-      })
-      .catch(reportSaveError);
-  }
-
-  function revertClientVisible() {
-    clientVisPending = savedClientVisibleIds();
-    buildOverview();          // redesenha as miniaturas com os ícones do olho resetados
-    updateClientVisBar();
   }
 
   /* ---------- modal de confirmação reutilizável ---------- */
@@ -2151,53 +2079,13 @@
     document.addEventListener("touchstart", poke, { passive: true });
   }
 
-  // visibilidade efetiva p/ o cliente @caixa: allowlist publicada, ou seed
-  // (!hidden e não-adicionado) enquanto a lista nunca foi salva.
-  function isClientVisible(s) {
-    if (clientVisible === null) return !s.hidden && !s._added;
-    return clientVisible.indexOf(s.id) !== -1;
-  }
-
-  function idOf(s) { return s.id; }
-
-  // ids efetivamente visíveis p/ cliente HOJE (persistido, ou seed) — base do pendente
-  function savedClientVisibleIds() {
-    // null = nunca salvo: usa o mesmo seed de isClientVisible (fonte única da regra)
-    if (clientVisible === null) return slides.filter(isClientVisible).map(idOf);
-    return clientVisible.slice();
-  }
-
-  function sameIds(a, b) {
-    if (a.length !== b.length) return false;
-    var x = a.slice().sort(), y = b.slice().sort();
-    for (var i = 0; i < x.length; i++) if (x[i] !== y[i]) return false;
-    return true;
-  }
-
-  function applyEyeState(eye, thumb, on) {
-    eye.innerHTML = on ? EYE_OPEN_SVG : EYE_OFF_SVG;
-    eye.setAttribute("aria-label", on ? "Visível para o cliente" : "Oculto para o cliente");
-    eye.title = on ? "Visível p/ cliente — clique para ocultar" : "Oculto p/ cliente — clique para mostrar";
-    eye.classList.toggle("is-off", !on);
-    thumb.classList.toggle("is-client-hidden", !on);
-  }
-
-  function updateClientVisBar() {
-    if (!clientVisSave) return;
-    var dirty = !sameIds(clientVisPending || [], savedClientVisibleIds());
-    clientVisSave.disabled = !dirty;
-    if (clientVisRevert) clientVisRevert.hidden = !dirty;
-  }
-
   function buildDeck(data) {
     slides = (data && data.slides) || [];
     deckMeta = (data && data.meta) || null;
     fullAccess = !!storedEditKey();
     slides = slides.filter(function (s) {
-      // @caixa (fullAccess=false): só vê o que isClientVisible liberar (allowlist ou seed).
-      // publishedHidden (deletar pelo índice): some para todos, inclusive @aeroli.to.
-      return (fullAccess || isClientVisible(s)) &&
-        publishedHidden.indexOf(s.id) === -1;
+      // hidden publicado (deletar pelo índice): some para todos
+      return publishedHidden.indexOf(s.id) === -1;
     });
     slides = applySavedOrder(slides);   // restaura ordem reordenada anteriormente
     els = slides.map(buildSlide);
@@ -2216,7 +2104,7 @@
   // com #login presente, o deck espera o "enter-deck" do fim da introdução do login;
   // sem login (dev/visão direta), ativa assim que os dados chegam.
   if (!document.getElementById("login")) entered = true;
-  // ?edit=1: ativa o modo edição sem teclado (útil no mobile)
+  // ?edit=1: pede a chave sem teclado (útil no mobile); com chave já salva, só limpa o parâmetro
   try {
     if (new URLSearchParams(location.search).get("edit") === "1") {
       if (storedEditKey()) {
@@ -2252,7 +2140,6 @@
       if (o.media && typeof o.media === "object") s.media = o.media;
     });
     publishedHidden = Array.isArray(content.hidden) ? content.hidden : [];
-    clientVisible = Array.isArray(content.clientVisible) ? content.clientVisible : null;
     return data;
   }
 
