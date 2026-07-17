@@ -883,12 +883,6 @@
   function prev() { if (editing) return; go(index - 1); }
 
   /* ---------- visão geral / índice (grade de miniaturas) ---------- */
-  var EYE_OPEN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
-    '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="1.6"/>' +
-    '<circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
-  var EYE_OFF_SVG = EYE_OPEN_SVG.replace("</svg>",
-    '<path d="M3 3l18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>');
-
   // selo ▶ (slides de vídeo: layout video e media/MP4) — sem imagem externa
   function thumbVideoBadge() {
     return '<span class="thumb-fig-badge" aria-hidden="true">' +
