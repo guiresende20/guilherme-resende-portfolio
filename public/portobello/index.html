@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aeroli.to · Territórios de Futuros</title>
+<meta name="description" content="Apresentação Aeroli.to — sinais e territórios de futuros.">
+<meta name="theme-color" content="#000000">
+
+<!-- favicon: logo Aerolito -->
+<link rel="icon" type="image/png" href="assets/favicon.png">
+
+<!-- tipografia: corpo em Times New Roman (sistema); wordmark da capa em Manrope -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- atmosfera global -->
+<canvas id="starfield" aria-hidden="true"></canvas>
+<canvas id="index-particles" class="particle-bg" aria-hidden="true"></canvas>
+
+<!-- ============ DECK (atrás da capa) ============ -->
+<main id="deck" aria-roledescription="apresentação" aria-label="Territórios de Futuros">
+  <div id="deck-stage"></div>
+
+  <!-- progresso de leitura (acompanha o slide atual) -->
+  <div class="deck-progress" role="progressbar" aria-label="Progresso da apresentação"
+       aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <span id="deck-progress-bar" class="deck-progress-bar"></span>
+  </div>
+
+  <!-- marca Aerolito (canto superior direito) -->
+  <div class="deck-logo" aria-hidden="true">
+    <img src="assets/logo-aero.png" alt="Aerolito">
+  </div>
+
+  <!-- controles -->
+  <nav id="deck-controls" class="deck-controls" aria-label="Navegação dos slides" hidden>
+    <button id="nav-index" class="nav-btn" type="button" aria-label="Índice" title="Índice (Esc)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v5H4zM13 14h7v5h-7z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button id="nav-prev" class="nav-btn" type="button" aria-label="Slide anterior" title="Anterior (←)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="deck-counter" aria-live="polite">
+      <span id="counter-cur" class="cur">1</span> / <span id="counter-tot">1</span>
+    </span>
+    <button id="nav-next" class="nav-btn" type="button" aria-label="Próximo slide" title="Próximo (→)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button id="nav-full" class="nav-btn" type="button" aria-label="Tela cheia" title="Tela cheia (F)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </nav>
+
+  <!-- índice / visão geral (grade de miniaturas) — abre no Esc ou no botão índice -->
+  <div id="overview" class="overview" hidden>
+    <div class="overview-head">
+      <div class="overview-headings">
+        <span class="overview-title">Índice</span>
+        <span class="overview-hint">arraste as miniaturas para reordenar</span>
+      </div>
+      <button id="overview-close" class="nav-btn" type="button" aria-label="Fechar índice" title="Fechar (Esc)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <div id="overview-grid" class="overview-grid" role="list"></div>
+  </div>
+
+  <!-- painel de sinal (abre ao clicar num chip) -->
+  <aside id="signal-panel" class="signal-panel" role="dialog" aria-modal="true" aria-label="Detalhe do sinal" tabindex="-1" hidden>
+    <button id="signal-close" class="nav-btn signal-close" type="button" aria-label="Fechar painel" title="Fechar (Esc)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <p class="signal-kicker">Sinal <span id="signal-pos"></span></p>
+    <h3 id="signal-title" class="signal-title"></h3>
+    <p id="signal-desc" class="signal-desc"></p>
+    <a id="signal-link" class="signal-link" target="_blank" rel="noopener noreferrer" hidden>visitar site ↗</a>
+    <p class="signal-hint">← → navega entre os sinais · Esc fecha</p>
+  </aside>
+</main>
+
+<!-- ============ LOGIN (por cima de tudo) ============ -->
+<div id="login">
+  <canvas id="login-particles" class="particle-bg" aria-hidden="true"></canvas>
+  <video class="login-video" id="login-video" autoplay muted loop playsinline></video>
+  <div class="login-video-ovl"></div>
+  <img class="login-intro-logo" id="login-intro-logo" src="assets/login/aerolito-logo.png" alt="Aerolito" aria-hidden="true">
+  <form class="login-card" id="login-form" autocomplete="off">
+    <img class="login-logo" src="assets/login/aerolito-logo.png" alt="Aerolito">
+    <div class="login-title">Login</div>
+    <input class="login-input" id="login-email" type="text" name="ni-user" placeholder="Email"
+           autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+           data-1p-ignore data-lpignore="true" required>
+    <div class="login-pass">
+      <input class="login-input masked" id="login-pass" type="text" name="ni-pass" placeholder="Senha"
+             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"
+             data-1p-ignore data-lpignore="true" required>
+      <button class="eye" id="login-eye" type="button" aria-label="Mostrar senha">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+    <button class="login-btn" type="submit">Entrar</button>
+    <p class="login-error" id="login-error"></p>
+  </form>
+</div>
+
+<script src="js/starfield.js"></script>
+<script src="js/vendor/qrcode.js"></script>
+<script src="js/constellation.js"></script>
+<script type="module" src="js/lib/print-doc.mjs"></script>
+<script type="module" src="js/lib/pptx-doc.mjs"></script>
+<script src="js/deck.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/login.js"></script></body>
+</html>
