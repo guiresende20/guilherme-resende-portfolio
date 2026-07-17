@@ -39,7 +39,7 @@
   // e os layouts-base novos (grade/wordmark/hero/manifesto) NÃO contam como
   // território — usado na numeração e na contagem do índice.
   function isTerritorySlide(s) {
-    return !!s && s.type !== "intro" && s.type !== "vote" && !s.layout;
+    return !!s && s.type !== "intro" && !s.layout;
   }
 
   // slug do título para a URL (#): minúsculas, sem acento, hífens no lugar de
@@ -90,7 +90,7 @@
   /* reordenar miniaturas (arrastar) — desktop, persistido em localStorage */
   // v2: a intro entrou como 1º slide; ordens v1 salvas empurrariam a intro
   // para o fim (applySavedOrder anexa ids novos ao final). Orfana ordens antigas.
-  var ORDER_KEY = "caixa-deck-order-v2";
+  var ORDER_KEY = "portobello-deck-order-v1";
   var dragFrom = -1;
   var justDragged = false;
 
@@ -122,7 +122,6 @@
   }
 
   function buildSlide(s, i) {
-    if (s.type === "vote") return buildVoteSlide(s, i);
     if (s.type === "intro") return buildIntroSlide(s, i);
     if (s.layout === "grid") return buildGridSlide(s, i);
     if (s.layout === "video") return buildVideoSlide(s, i);
@@ -224,56 +223,6 @@
       });
     }
 
-    return el;
-  }
-
-  function buildVoteSlide(s, i) {
-    var el = document.createElement("section");
-    el.className = "slide slide-vote";
-    if (s.id) el.dataset.id = s.id;
-    el.dataset.type = "vote";
-    el.setAttribute("aria-roledescription", "slide");
-    el.setAttribute("aria-label", (i + 1) + " de " + slides.length + ": " + s.title);
-    el.style.setProperty("--accent", ACCENTS[s.accent] || ACCENTS.violet);
-    el.innerHTML =
-      '<div class="vote-slide-wrap">' +
-        '<h2 class="panel-title">' + esc(s.title) + "</h2>" +
-        '<p class="panel-body vote-slide-instructions">' + esc(s.body || "") + "</p>" +
-        '<div class="vote-live" data-vote-live>' +
-          '<div class="vote-qr" data-vote-qr aria-label="QR code para votar"></div>' +
-          '<div class="vote-live-meta">' +
-            '<p class="vote-live-url" data-vote-url></p>' +
-            '<p class="vote-live-count"><strong data-vote-count>–</strong> <span data-vote-count-label>pessoas já votaram</span></p>' +
-            '<p class="vote-live-status" data-vote-status hidden></p>' +
-          "</div>" +
-        "</div>" +
-        '<canvas class="constellation" data-constellation hidden></canvas>' +
-        '<div class="vote-admin" data-vote-admin hidden>' +
-          '<button type="button" class="vote-admin-btn" data-admin="reveal">Revelar (R)</button>' +
-          '<button type="button" class="vote-admin-btn" data-admin="reset">Zerar votação</button>' +
-          '<button type="button" class="vote-admin-btn" data-admin="json">Exportar JSON</button>' +
-          '<button type="button" class="vote-admin-btn" data-admin="csv">Exportar CSV</button>' +
-        "</div>" +
-      "</div>";
-
-    // QR + URL da cédula
-    var voteUrl = location.origin + location.pathname.replace(/[^/]*$/, "") + "vote.html";
-    var urlEl = el.querySelector("[data-vote-url]");
-    if (urlEl) urlEl.textContent = voteUrl.replace(/^https?:\/\//, "");
-    var qrEl = el.querySelector("[data-vote-qr]");
-    if (qrEl && typeof qrcode === "function") {
-      try {
-        var qr = qrcode(0, "M");
-        qr.addData(voteUrl);
-        qr.make();
-        qrEl.innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true });
-      } catch (e) { qrEl.textContent = voteUrl; }
-    } else if (qrEl) {
-      // lib de QR não carregou — mostra a URL como texto para digitar
-      qrEl.textContent = voteUrl;
-    }
-
-    el.querySelector("[data-vote-admin]").addEventListener("click", onAdminClick);
     return el;
   }
 
@@ -581,49 +530,38 @@
     return el;
   }
 
-  /* ---------- apresentador: chave, revelar, reset, export ---------- */
-  var PRESENTER_KEY_STORE = "caixa-presenter-key";
+  /* ---------- edição: chave (validada no servidor via PORTOBELLO_EDIT_KEY) ---------- */
+  var EDIT_KEY_STORE = "portobello-edit-key";
 
-  function presenterKey(forceAsk) {
-    var k = null;
-    try { k = sessionStorage.getItem(PRESENTER_KEY_STORE); } catch (_) {}
-    if (!k || forceAsk) {
-      k = window.prompt("Chave do apresentador:");
-      if (k) { try { sessionStorage.setItem(PRESENTER_KEY_STORE, k); } catch (_) {} }
-    }
-    return k;
+  function storedEditKey() {
+    try { return sessionStorage.getItem(EDIT_KEY_STORE); } catch (_) { return null; }
   }
 
-  function syncAdminVisibility() {
-    var el = voteEls();
-    if (!el) return;
-    var admin = el.querySelector("[data-vote-admin]");
-    var has = false;
-    try { has = !!sessionStorage.getItem(PRESENTER_KEY_STORE); } catch (_) {}
-    if (admin) admin.hidden = !has;
+  function clearEditKey() {
+    try { sessionStorage.removeItem(EDIT_KEY_STORE); } catch (_) {}
   }
 
-  function stateAction(action) {
-    var key = presenterKey(false);
-    if (!key) return;
-    fetch("/api/state", {
+  // pede a chave, valida no servidor e recarrega com o modo edição ativo.
+  // O reload reconstrói o deck com fullAccess=true (controles de edição).
+  function requestEditMode() {
+    var k = window.prompt("Chave de edição:");
+    if (!k) return;
+    fetch("/api/portobello-content", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ action: action, key: key })
+      body: JSON.stringify({ action: "verify", key: k })
     })
       .then(function (r) {
-        if (r.status === 401) {
-          try { sessionStorage.removeItem(PRESENTER_KEY_STORE); } catch (_) {}
-          window.alert("Chave incorreta.");
-          throw new Error("401");
-        }
+        if (r.status === 401) { window.alert("Chave incorreta."); throw new Error("401"); }
         if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
+        try { sessionStorage.setItem(EDIT_KEY_STORE, k); } catch (_) {}
+        // remove ?edit=1 da URL antes do reload (evita novo prompt)
+        try { history.replaceState(null, "", location.pathname + location.hash); } catch (_) {}
+        location.reload();
       })
-      .then(function () { pollTally(); })
       .catch(function (err) {
-        if (err && err.message === "401") return; // já alertou e limpou a chave
-        window.alert("Erro ao comunicar com o servidor. Tente novamente.");
+        if (err && err.message === "401") return;
+        window.alert("Erro ao validar a chave. Tente novamente.");
       });
   }
 
@@ -635,17 +573,17 @@
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   }
 
-  /* ---------- backups (histórico + export), gated por PRESENTER_KEY ---------- */
+  /* ---------- backups (histórico + export), gated por EDIT_KEY ---------- */
   function backupPost(action, extra) {
-    var key = presenterKey(false);
+    var key = storedEditKey();
     if (!key) return Promise.reject(new Error("no-key"));
-    return fetch("/api/backup", {
+    return fetch("/api/portobello-backup", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(Object.assign({ action: action, key: key }, extra || {}))
     }).then(function (r) {
       if (r.status === 401) {
-        try { sessionStorage.removeItem(PRESENTER_KEY_STORE); } catch (_) {}
+        clearEditKey();
         window.alert("Chave incorreta.");
         throw new Error("401");
       }
@@ -658,7 +596,7 @@
     backupPost("export")
       .then(function (bundle) {
         var stamp = new Date().toISOString().slice(0, 10);
-        download("caixa-backup-" + stamp + ".json", JSON.stringify(bundle, null, 2), "application/json");
+        download("portobello-backup-" + stamp + ".json", JSON.stringify(bundle, null, 2), "application/json");
       })
       .catch(function (err) {
         if (err && (err.message === "401" || err.message === "no-key")) return;
@@ -743,7 +681,7 @@
 
     function refresh() {
       var list = overlay.querySelector("[data-list]");
-      return fetch("/api/backup", { cache: "no-store" })
+      return fetch("/api/portobello-backup", { cache: "no-store" })
         .then(function (r) { return r.ok ? r.json() : { backups: [] }; })
         .then(function (data) { renderBackupsList(list, data.backups || [], close); })
         .catch(function () { list.innerHTML = '<li class="backups-empty">Erro ao carregar.</li>'; });
@@ -922,42 +860,6 @@
       });
   }
 
-  function exportResult(format) {
-    if (!lastTally || !lastTally.revealed || !lastTally.totals) {
-      window.alert("Exporte depois da revelação.");
-      return;
-    }
-    var meta = territoriesMeta();
-    var suffix = (lastTally.epoch || "sessao").replace(/[^A-Za-z0-9-]/g, "").slice(0, 24);
-    if (format === "json") {
-      download("votacao-territorios-" + suffix + ".json", JSON.stringify({
-        epoch: lastTally.epoch,
-        voterCount: lastTally.voterCount,
-        totals: lastTally.totals
-      }, null, 2), "application/json");
-    } else {
-      var lines = ["territorio,titulo,votos"];
-      meta.forEach(function (t) {
-        lines.push(t.id + ',"' + t.title.replace(/"/g, '""') + '",' + (lastTally.totals[t.id] || 0));
-      });
-      download("votacao-territorios-" + suffix + ".csv", lines.join("\n"), "text/csv");
-    }
-  }
-
-  function onAdminClick(e) {
-    var btn = e.target.closest ? e.target.closest("[data-admin]") : null;
-    if (!btn) return;
-    var a = btn.getAttribute("data-admin");
-    if (a === "reveal") stateAction("reveal");
-    else if (a === "reset") {
-      if (window.confirm("Zerar todos os votos? Os participantes precisarão votar de novo.")) {
-        stateAction("reset");
-      }
-    }
-    else if (a === "json") exportResult("json");
-    else if (a === "csv") exportResult("csv");
-  }
-
   function go(i, fromHash) {
     closeSignal();
     if (!slides.length) return;
@@ -980,7 +882,6 @@
       var slug = slugForSlide(slides[i], i);
       try { history.replaceState(null, "", "#" + slug); } catch (e) {}
     }
-    syncVotePolling();
   }
 
   function next() { if (editing) return; go(index + 1); }
@@ -1041,7 +942,7 @@
           'stroke-linecap="round" stroke-linejoin="round"/></svg>' +
         "</span>";
     }
-    return '<span class="thumb-figure-vote" aria-hidden="true">✦</span>';
+    return '<span class="thumb-figure-fallback" aria-hidden="true">✦</span>';
   }
 
   // miolo completo da .thumb-figure: fundo + número + grip + título
@@ -1081,7 +982,7 @@
 
       // botão de deletar (canto sup. direito), só @aeroli.to e só territórios.
       // span (não button) para não aninhar botões; fecha sobre o objeto s.
-      if (fullAccess && s.type !== "intro" && s.type !== "vote") {
+      if (fullAccess && s.type !== "intro") {
         var del = document.createElement("span");
         del.className = "thumb-del";
         del.setAttribute("role", "button");
@@ -1102,7 +1003,7 @@
       }
 
       // toggle de visibilidade p/ cliente (canto sup. esquerdo), só @aeroli.to e territórios
-      if (fullAccess && s.type !== "intro" && s.type !== "vote") {
+      if (fullAccess && s.type !== "intro") {
         var eye = document.createElement("span");
         eye.className = "thumb-eye";
         eye.setAttribute("role", "button");
@@ -1319,75 +1220,6 @@
     renderSignal();
   }
 
-  /* ---------- votação: polling e estado ---------- */
-  var votePollTimer = null;
-  var lastTally = null;
-
-  function voteEls() {
-    var el = els[index];
-    return (el && el.dataset.type === "vote") ? el : null;
-  }
-
-  function renderVoteState(t) {
-    var el = voteEls();
-    if (!el) return;
-    lastTally = t;
-    var n = el.querySelector("[data-vote-count]");
-    var lbl = el.querySelector("[data-vote-count-label]");
-    if (n) n.textContent = String(t.voterCount);
-    if (lbl) lbl.textContent = t.voterCount === 1 ? "pessoa já votou" : "pessoas já votaram";
-    var status = el.querySelector("[data-vote-status]");
-    if (status) status.hidden = true;
-    var live = el.querySelector("[data-vote-live]");
-    var canvas = el.querySelector("[data-constellation]");
-    if (t.revealed && t.totals) {
-      if (live) live.hidden = true;
-      if (canvas && window.CaixaConstellation) {
-        canvas.hidden = false;
-        window.CaixaConstellation.render(canvas, territoriesMeta(), t.totals);
-      }
-    } else {
-      if (live) live.hidden = false;
-      if (canvas) canvas.hidden = true;
-    }
-    syncAdminVisibility();
-  }
-
-  function territoriesMeta() {
-    return slides.filter(function (s) { return s.type !== "vote" && s.type !== "intro"; })
-                 .map(function (s) { return { id: s.id, title: s.title }; });
-  }
-
-  function renderVoteUnavailable() {
-    var el = voteEls();
-    if (!el) return;
-    var status = el.querySelector("[data-vote-status]");
-    if (status) {
-      status.textContent = "Votação indisponível neste ambiente (funções não publicadas).";
-      status.hidden = false;
-    }
-  }
-
-  var pollAbort = null;
-
-  function pollTally() {
-    // cancela a requisição anterior — evita resposta atrasada sobrescrever a atual
-    if (pollAbort) pollAbort.abort();
-    pollAbort = (typeof AbortController === "function") ? new AbortController() : null;
-    fetch("/api/tally", { cache: "no-store", signal: pollAbort && pollAbort.signal })
-      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-      .then(renderVoteState)
-      .catch(function (e) {
-        if (!e || e.name !== "AbortError") renderVoteUnavailable();
-      });
-  }
-
-  function syncVotePolling() {
-    var onVote = !!voteEls();
-    if (onVote && !votePollTimer) { pollTally(); votePollTimer = setInterval(pollTally, 2000); }
-    if (!onVote && votePollTimer) { clearInterval(votePollTimer); votePollTimer = null; }
-  }
-
   /* ---------- auto-ocultar dos controles ---------- */
   function poke() {
     if (!ready || overviewOpen) return;
@@ -1426,8 +1258,9 @@
       case "Home": e.preventDefault(); go(0); break;
       case "End": e.preventDefault(); go(slides.length - 1); break;
       case "f": case "F": toggleFull(); break;
-      case "r": case "R":
-        if (voteEls()) { e.preventDefault(); stateAction("reveal"); }
+      case "e": case "E":
+        e.preventDefault();
+        if (!fullAccess) requestEditMode(); else toggleEdit();
         break;
     }
   }
@@ -1477,16 +1310,14 @@
     ready = true;
     go(hashIndex(), true);
     poke(); // inicia o ciclo de auto-ocultar
-    syncAdminVisibility();
   }
 
   // registrado de forma síncrona (antes do login disparar "enter-deck") p/ não perder o evento
   function requestEnter() { entered = true; maybeBuild(); }
   function maybeActivate() { if (entered && loaded) activate(); }
 
-  // só monta o deck depois que o usuário entrou (o login grava sessionStorage
-  // "deck-full" ANTES do enter-deck) — assim o perfil @aeroli.to já está
-  // disponível quando buildDeck lê fullAccess. Sem capa (dev/visão direta),
+  // só monta o deck depois que o usuário entrou — assim storedEditKey()
+  // já está disponível quando buildDeck lê fullAccess. Sem capa (dev/visão direta),
   // entered já é true e monta assim que os dados chegam.
   function onData(data) { pendingData = data; maybeBuild(); }
   function maybeBuild() {
@@ -1669,9 +1500,7 @@
     var slide = makeNewSlideTemplate(layout);
     postContent({ action: "addSlide", slide: slide })
       .then(function () {
-        // insere antes da votação (que é sempre o último slide), nunca depois dela
-        var voteIdx = slides.findIndex(function (s) { return s.type === "vote"; });
-        var i = voteIdx === -1 ? slides.length : voteIdx;
+        var i = slides.length;
         slides.splice(i, 0, slide);
         var el = buildSlide(slide, i);
         els.splice(i, 0, el);
@@ -1765,7 +1594,7 @@
   function toggleEdit() {
     if (editing) { cancelEdit(); return; }
     var s = slides[index];
-    if (!s || s.type === "vote" || s.type === "intro") {
+    if (!s || s.type === "intro") {
       window.alert("Só territórios podem ser editados (título, corpo e imagem).");
       return;
     }
@@ -2196,13 +2025,14 @@
   }
 
   function postContent(payload) {
-    return fetch("/api/content", {
+    payload = Object.assign({ key: storedEditKey() }, payload);
+    return fetch("/api/portobello-content", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
     }).then(function (r) {
       if (r.status === 401) {
-        try { sessionStorage.removeItem(PRESENTER_KEY_STORE); } catch (_) {}
+        clearEditKey();
         throw new Error("401");
       }
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -2362,7 +2192,7 @@
   function buildDeck(data) {
     slides = (data && data.slides) || [];
     deckMeta = (data && data.meta) || null;
-    try { fullAccess = sessionStorage.getItem("deck-full") === "1"; } catch (_) { fullAccess = false; }
+    fullAccess = !!storedEditKey();
     slides = slides.filter(function (s) {
       // @caixa (fullAccess=false): só vê o que isClientVisible liberar (allowlist ou seed).
       // publishedHidden (deletar pelo índice): some para todos, inclusive @aeroli.to.
@@ -2370,11 +2200,6 @@
         publishedHidden.indexOf(s.id) === -1;
     });
     slides = applySavedOrder(slides);   // restaura ordem reordenada anteriormente
-    // a votação fica sempre por último, mesmo após reordenar ou adicionar territórios
-    // (sort estável no V8: preserva a ordem relativa dos demais)
-    slides.sort(function (a, b) {
-      return (a.type === "vote" ? 1 : 0) - (b.type === "vote" ? 1 : 0);
-    });
     els = slides.map(buildSlide);
     els.forEach(function (el) { stage.appendChild(el); });
     updateTerritoryNumbers();   // preenche os eyebrows "Território NN / 10"
@@ -2391,6 +2216,16 @@
   // com #login presente, o deck espera o "enter-deck" do fim da introdução do login;
   // sem login (dev/visão direta), ativa assim que os dados chegam.
   if (!document.getElementById("login")) entered = true;
+  // ?edit=1: ativa o modo edição sem teclado (útil no mobile)
+  try {
+    if (new URLSearchParams(location.search).get("edit") === "1") {
+      if (storedEditKey()) {
+        history.replaceState(null, "", location.pathname + location.hash);
+      } else {
+        requestEditMode();
+      }
+    }
+  } catch (_) {}
 
   // aplica o conteúdo publicado sobre os slides-base:
   // - overrides (texto/imagem/sinais) por id
@@ -2423,7 +2258,7 @@
 
   // conteúdo do servidor; falha de rede / dev sem functions => null (usa a base)
   function loadContent() {
-    return fetch("/api/content", { cache: "no-store" })
+    return fetch("/api/portobello-content", { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .catch(function () { return null; });
   }
