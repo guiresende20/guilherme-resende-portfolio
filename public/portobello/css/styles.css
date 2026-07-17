@@ -1,0 +1,1944 @@
+/* ============================================================
+   Aeroli.to · Deck — design tokens (design.md §2/§3/§12)
+   Fonte única de verdade dos valores; nada de hex fora do :root.
+   ============================================================ */
+:root {
+  /* Fundos */
+  --bg-base:        #000000;
+  --bg-elevated:    #0A0A0A;
+  --bg-input:       #050505;
+
+  /* Texto */
+  --text-primary:   #FFFFFF;
+  --text-secondary: #9A9A9A;
+  --text-tertiary:  #5C5C5C;
+
+  /* Estrutura */
+  --border-default: #2E2E2E;
+  --border-strong:  #FFFFFF;
+
+  /* Acentos */
+  --accent-violet:  #6C5CE7;
+  --accent-pink:    #F4538A;
+  --accent-cyan:    #5CE1E6;
+
+  /* acento ativo por slide (sobrescrito inline por data-accent) */
+  --accent: var(--accent-violet);
+
+  /* Forma */
+  --radius-base:    2px;
+
+  /* Motion */
+  --ease-ui:        cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-ui:    200ms;
+
+  /* Tipografia */
+  --font-display:  "Times New Roman", Times, serif;
+  --font-editorial: "Times New Roman", Times, serif;
+  --font-brand:    "Manrope", "Helvetica Neue", Arial, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+  touch-action: manipulation;
+}
+
+img { display: block; max-width: 100%; }
+
+/* ---------- starfield global (atmosfera, design.md §2.3/§8) ---------- */
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.6s var(--ease-ui);
+}
+
+/* partículas do índice — mesmo campo do login (continuidade na entrada).
+   Só aparecem no slide de abertura (body.on-intro), no lugar do starfield. */
+#index-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease-ui), visibility 0.6s var(--ease-ui);
+}
+body.on-intro #starfield { opacity: 0; }
+body.on-intro #index-particles { opacity: 1; visibility: visible; }
+
+/* ============================================================
+   DECK / SLIDES
+   ============================================================ */
+#deck {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.9s var(--ease-ui), visibility 0.9s var(--ease-ui);
+}
+#deck.is-active { opacity: 1; visibility: visible; }
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease-ui), visibility 0.6s var(--ease-ui);
+}
+.slide.is-current { opacity: 1; visibility: visible; }
+
+/* foto de fundo full-bleed + overlay p/ legibilidade */
+.slide-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+/* placeholder (logo Aerolito): contido e centralizado, sem esticar nem zoom.
+   scale-down (em vez de contain) impede que o logo — que é pequeno (262×240) —
+   seja ampliado além do tamanho nativo em telas grandes e fique "estourado". */
+.slide-bg.is-placeholder {
+  object-fit: scale-down;
+  padding: clamp(40px, 12vmin, 160px);
+  background: var(--bg-base, #050505);
+}
+.slide-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.55) 34%, rgba(0,0,0,0.10) 62%, rgba(0,0,0,0) 100%),
+    linear-gradient(0deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 40%);
+}
+
+/* Ken Burns: zoom/pan lento na foto do slide ativo (telão vivo). */
+.slide.is-current .slide-bg {
+  animation: ken-burns 18s var(--ease-ui) both;
+  transform-origin: center;
+  will-change: transform;
+}
+/* o placeholder não recebe Ken Burns (não deve escalar/recortar o logo) */
+.slide.is-current .slide-bg.is-placeholder { animation: none; transform: none; }
+@keyframes ken-burns {
+  from { transform: scale(1.04) translate(0, 0); }
+  to   { transform: scale(1.12) translate(-1.5%, -1%); }
+}
+
+/* logo wireframe no canto superior direito */
+.deck-logo {
+  position: absolute;
+  top: clamp(18px, 2.8vw, 38px);
+  right: clamp(18px, 2.8vw, 48px);
+  z-index: 5;
+  width: clamp(52px, 5.5vw, 84px);
+  opacity: 0.92;
+  pointer-events: none;
+}
+.deck-logo img { width: 100%; height: auto; display: block; }
+/* na vote-page (rolável) o logo fica fixo no canto da viewport */
+body.vote-page .deck-logo { position: fixed; }
+
+/* botão X para ocultar o slide (canto superior esquerdo) */
+.slide-close {
+  position: absolute;
+  top: clamp(18px, 2.8vw, 38px);
+  left: clamp(18px, 2.8vw, 48px);
+  z-index: 6;
+  width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0;
+  font: 300 24px/1 var(--font-brand, system-ui);
+  color: var(--text-primary, #fff);
+  background: rgba(0, 0, 0, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 50%;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s var(--ease-ui), background 0.2s var(--ease-ui), border-color 0.2s var(--ease-ui);
+}
+/* só aparece no slide visível (evita captura de clique nos slides empilhados) */
+.slide.is-current .slide-close { opacity: 0.7; }
+.slide:not(.is-current) .slide-close { pointer-events: none; }
+.slide-close:hover { opacity: 1; background: var(--accent-pink); border-color: var(--accent-pink); }
+
+/* painel de conteúdo (design.md: borda 1px, radius 2px — sem "vidro" pesado) */
+.panel {
+  position: absolute;
+  left: clamp(24px, 6vw, 112px);
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(56ch, 48vw);
+  min-width: 320px;
+  padding: clamp(28px, 3vw, 44px);
+  background: color-mix(in srgb, var(--bg-elevated) 78%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  /* textos longos (territórios de 2–3 parágrafos) rolam dentro do painel */
+  max-height: calc(100dvh - 56px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-primary) 22%, transparent) transparent;
+}
+.panel::-webkit-scrollbar { width: 8px; }
+.panel::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text-primary) 18%, transparent);
+  border-radius: 8px;
+}
+
+/* corpo com vários parágrafos (formato novo, array de body) */
+.panel-copy .panel-body { margin-bottom: 16px; }
+.panel-copy .panel-body:last-child { margin-bottom: 28px; }
+
+.panel-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+
+.panel-title {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(30px, 3.4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+/* subtítulo do slide — logo abaixo do título */
+.panel-subtitle {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(15px, 1.4vw, 22px);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+  color: #C9C9CE;
+  max-width: 48ch;
+  margin: -10px 0 22px;
+}
+.panel-subtitle:empty { display: none; }
+
+.panel-body {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(10.5px, 0.66vw, 12px);
+  line-height: 1.38;
+  color: #E7E7E7;
+  max-width: 60ch;
+  margin-bottom: 28px;
+}
+
+/* subtítulo dentro do corpo (ex.: "Aderência") */
+.panel-subhead {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 4px 0 14px;
+}
+
+/* citação (pull-quote) com barra de destaque à esquerda */
+.panel-quote {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(14px, 1.05vw, 19px);
+  line-height: 1.3;
+  color: #F4F4F4;
+  max-width: 56ch;
+  margin: 0 0 26px;
+  padding-left: 18px;
+  border-left: 3px solid var(--accent);
+}
+
+.panel-quote-cite {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--font-base, inherit);
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  text-align: right;
+}
+
+/* número/trecho em destaque dentro do corpo (**...**) */
+.stat-hl {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* epígrafe flutuante: citação fora do card, sobre a imagem (canto sup. direito) */
+.slide-epigraph {
+  position: absolute;
+  /* começa abaixo do logo giratório do canto (.deck-logo) p/ não sobrepor */
+  top: clamp(128px, 15vh, 160px);
+  right: clamp(24px, 5vw, 96px);
+  z-index: 2;
+  max-width: min(40ch, 40vw);
+  margin: 0;
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(17px, 1.7vw, 30px);
+  line-height: 1.28;
+  text-align: right;
+  color: #F6F6F6;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+}
+.slide-epigraph cite {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--font-base, inherit);
+  font-style: normal;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7);
+}
+
+@media (max-width: 560px) {
+  /* no mobile o card fica na base; a epígrafe ocupa o topo livre,
+     mas abaixo do logo (top:14px + ~64px) p/ não sobrepor */
+  .slide-epigraph {
+    top: 88px;
+    left: 16px;
+    right: 16px;
+    max-width: none;
+    font-size: 16px;
+    line-height: 1.3;
+  }
+}
+
+/* chips = botões outline (design.md §5.3) — agora links p/ o site da empresa */
+.chips { list-style: none; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+  text-decoration: none;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--duration-ui) var(--ease-ui),
+              color var(--duration-ui) var(--ease-ui),
+              border-color var(--duration-ui) var(--ease-ui);
+}
+.chip::before {
+  content: "";
+  width: 6px; height: 6px;
+  margin-right: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: none;
+}
+/* primeiro item de cada slide: bullet rosa */
+.chips li:first-child .chip::before { background: var(--accent-pink); }
+.chip:hover { background: var(--text-primary); color: var(--bg-base); border-color: var(--text-primary); }
+.chip:hover::before,
+.chips li:first-child .chip:hover::before { background: var(--bg-base); }
+/* chips clicáveis (painel de sinal) */
+button.chip { cursor: pointer; font: inherit; }
+
+/* entrada de conteúdo: fade-up sutil (design.md §8) */
+.slide.is-current .panel > * { animation: fade-up 0.6s var(--ease-ui) both; }
+.slide.is-current .panel > *:nth-child(1) { animation-delay: 0.05s; }
+.slide.is-current .panel > *:nth-child(2) { animation-delay: 0.10s; }
+.slide.is-current .panel > *:nth-child(3) { animation-delay: 0.16s; }
+.slide.is-current .panel > *:nth-child(4) { animation-delay: 0.22s; }
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   LAYOUTS-BASE ADICIONAIS (grade · wordmark · imagem · manifesto)
+   Reaproveitam o MESMO DOM de território (edição inline, índice,
+   PDF e visibilidade continuam iguais); a diferença é só visual,
+   pela classe "slide--<layout>" no <section>. O logo global
+   (.deck-logo, canto sup. direito) permanece visível nos quatro.
+   ============================================================ */
+
+/* fundo preto sólido nos layouts sem foto (grade, wordmark, manifesto) */
+.slide--grid,
+.slide--wordmark,
+.slide--manifesto { background: var(--bg-base); }
+.slide--grid > .slide-bg,
+.slide--wordmark > .slide-bg,
+.slide--manifesto > .slide-bg,
+.slide--grid > .slide-scrim,
+.slide--wordmark > .slide-scrim,
+.slide--manifesto > .slide-scrim { display: none; }
+
+/* painel = área centralizada, sem card/borda (grade, wordmark, manifesto) */
+.slide--grid > .panel,
+.slide--wordmark > .panel,
+.slide--manifesto > .panel {
+  position: absolute; inset: 0;
+  left: 0; top: 0; transform: none;
+  width: 100%; min-width: 0; max-width: none;
+  max-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  gap: clamp(12px, 2vh, 24px);
+  /* padding-top generoso: mantém o conteúdo abaixo do logo do canto */
+  padding: clamp(80px, 11vh, 132px) clamp(28px, 8vw, 140px);
+  background: transparent; border: 0;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  overflow-y: auto;
+}
+/* some com corpo/chips vazios p/ não abrir espaço morto no centro */
+.slide--wordmark .panel-copy:empty,
+.slide--manifesto .panel-copy:empty,
+.slide--wordmark .chips:empty,
+.slide--manifesto .chips:empty,
+.slide--hero .chips:empty { display: none; }
+
+/* ---------- 1) grade de miniaturas ---------- */
+/* galeria = thumbs pequenas quadradas, lado a lado (imagens enviadas) */
+.slide--grid .grid-gallery {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(10px, 1.4vw, 20px);
+  width: 100%;
+  max-width: 1100px;
+  margin-top: clamp(10px, 2.5vh, 28px);
+}
+.slide--grid .grid-thumb {
+  position: relative;
+  width: clamp(110px, 14vw, 190px);
+  aspect-ratio: 1 / 1;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  overflow: hidden;
+  background: var(--bg-elevated);
+}
+.slide--grid .grid-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+
+/* --- editor da galeria (modo de edição) --- */
+.grid-gallery-edit.is-uploading { opacity: 0.7; }
+.grid-thumb-del {
+  position: absolute; top: 4px; right: 4px;
+  z-index: 2;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font: 300 16px/1 var(--font-brand, system-ui); color: #fff;
+  background: rgba(10, 10, 14, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px; cursor: pointer;
+}
+.grid-thumb-del:hover { background: #b91c1c; border-color: #b91c1c; }
+.slide--grid .grid-thumb-add {
+  display: flex; align-items: center; justify-content: center;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--text-primary) 30%, transparent);
+  background: transparent;
+}
+.grid-add-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 100%; height: 100%;
+  font: inherit; color: var(--accent, #8b5cf6);
+  background: transparent; border: 0; cursor: pointer;
+}
+.grid-add-plus { font-size: clamp(26px, 3vw, 40px); line-height: 1; }
+.grid-add-txt {
+  font-family: var(--font-brand); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+}
+.grid-add-btn:hover { color: var(--text-primary); }
+
+/* ---------- 2) marca (wordmark + linha) ---------- */
+.slide--wordmark > .panel {
+  align-items: flex-start;
+  text-align: left;
+}
+.slide--wordmark .panel-title {
+  display: flex; align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+  width: 100%;
+  margin: 0;
+  font-family: var(--font-brand);
+  font-style: normal;
+  font-weight: 800;
+  font-size: clamp(46px, 9vw, 124px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+}
+.slide--wordmark .panel-title::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: color-mix(in srgb, var(--text-primary) 68%, transparent);
+}
+.slide--wordmark .panel-subtitle {
+  font-family: var(--font-brand);
+  font-style: normal;
+  color: var(--text-secondary);
+  letter-spacing: 0.02em;
+  max-width: 52ch;
+  margin: clamp(16px, 2vh, 28px) 0 0;
+}
+
+/* ---------- 3) imagem em destaque + legenda ---------- */
+.slide--hero > .slide-scrim { display: none; }
+.slide--hero > .panel {
+  top: auto; bottom: 0; left: 0;
+  transform: none;
+  width: 100%; min-width: 0; max-width: none;
+  max-height: none;
+  /* padding-bottom afasta a legenda da barra de controles (evita sobreposição) */
+  padding: clamp(48px, 9vh, 96px) clamp(24px, 6vw, 112px) clamp(84px, 12vh, 120px);
+  background: linear-gradient(0deg,
+    rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.42) 58%, rgba(0,0,0,0) 100%);
+  border: 0;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  overflow: visible;
+}
+.slide--hero .panel-title {
+  font-size: clamp(26px, 3vw, 44px);
+  margin-bottom: 6px;
+}
+.slide--hero .panel-subtitle { margin: 0 0 8px; }
+.slide--hero .panel-copy .panel-body { max-width: 72ch; margin-bottom: 0; }
+
+/* ---------- 4) frase-manifesto ---------- */
+.slide--manifesto .panel-eyebrow { margin-bottom: clamp(18px, 3vh, 34px); }
+.slide--manifesto .panel-title {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--font-brand);
+  font-style: normal;
+  font-weight: 800;
+  font-size: clamp(32px, 6vw, 84px);
+  line-height: 1.03;
+  letter-spacing: -0.02em;
+}
+.slide--manifesto .panel-subtitle {
+  font-family: var(--font-brand);
+  font-style: normal;
+  color: var(--text-secondary);
+  max-width: 46ch;
+  margin: clamp(18px, 3vh, 30px) auto 0;
+}
+
+/* ---------- 5) vídeo (YouTube embed) ---------- */
+.slide--video { background: var(--bg-base); }
+.slide--video > .panel {
+  position: absolute; inset: 0;
+  left: 0; top: 0; transform: none;
+  width: 100%; min-width: 0; max-width: none; max-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: clamp(14px, 2.5vh, 30px);
+  padding: clamp(56px, 8vh, 104px) clamp(24px, 6vw, 96px);
+  background: transparent; border: 0;
+  backdrop-filter: none; -webkit-backdrop-filter: none;
+  text-align: center;
+  overflow-y: auto;
+}
+.slide--video .panel-title {
+  margin: 0;
+  font-family: var(--font-brand); font-style: normal; font-weight: 800;
+  font-size: clamp(20px, 2.4vw, 38px);
+  letter-spacing: -0.01em;
+}
+.slide--video .panel-title:empty { display: none; }
+
+/* retângulo 16:9 com borda branca, centralizado (limita pela altura p/ não cortar) */
+.slide--video .video-frame {
+  position: relative;
+  width: min(1120px, 92vw, calc((100dvh - 220px) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  border: 2px solid var(--border-strong, #fff);
+  border-radius: var(--radius-base);
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+}
+.slide--video .video-embed {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  border: 0; display: block;
+}
+.slide--video .video-empty {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; text-align: center;
+  font-family: var(--font-editorial); font-style: italic;
+  font-size: clamp(13px, 1.2vw, 18px);
+  color: var(--text-secondary);
+}
+
+/* campo de link do YouTube (modo de edição) */
+.video-edit {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: min(560px, 84vw);
+}
+.video-edit-label {
+  font-family: var(--font-brand); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary);
+}
+.video-edit-input {
+  width: 100%;
+  padding: 10px 16px;
+  font: inherit; font-size: 14px; text-align: center;
+  color: #fff;
+  background: rgba(17, 17, 22, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.video-edit-input:focus { outline: 1px solid var(--accent, #8b5cf6); }
+
+/* ---------- 5b) media (GIF/MP4 em loop) — reusa a moldura do vídeo ---------- */
+.slide--media { background: var(--bg-base); }
+.slide--media > .panel {
+  position: absolute; inset: 0;
+  left: 0; top: 0; transform: none;
+  width: 100%; min-width: 0; max-width: none; max-height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  padding: 56px 40px;
+  background: none; border: 0; box-shadow: none;
+  text-align: center;
+  overflow-y: auto;
+}
+.slide--media .panel-title {
+  margin: 0;
+  font-family: var(--font-brand); font-style: normal; font-weight: 800;
+  font-size: clamp(20px, 2.4vw, 38px);
+  letter-spacing: -0.01em;
+}
+.slide--media .panel-title:empty { display: none; }
+
+.slide--media .media-frame {
+  position: relative;
+  width: min(1120px, 92vw, calc((100dvh - 220px) * 16 / 9));
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 6px solid #fff;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  display: flex; align-items: center; justify-content: center;
+}
+.slide--media .media-embed {
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto;
+  display: block;
+}
+.slide--media .media-empty {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; text-align: center;
+  font-family: var(--font-brand); font-size: 14px; color: var(--text-secondary);
+}
+
+/* editor do layout media (upload + URL) */
+.media-edit {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  width: min(560px, 84vw);
+}
+.media-edit-btn {
+  padding: 9px 20px;
+  font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  color: #fff; background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.media-edit-btn:hover { background: rgba(255, 255, 255, 0.2); }
+.media-edit-btn:disabled { opacity: 0.5; cursor: default; }
+.media-edit-hint {
+  font-size: 11px; color: var(--text-secondary); text-align: center;
+}
+.media-edit-label {
+  margin-top: 4px;
+  font-family: var(--font-brand); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary);
+}
+.media-edit-input {
+  width: 100%;
+  padding: 10px 16px;
+  font: inherit; font-size: 14px; text-align: center;
+  color: #fff; background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+.media-edit-input:focus { outline: 1px solid var(--accent, #8b5cf6); }
+
+/* seletor de layout do botão "+ Novo slide" (índice, @aeroli.to) */
+.overview-add-wrap { position: relative; }
+.overview-add-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  z-index: 30;
+  display: flex; flex-direction: column;
+  width: 268px; padding: 6px;
+  text-align: left;
+  background: color-mix(in srgb, var(--bg-base) 94%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.overview-add-menu[hidden] { display: none; }
+.overview-add-opt {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 9px 12px; cursor: pointer;
+  font: inherit; text-align: left; color: var(--text-primary);
+  background: transparent; border: 0; border-radius: var(--radius-base);
+}
+.overview-add-opt:hover { background: color-mix(in srgb, var(--text-primary) 10%, transparent); }
+.overview-add-opt-name { font-size: 13px; }
+.overview-add-opt-desc { font-size: 11px; color: var(--text-tertiary); }
+
+/* mobile: layouts centralizados reduzem padding lateral */
+@media (max-width: 560px) {
+  .slide--grid > .panel,
+  .slide--wordmark > .panel,
+  .slide--manifesto > .panel { padding: 88px 18px 96px; }
+  .slide--wordmark .panel-title { font-size: clamp(38px, 15vw, 68px); }
+  .slide--manifesto .panel-title { font-size: clamp(28px, 8.5vw, 52px); }
+  .slide--hero > .panel { padding: 56px 18px 96px; }
+}
+
+/* ---------- progresso de leitura ---------- */
+.deck-progress {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  z-index: 6;
+  background: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  pointer-events: none;
+}
+.deck-progress-bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent-violet), var(--accent-pink));
+  transition: width 0.5s var(--ease-ui);
+}
+
+/* ============================================================
+   SLIDE DE INTRODUÇÃO (logo após a capa)
+   miniaturas dos territórios + download do report em PDF.
+   Sem foto de fundo: o starfield global aparece atrás.
+   ============================================================ */
+.slide-intro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.intro-wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin: auto;
+  padding: clamp(48px, 7vh, 96px) clamp(24px, 5vw, 72px);
+}
+
+.intro-head {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto clamp(28px, 4vh, 48px);
+  /* a animação fade-up cria contextos de empilhamento por transform em todos os
+     filhos do .intro-wrap; sem isto a grade (depois no DOM) cobre o botão/painel */
+  position: relative;
+  z-index: 2;
+}
+.intro-eyebrow {
+  font-family: var(--font-brand);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.intro-title {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(34px, 5vw, 64px);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  margin-bottom: 18px;
+}
+.intro-lead {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(11.2px, 1.04vw, 13.6px);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin: 0 auto 26px;
+  max-width: 60ch;
+}
+
+/* ícone redondo + rótulo — reaproveitados pelo botão "Gerar PDF" */
+.intro-download-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  transition: background var(--duration-ui) var(--ease-ui),
+              color var(--duration-ui) var(--ease-ui),
+              border-color var(--duration-ui) var(--ease-ui);
+}
+.intro-download-icon svg { width: 16px; height: 16px; }
+.intro-download-label {
+  font-family: var(--font-brand);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.intro-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: clamp(14px, 1.6vw, 22px);
+  position: relative;
+  z-index: 1;
+}
+.intro-grid li { display: block; }
+.intro-thumb { width: 100%; }
+
+/* entrada suave do conteúdo da intro */
+.slide-intro.is-current .intro-wrap > * { animation: fade-up 0.6s var(--ease-ui) both; }
+.slide-intro.is-current .intro-grid { animation-delay: 0.12s; }
+
+@media (max-width: 560px) {
+  .intro-wrap { padding: 40px 16px 56px; }
+  .intro-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-intro.is-current .intro-wrap > * { animation: none !important; }
+}
+
+/* ============================================================
+   CONTROLES / NAVEGAÇÃO
+   ============================================================ */
+.deck-controls {
+  position: fixed;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 12px;
+  background: color-mix(in srgb, var(--bg-elevated) 72%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: opacity 0.4s var(--ease-ui), transform 0.4s var(--ease-ui);
+}
+
+/* auto-ocultar: some após inatividade; volta em qualquer ação */
+#deck.controls-hidden .deck-controls {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(12px);
+}
+/* mantém visível enquanto a visão geral estiver aberta */
+#deck.overview-open .deck-controls { opacity: 0; pointer-events: none; }
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px; height: 36px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  cursor: pointer;
+  transition: background var(--duration-ui) var(--ease-ui),
+              color var(--duration-ui) var(--ease-ui),
+              border-color var(--duration-ui) var(--ease-ui);
+}
+.nav-btn:hover:not(:disabled) { background: var(--text-primary); color: var(--bg-base); border-color: var(--text-primary); }
+.nav-btn:disabled { opacity: 0.35; cursor: default; }
+.nav-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+
+.deck-counter {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  min-width: 4ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.deck-counter .cur { color: var(--text-primary); }
+
+:focus-visible { outline: 1px solid var(--text-primary); outline-offset: 2px; }
+
+/* ============================================================
+   VISÃO GERAL / ÍNDICE (grade de miniaturas — Esc ou botão índice)
+   ============================================================ */
+.overview {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--bg-base) 88%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease-ui), visibility 0.3s var(--ease-ui);
+}
+#deck.overview-open .overview { opacity: 1; visibility: visible; }
+
+.overview-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: clamp(18px, 3vw, 36px) clamp(20px, 4vw, 56px) 0;
+}
+.overview-headings { display: flex; flex-direction: column; gap: 2px; }
+.overview-title {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(20px, 2.4vw, 32px);
+  letter-spacing: 0.01em;
+}
+.overview-hint {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: clamp(16px, 2vw, 28px);
+  align-content: start;
+  padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 56px) clamp(28px, 5vw, 64px);
+  overflow-y: auto;
+}
+
+.thumb {
+  display: block;
+  text-align: left;
+  padding: 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  overflow: hidden;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: border-color var(--duration-ui) var(--ease-ui),
+              transform var(--duration-ui) var(--ease-ui);
+}
+.thumb:hover { border-color: var(--text-primary); transform: translateY(-2px); }
+.thumb.is-current { border-color: var(--accent-violet); }
+
+/* reordenar por arrastar (desktop) */
+.thumb-slide { cursor: grab; }
+.thumb-slide:active { cursor: grabbing; }
+.thumb-slide img { pointer-events: none; }   /* o botão é a fonte do drag, não a imagem */
+.thumb.dragging { opacity: 0.4; cursor: grabbing; transform: none; }
+.thumb.drop-before { box-shadow: -4px 0 0 0 var(--accent-pink); }
+.thumb.drop-after  { box-shadow:  4px 0 0 0 var(--accent-pink); }
+
+.thumb-grip {
+  position: absolute;
+  top: 6px; right: 8px;
+  z-index: 2;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-tertiary);
+  opacity: 0;
+  transition: opacity var(--duration-ui) var(--ease-ui);
+  pointer-events: none;
+}
+.thumb-slide:hover .thumb-grip { opacity: 0.85; }
+
+.thumb-figure {
+  /* block (não o inline padrão do <span>): sem isto o aspect-ratio é ignorado
+     e cada thumb herda o aspecto da imagem, ficando de tamanhos diferentes. */
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #050505;
+}
+.thumb-figure img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* placeholder na miniatura: logo contido e centralizado (sem cover) */
+.thumb-figure img.is-placeholder {
+  object-fit: contain;
+  padding: 14%;
+}
+.thumb-num {
+  position: absolute;
+  top: 8px; left: 8px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--bg-base) 70%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+}
+/* título do slide sobreposto na miniatura (sempre visível no índice) */
+.thumb-title {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  padding: 26px 12px 10px;
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.2;
+  text-align: left;
+  color: var(--text-primary);
+  background: linear-gradient(0deg,
+    rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 45%, rgba(0,0,0,0) 100%);
+}
+
+/* hover rico: zoom na foto + título revelado com fade (índice e grade da intro) */
+.thumb-figure img { transition: transform 0.5s var(--ease-ui); }
+.thumb:hover .thumb-figure img { transform: scale(1.06); }
+@media (hover: hover) {
+  .thumb-slide .thumb-title,
+  .intro-thumb .thumb-title {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity var(--duration-ui) var(--ease-ui),
+                transform var(--duration-ui) var(--ease-ui);
+  }
+  .thumb-slide:hover .thumb-title,
+  .thumb-slide.is-current .thumb-title,
+  .intro-thumb:hover .thumb-title { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .thumb-figure img { transition: none; }
+  .slide.is-current .slide-bg { animation: none !important; }
+  .thumb-slide .thumb-title,
+  .intro-thumb .thumb-title { opacity: 1 !important; transform: none !important; }
+}
+
+@media (max-width: 560px) {
+  /* painel reflui para a base, com rolagem se o conteúdo for alto */
+  .panel {
+    width: auto;
+    left: 12px; right: 12px;
+    top: auto; bottom: 84px;
+    transform: none;
+    min-width: 0;
+    max-height: calc(100dvh - 84px - 84px);
+    overflow-y: auto;
+    padding: 20px 18px;
+  }
+  .panel-title { font-size: clamp(26px, 8vw, 34px); margin-bottom: 14px; }
+  .panel-body { font-size: 12.5px; line-height: 1.55; margin-bottom: 16px; }
+  .chip { padding: 11px 16px; }
+  .slide-scrim {
+    background:
+      linear-gradient(0deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.55) 38%, rgba(0,0,0,0.15) 66%, rgba(0,0,0,0) 100%);
+  }
+
+  /* logo do deck menor p/ não competir com o conteúdo */
+  .deck-logo { width: 64px; top: 14px; right: 16px; }
+
+  /* barra de controles mais compacta */
+  .deck-controls { gap: 8px; padding: 7px 10px; }
+  .nav-btn { width: 38px; height: 38px; } /* alvo de toque confortável */
+  .deck-counter { font-size: 12px; min-width: 3.5ch; }
+
+  /* índice: mais colunas pequenas + cabeçalho enxuto */
+  .overview-head { padding: 16px 16px 0; }
+  .overview-title { font-size: 20px; }
+  .overview-hint { display: none; }   /* reordenar é desktop-only por enquanto */
+  .overview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
+    padding: 16px 16px 28px;
+  }
+  .thumb-title { padding: 22px 10px 8px; font-size: 13px; }
+}
+
+/* ---------- prefers-reduced-motion (design.md §8/§10) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  #deck, .slide,
+  .nav-btn, .chip, .deck-controls, .overview, .thumb, .deck-progress-bar {
+    transition: none !important;
+  }
+  .slide.is-current .panel > * { animation: none !important; }
+}
+
+/* ============================================================
+   PAINEL DE SINAL
+   ============================================================ */
+.signal-panel {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: min(420px, 92vw);
+  background: var(--bg-elevated);
+  border-left: 1px solid var(--border-default);
+  padding: 56px 28px 28px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: signal-in .2s var(--ease-ui);
+}
+.signal-panel[hidden] { display: none; }
+@keyframes signal-in {
+  from { transform: translateX(14px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+.signal-close { position: absolute; top: 14px; right: 14px; }
+.signal-kicker {
+  font-family: var(--font-brand);
+  font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.signal-title {
+  font-family: var(--font-brand);
+  font-weight: 800; font-size: 22px; line-height: 1.2;
+  color: var(--text-primary);
+}
+.signal-desc {
+  font-family: var(--font-editorial);
+  font-size: 15px; line-height: 1.55;
+  color: var(--text-secondary);
+}
+.signal-link {
+  align-self: flex-start;
+  font-family: var(--font-brand);
+  font-size: 13px; color: var(--accent, var(--accent-violet));
+  border: 1px solid var(--border-default);
+  padding: 8px 14px; border-radius: var(--radius-base);
+  text-decoration: none;
+}
+.signal-link:hover, .signal-link:focus-visible { border-color: var(--border-strong); }
+.signal-hint {
+  margin-top: auto;
+  font-size: 11px; color: var(--text-tertiary);
+}
+/* estado invertido completo — sem ele, o :hover (fundo branco) + cor branca
+   do is-open deixavam o label do chip aberto invisível */
+.chip.is-open,
+.chip.is-open:hover { background: var(--text-primary); color: var(--bg-base); border-color: var(--text-primary); }
+.chip.is-open::before,
+.chips li:first-child .chip.is-open::before { background: var(--bg-base); }
+
+@media (max-width: 560px) {
+  .signal-panel {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: auto; max-height: 70vh;
+    border-left: none; border-top: 1px solid var(--border-default);
+    border-radius: 14px 14px 0 0;
+    animation-name: signal-up;
+  }
+  @keyframes signal-up {
+    from { transform: translateY(14px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+  .signal-hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .signal-panel { animation: none; }
+}
+
+/* ============================================================
+   PÁGINA DE VOTAÇÃO
+   ============================================================ */
+
+/* Neutraliza regras globais do deck (overflow:hidden, height:100dvh) que quebram
+   a rolagem numa página normal de formulário — libera html e body na vote-page. */
+html:has(body.vote-page) { overflow: auto; height: auto; }
+
+body.vote-page {
+  overflow: auto;
+  height: auto;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  background: var(--bg-base);
+  touch-action: auto; /* deck usa manipulation; vote-page quer scroll livre */
+}
+
+.vote-main { max-width: 520px; margin: 0 auto; padding: 28px 20px 48px; }
+
+.vote-brand {
+  font-family: var(--font-brand); font-size: 12px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text-tertiary);
+}
+/* .tld precisa de escopo próprio aqui (a página de votação tem seu próprio CSS) */
+.vote-brand .tld { color: var(--accent-violet); }
+
+.vote-h1 { font-family: var(--font-brand); font-weight: 800; font-size: 26px; margin: 10px 0 4px; color: var(--text-primary); }
+.vote-h1 strong { color: var(--accent-violet); }
+.vote-sub { font-family: var(--font-editorial); color: var(--text-secondary); font-size: 15px; }
+
+.vote-budget {
+  font-family: var(--font-brand); font-size: 13px; color: var(--accent-violet);
+  margin: 18px 0 10px;
+}
+
+.vote-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.vote-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border: 1px solid var(--border-default); border-radius: var(--radius-base);
+  padding: 12px 14px; background: var(--bg-elevated);
+}
+.vote-row.has-votes { border-color: var(--accent-violet); }
+.vote-row-title { font-family: var(--font-brand); font-weight: 700; font-size: 14px; color: var(--text-primary); }
+
+.vote-stepper { display: flex; align-items: center; gap: 10px; }
+.vote-step {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1px solid var(--border-default); background: transparent;
+  color: var(--text-primary); font-size: 18px; cursor: pointer;
+}
+.vote-step:disabled { opacity: .35; cursor: default; }
+.vote-n { min-width: 18px; text-align: center; font-family: var(--font-brand); font-weight: 800; color: var(--text-primary); }
+
+.vote-submit {
+  width: 100%; margin-top: 18px; padding: 14px;
+  font-family: var(--font-brand); font-weight: 800; font-size: 15px;
+  background: var(--accent-violet); color: #fff; border: none; border-radius: var(--radius-base); cursor: pointer;
+}
+.vote-submit:disabled { opacity: .4; cursor: default; }
+
+.vote-msg { margin-top: 12px; font-family: var(--font-editorial); font-size: 14px; color: var(--text-secondary); }
+.vote-msg.is-ok { color: var(--accent-cyan); }
+.vote-msg.is-err, .vote-msg.is-warn { color: var(--accent-pink); }
+
+/* ============================================================
+   SLIDE DE VOTAÇÃO
+   ============================================================ */
+/* overflow-y: em viewports baixas o conteúdo rola em vez de cortar */
+.slide-vote { display: flex; align-items: center; justify-content: center; overflow-y: auto; }
+.vote-slide-wrap { max-width: 880px; padding: 40px; text-align: center; margin: auto; }
+.vote-slide-instructions { margin: 12px auto 28px; max-width: 560px; }
+.vote-live { display: flex; align-items: center; justify-content: center; gap: 40px; flex-wrap: wrap; }
+.vote-live[hidden] { display: none; }
+.vote-qr { width: 220px; height: 220px; background: #fff; border-radius: var(--radius-base); padding: 10px; }
+.vote-qr svg { width: 100%; height: 100%; display: block; }
+.vote-live-meta { text-align: left; }
+.vote-live-url { font-family: var(--font-brand); font-size: 14px; color: var(--text-secondary); letter-spacing: .04em; }
+.vote-live-count { font-family: var(--font-brand); font-size: 18px; color: var(--text-primary); margin-top: 8px; }
+.vote-live-count strong { font-size: 42px; font-weight: 800; color: var(--accent, var(--accent-violet)); display: block; }
+.vote-live-status { font-family: var(--font-editorial); font-size: 14px; color: var(--accent-pink); margin-top: 10px; }
+.constellation { width: 100%; max-width: 880px; height: 56vh; display: block; margin: 0 auto; }
+.constellation[hidden] { display: none; }
+.vote-admin { display: flex; gap: 10px; justify-content: center; margin-top: 22px; flex-wrap: wrap; }
+.vote-admin[hidden] { display: none; }
+.vote-admin-btn {
+  font-family: var(--font-brand); font-size: 12px; cursor: pointer;
+  background: transparent; color: var(--text-secondary);
+  border: 1px solid var(--border-default); border-radius: var(--radius-base); padding: 8px 14px;
+}
+.vote-admin-btn:hover { border-color: var(--border-strong); color: var(--text-primary); }
+@media (max-width: 560px) {
+  .vote-live { gap: 20px; }
+  .vote-qr { width: 160px; height: 160px; }
+}
+.thumb-figure-vote {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  font-size: 28px; color: var(--accent-violet);
+  background: var(--bg-elevated);
+}
+/* miniatura da intro no índice: glifo de grade (mesmo do botão Índice) */
+.thumb-figure-intro {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  background: var(--bg-elevated);
+}
+.thumb-figure-intro svg {
+  width: 40px; height: 40px;
+  fill: none; stroke: var(--accent-violet); stroke-width: 1.5;
+}
+/* selo ▶ da miniatura (slides de vídeo/MP4 sem capa) */
+.thumb-fig-badge {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  background: #050505;
+}
+.thumb-fig-badge svg {
+  width: 34px; height: 34px;
+  fill: var(--accent-violet);
+}
+/* mini-render de texto (frase-manifesto / nome do wordmark) */
+.thumb-fig-text {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 100%;
+  padding: 8% 10%; box-sizing: border-box;
+  background: var(--bg-elevated);
+}
+.thumb-fig-text-in {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  overflow: hidden;
+  font-family: var(--font-brand); font-weight: 700;
+  font-size: 11px; line-height: 1.25; text-align: center;
+  color: var(--text-primary, #f2f2f2);
+}
+
+/* ---------- botão "Gerar PDF" + menu de orientação (intro) ---------- */
+/* z-index alto: a grade de thumbnails cria contexto de empilhamento (animação),
+   então o container do botão precisa ficar acima para o menu não sumir atrás. */
+/* linha de ações da intro: Backups + Gerar PDF lado a lado */
+.intro-actions { display: inline-flex; align-items: center; gap: 24px; margin-top: 18px; }
+.intro-pdf { position: relative; display: inline-block; z-index: 20; }
+.intro-generate-pdf {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 6px 0; cursor: pointer;
+  font: inherit; color: var(--text-primary);
+  background: transparent; border: 0;
+}
+.intro-generate-pdf:hover .intro-download-icon {
+  background: var(--text-primary); color: var(--bg-base);
+  border-color: var(--text-primary);
+}
+.intro-generate-pdf:hover .intro-download-label { color: var(--text-secondary); }
+.intro-generate-pdf .intro-download-icon { display: inline-flex; }
+.intro-generate-pdf svg { width: 20px; height: 20px; }
+/* painel surge à direita do botão (não embaixo, onde a grade o cobria) */
+.intro-pdf-menu {
+  position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%);
+  z-index: 20;
+  display: flex; flex-direction: column; gap: 16px;
+  width: 280px; max-height: 70vh; padding: 16px;
+  text-align: left;
+  background: color-mix(in srgb, var(--bg-base) 92%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+/* o atributo hidden precisa vencer o display:flex acima */
+.intro-pdf-menu[hidden] { display: none; }
+
+.pdf-field { display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+.pdf-field-label {
+  font-family: var(--font-brand); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary);
+}
+.pdf-all-note { margin: 0; font-size: 12px; line-height: 1.4; color: var(--text-tertiary); }
+
+/* orientação: segmented control */
+.pdf-seg { display: flex; border: 1px solid var(--border-default); border-radius: var(--radius-base); overflow: hidden; }
+.pdf-seg-btn {
+  flex: 1; padding: 8px 10px; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--text-secondary);
+  background: transparent; border: 0;
+}
+.pdf-seg-btn + .pdf-seg-btn { border-left: 1px solid var(--border-default); }
+.pdf-seg-btn.is-active { background: var(--text-primary); color: var(--bg-base); }
+
+/* checklist de territórios */
+.pdf-checklist {
+  display: flex; flex-direction: column;
+  overflow-y: auto; max-height: 34vh;
+  scrollbar-width: thin;
+  border-top: 1px solid color-mix(in srgb, var(--border-default) 60%, transparent);
+  padding-top: 6px;
+}
+.pdf-check {
+  display: flex; align-items: center; gap: 9px;
+  padding: 5px 2px; cursor: pointer; font-size: 13px; color: var(--text-primary);
+}
+.pdf-check input { width: 15px; height: 15px; accent-color: var(--accent-violet); flex: none; }
+.pdf-check span { line-height: 1.3; }
+.pdf-check-all { font-weight: 700; }
+
+.pdf-generate-btn {
+  padding: 10px 16px; cursor: pointer;
+  font: inherit; font-weight: 700; color: var(--bg-base);
+  background: var(--text-primary); border: 0; border-radius: var(--radius-base);
+}
+.pdf-generate-btn:hover { background: var(--accent-violet); color: var(--text-primary); }
+
+/* segundo botão do menu (Exportar PPTX): separado do "Gerar PDF" e em acento */
+.pdf-generate-btn + .pdf-generate-btn { margin-top: 8px; }
+/* TEMPORÁRIO: oculto enquanto investigamos a trava do export PPTX (trava na
+   captura de um slide no Chrome). Ver branch debug/pptx-hang. Remover ao corrigir. */
+.pdf-generate-pptx { display: none; }
+.pdf-generate-pptx {
+  background: var(--accent-violet); color: var(--text-primary);
+}
+.pdf-generate-pptx:hover { background: var(--text-primary); color: var(--bg-base); }
+.pdf-generate-pptx:disabled { opacity: 0.6; cursor: default; }
+
+/* ---------- documento de impressão (PDF dos territórios) ---------- */
+#print-root { display: none; }
+
+@media print {
+  /* o deck trava html/body em height:100% + overflow:hidden — isso recortava
+     tudo numa página só. Solta o fluxo para o documento paginar. */
+  html, body { height: auto !important; overflow: visible !important; }
+  /* só o documento de impressão aparece */
+  body > *:not(#print-root) { display: none !important; }
+  #print-root { display: block; }
+
+  /* min-height (não height fixo) + sem overflow:hidden: o conteúdo nunca é
+     recortado; territórios longos podem crescer um pouco além da página. */
+  .print-page {
+    position: relative; width: 100%; min-height: 100vh;
+    background: #000; color: #fff;
+    break-after: page; page-break-after: always;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .print-page:last-child { break-after: auto; page-break-after: auto; }
+
+  /* contain (não cover): mostra a imagem inteira, na proporção original, sem
+     recortar. Áreas que sobram ficam no preto da .print-page (letterbox). */
+  .print-bg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain; object-position: center;
+  }
+  /* placeholder (logo Aerolito, 262×240): scale-down impede que seja ampliado
+     além do tamanho nativo e fique "estourado" quando o slide não tem imagem. */
+  .print-bg.is-placeholder {
+    object-fit: scale-down;
+    padding: clamp(24px, 8vmin, 96px);
+    box-sizing: border-box;
+  }
+  .print-scrim {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.7) 42%, rgba(0,0,0,0.25) 70%, rgba(0,0,0,0.05) 100%),
+      linear-gradient(0deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 45%);
+  }
+  .print-mark {
+    position: absolute; top: 6%; right: 5%; z-index: 3;
+    width: 45px; height: auto; color: #fff; opacity: 0.92;
+  }
+  /* painel em fluxo (não absoluto): ocupa a página e centraliza quando curto,
+     cresce quando longo — sem cortar texto nem os sinais. */
+  .print-panel {
+    position: relative; z-index: 2; box-sizing: border-box;
+    width: min(62ch, 54%); margin-left: 6%;
+    min-height: 100vh; padding: 8vh 0;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .print-eyebrow {
+    margin: 0 0 10px; font-size: 11px; letter-spacing: .14em;
+    text-transform: uppercase; color: #cfcfcf;
+  }
+  .print-title { margin: 0 0 14px; font-size: 26px; line-height: 1.12; font-weight: 700; }
+  .print-copy .panel-body,
+  .print-copy .panel-quote { margin: 0 0 10px; font-size: 11.5px; line-height: 1.5; }
+  .print-copy .panel-body:last-child { margin-bottom: 0; }
+  .print-copy .panel-subhead { margin: 12px 0 6px; font-size: 13px; }
+  .print-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+  .print-chip {
+    display: inline-block; padding: 6px 11px; font-size: 10.5px; color: #fff;
+    border: 1px solid rgba(255,255,255,0.55); border-radius: 2px; text-decoration: none;
+  }
+
+  /* capa */
+  .print-cover { display: flex; align-items: center; justify-content: center; text-align: center; }
+  .print-cover-inner { z-index: 2; }
+  .print-cover .print-mark {
+    position: static; display: inline-block; width: 120px; margin: 0 auto 20px;
+  }
+  .print-wordmark {
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    font-size: 56px; letter-spacing: -0.02em;
+  }
+  .print-wordmark .tld { color: #6C5CE7; }
+  .print-cover-title { margin: 18px 0 6px; font-size: 22px; font-weight: 400; }
+  .print-cover-sub { margin: 0; font-size: 13px; color: #9A9A9A; }
+
+  /* --- páginas dos layouts-base --- */
+  /* grade de referências */
+  .print-grid-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 8vh 8%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .print-grid-title { margin: 0 0 24px; font-size: 28px; font-weight: 700; text-align: center; }
+  .print-grid-gallery {
+    display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; width: 100%;
+  }
+  .print-grid-thumb {
+    width: 22%; aspect-ratio: 1 / 1; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.4);
+  }
+  .print-grid-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* marca (wordmark) */
+  .print-brand-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 8vh 8%;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .print-brand-title {
+    display: flex; align-items: center; gap: 24px; margin: 0;
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    font-size: 58px; letter-spacing: -0.02em;
+  }
+  .print-brand-title::after { content: ""; flex: 1; height: 2px; background: rgba(255,255,255,0.7); }
+  .print-brand-sub {
+    margin: 16px 0 0; font-size: 14px; color: #9A9A9A;
+    font-family: "Manrope", system-ui, sans-serif;
+  }
+
+  /* imagem em destaque */
+  .print-hero-caption {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+    padding: 60px 8% 44px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 55%, rgba(0,0,0,0) 100%);
+  }
+  .print-hero-sub {
+    margin: 0 0 8px; font-size: 14px; color: #d8d8d8;
+    font-family: "Times New Roman", serif; font-style: italic;
+  }
+
+  /* frase-manifesto */
+  .print-manifesto-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 8vh 10%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  }
+  .print-manifesto-title {
+    margin: 0; max-width: 20ch;
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    font-size: 48px; line-height: 1.06; letter-spacing: -0.02em;
+  }
+  .print-manifesto-sub {
+    margin: 18px 0 0; max-width: 46ch; font-size: 14px; color: #9A9A9A;
+    font-family: "Manrope", system-ui, sans-serif;
+  }
+
+  /* vídeo (título + link, com moldura branca) */
+  .print-video-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 8vh 8%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+  }
+  .print-video-box {
+    width: min(70%, 620px); aspect-ratio: 16 / 9;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    padding: 32px; text-align: center;
+    border: 2px solid #fff; border-radius: 2px;
+  }
+  .print-video-badge {
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 700;
+    font-size: 14px; letter-spacing: 0.08em; color: #fff;
+  }
+  .print-video-link { color: #5CE1E6; font-size: 13px; word-break: break-all; }
+  .print-video-empty { color: #9A9A9A; font-size: 13px; font-style: italic; }
+
+  /* media (GIF/MP4): título + link, moldura branca (não anima em PDF) */
+  .print-media-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 8vh 8%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+  }
+  .print-media-box {
+    width: min(70%, 620px); aspect-ratio: 16 / 9;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    padding: 32px; text-align: center;
+    border: 2px solid #fff; border-radius: 2px;
+  }
+  .print-media-badge {
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 700;
+    font-size: 14px; letter-spacing: 0.08em; color: #fff;
+  }
+  .print-media-link { color: #5CE1E6; font-size: 13px; word-break: break-all; }
+  .print-media-empty { color: #9A9A9A; font-size: 13px; font-style: italic; }
+
+  /* orientação retrato: imagem no topo (banda), painel embaixo em fluxo */
+  #print-root.is-portrait .print-territory { background: #000; }
+  #print-root.is-portrait .print-bg {
+    position: relative; inset: auto; width: 100%; height: 38vh;
+  }
+  #print-root.is-portrait .print-scrim { display: none; }
+  #print-root.is-portrait .print-panel {
+    width: auto; margin-left: 0; padding: 28px 8% 36px;
+    min-height: 0; justify-content: flex-start;
+  }
+}
+
+/* ============ LOGIN (abertura: vídeo + partículas + card) ============ */
+#login {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px; overflow: hidden;
+  background: #000;
+  transition: opacity 1.5s ease;
+}
+#login.lift { opacity: 0; pointer-events: none; }
+
+#login-particles { position: absolute; inset: 0; z-index: 0; display: block; }
+.login-video {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; z-index: 1;
+}
+.login-video-ovl { position: absolute; inset: 0; background: rgba(0,0,0,0.55); z-index: 1; }
+.login-video, .login-video-ovl { transition: opacity 2.2s ease; }
+#login.s2 .login-video, #login.s2 .login-video-ovl { opacity: 0; }
+
+/* logo de transição que "surge" depois do login */
+.login-intro-logo {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: clamp(165px, 28.5vw, 390px); height: auto; z-index: 3;
+  opacity: 0; visibility: hidden;
+  transition: opacity 1.6s ease, visibility 0s linear 1.6s;
+  pointer-events: none;
+}
+.login-intro-logo.show {
+  opacity: 1; visibility: visible;
+  transition: opacity 1.6s ease, visibility 0s linear 0s;
+}
+
+/* card */
+.login-card {
+  position: relative; z-index: 2; width: 100%; max-width: 384px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: opacity 1.2s ease;
+}
+#login.s1 .login-card { opacity: 0; pointer-events: none; }
+.login-logo { width: 40px; height: auto; margin: 0 auto 18px; opacity: 0.95; }
+.login-title {
+  font-family: "Manrope", sans-serif; font-weight: 800; letter-spacing: -0.06em;
+  font-size: clamp(26px, 3vw, 34px); color: #fff; text-align: center; margin-bottom: 14px;
+}
+.login-input {
+  width: 100%; height: 48px; padding: 0 16px; font-size: 14px;
+  border: 1px solid rgba(255,255,255,0.4); border-radius: 2px; color: #fff;
+  font-family: "Times New Roman", Times, serif; font-style: italic;
+  background: rgba(255,255,255,0.08); transition: border-color 0.2s;
+}
+.login-input::placeholder { color: rgba(255,255,255,0.5); font-style: italic; }
+.login-input:focus { outline: none; border-color: #fff; }
+.login-input.masked { -webkit-text-security: disc; text-security: disc; }
+.login-pass { position: relative; }
+.login-pass .login-input { padding-right: 42px; }
+.eye {
+  position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer;
+  display: grid; place-items: center; transition: color 0.2s;
+}
+.eye:hover { color: #fff; }
+.login-btn {
+  width: 100%; height: 48px; border: 1px solid #fff; border-radius: 2px;
+  background: transparent; color: #fff; font-family: "Manrope", sans-serif;
+  font-weight: 800; font-size: 11px; letter-spacing: -0.04em; cursor: pointer;
+  transition: background 0.2s;
+}
+.login-btn:hover { background: rgba(255,255,255,0.1); }
+.login-error {
+  font-family: "Times New Roman", Times, serif; font-style: italic; font-size: 12px;
+  color: #fca5a5; text-align: center; min-height: 14px;
+}
+
+/* ============================================================
+   modo edição (@aeroli.to) — realce dos campos, botão de imagem
+   e barra Salvar/Cancelar. Reaproveita --accent e o estilo nav.
+   ============================================================ */
+.nav-edit svg { width: 22px; height: 22px; }
+
+.is-editing .slide.is-current .panel-title[contenteditable="true"],
+.is-editing .slide.is-current .panel-subtitle[contenteditable="true"],
+.is-editing .slide.is-current .edit-block[contenteditable="true"] {
+  outline: 1px dashed var(--accent, #8b5cf6);
+  outline-offset: 4px;
+  border-radius: 4px;
+  cursor: text;
+}
+.is-editing .slide.is-current .edit-block { white-space: pre-wrap; }
+
+/* no editor, o subtítulo aparece mesmo vazio, com placeholder, p/ permitir adicioná-lo */
+.is-editing .slide.is-current .panel-subtitle[contenteditable="true"] {
+  display: block;
+  min-height: 1em;
+}
+.is-editing .slide.is-current .panel-subtitle:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ferramentas de imagem (trocar + remover) no canto sup. direito */
+.edit-image-tools {
+  position: absolute;
+  top: 16px; right: 16px;
+  z-index: 6;
+  display: flex;
+  gap: 8px;
+}
+.edit-image-btn {
+  padding: 8px 14px;
+  font: inherit; font-size: 13px; font-weight: 600;
+  color: #fff;
+  background: rgba(17, 17, 22, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
+.edit-image-btn:hover { background: rgba(17, 17, 22, 0.9); }
+.edit-image-remove:hover { background: #b91c1c; border-color: #b91c1c; }
+
+/* botão "+ Parágrafo" no editor de corpo (só existe no modo de edição) */
+.edit-add-para {
+  display: inline-flex; align-items: center;
+  margin-top: 10px; padding: 5px 12px;
+  font: inherit; font-size: 12px; font-weight: 600;
+  color: #fff; background: rgba(17, 17, 22, 0.55);
+  border: 1px dashed rgba(255, 255, 255, 0.4); border-radius: 999px;
+  cursor: pointer;
+}
+.edit-add-para:hover { background: rgba(17, 17, 22, 0.85); border-style: solid; }
+
+/* durante a edição, oculta a marca do canto p/ não conflitar com as ferramentas */
+.is-editing .deck-logo { display: none; }
+
+.edit-bar {
+  position: fixed;
+  left: 50%; bottom: 84px;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: rgba(17, 17, 22, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+.edit-bar[hidden] { display: none; }
+.edit-bar-hint { color: rgba(255, 255, 255, 0.6); font-size: 12px; }
+.edit-btn {
+  font: inherit; font-size: 13px; font-weight: 600;
+  padding: 7px 16px; border-radius: 999px; cursor: pointer; border: 0;
+}
+.edit-save { color: #0b0b0f; background: var(--accent, #8b5cf6); }
+.edit-cancel { color: #fff; background: transparent; border: 1px solid rgba(255, 255, 255, 0.3); }
+.edit-save:hover { filter: brightness(1.08); }
+.edit-cancel:hover { background: rgba(255, 255, 255, 0.08); }
+
+/* editor de sinais (chips) no modo edição */
+.is-editing .chip-editor {
+  display: flex; flex-direction: column; gap: 10px;
+  max-height: 38vh; overflow-y: auto;
+  padding: 4px; margin: 0; list-style: none;
+}
+.chip-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  grid-template-areas: "label url remove" "desc desc remove";
+  gap: 6px 8px;
+  padding: 8px;
+  background: rgba(17, 17, 22, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+}
+.chip-edit {
+  font: inherit; font-size: 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.chip-edit:focus { outline: 1px solid var(--accent, #8b5cf6); }
+.chip-edit-label { grid-area: label; }
+.chip-edit-url { grid-area: url; }
+.chip-edit-desc { grid-area: desc; resize: vertical; min-height: 48px; }
+.chip-remove-btn {
+  grid-area: remove; align-self: start;
+  width: 28px; height: 28px; line-height: 1;
+  font-size: 18px; color: #fff; cursor: pointer;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+}
+.chip-remove-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.chip-add-btn {
+  align-self: flex-start;
+  font: inherit; font-size: 13px; font-weight: 600;
+  color: var(--accent, #8b5cf6);
+  background: transparent;
+  border: 1px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  padding: 6px 14px; cursor: pointer;
+}
+.chip-add-btn:hover { background: rgba(255, 255, 255, 0.06); }
+
+/* adicionar / deletar slide no índice */
+.overview-add svg { width: 22px; height: 22px; }
+
+.thumb-slide { position: relative; }
+.thumb-del {
+  position: absolute;
+  top: 6px; right: 6px;
+  z-index: 3;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; line-height: 1; color: #fff;
+  background: rgba(10, 10, 14, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--duration-ui) var(--ease-ui),
+              background var(--duration-ui) var(--ease-ui);
+}
+.thumb-slide:hover .thumb-del,
+.thumb-del:focus { opacity: 1; }
+.thumb-del:hover { background: #b91c1c; border-color: #b91c1c; opacity: 1; }
+
+/* toggle de visibilidade p/ cliente (canto sup. esquerdo da miniatura) */
+.thumb-eye {
+  position: absolute;
+  top: 6px; left: 44px;   /* à direita do número do slide (.thumb-num), p/ não sobrepor */
+  z-index: 3;
+  width: 22px; height: 22px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  background: rgba(10, 10, 14, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: opacity var(--duration-ui) var(--ease-ui),
+              background var(--duration-ui) var(--ease-ui);
+}
+.thumb-eye svg { width: 14px; height: 14px; }
+.thumb-slide:hover .thumb-eye,
+.thumb-eye:focus { opacity: 1; }
+.thumb-eye.is-off { background: rgba(120, 80, 10, 0.82); border-color: rgba(255, 200, 90, 0.6); }
+
+/* miniatura oculta p/ o cliente: esmaece o conteúdo (mantém o olho legível) */
+.thumb-slide.is-client-hidden .thumb-figure { opacity: 0.38; }
+
+/* botões de visibilidade no cabeçalho do índice */
+/* botões de texto (não de ícone): a caixa precisa envolver o texto */
+.overview-savevis, .overview-revertvis {
+  width: auto;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 13px;
+  line-height: 1;
+  white-space: nowrap;
+}
+.overview-savevis[disabled] { opacity: 0.45; cursor: default; }
+.overview-revertvis { opacity: 0.85; }
+
+/* modal de confirmação */
+.confirm-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  padding: 24px;
+}
+.confirm-overlay[hidden] { display: none; }
+.confirm-box {
+  max-width: 380px; width: 100%;
+  background: var(--bg-elevated, #16161c);
+  border: 1px solid var(--border-default, rgba(255, 255, 255, 0.14));
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.confirm-title { margin: 0 0 8px; font-size: 16px; color: var(--text-primary, #fff); }
+.confirm-msg {
+  margin: 0 0 18px; font-size: 14px; line-height: 1.5;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+.confirm-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.confirm-cancel, .confirm-ok {
+  font: inherit; font-size: 13px; font-weight: 600;
+  padding: 8px 16px; border-radius: 8px; cursor: pointer;
+}
+.confirm-cancel { color: var(--text-primary, #fff); background: transparent; border: 1px solid rgba(255, 255, 255, 0.25); }
+.confirm-cancel:hover { background: rgba(255, 255, 255, 0.08); }
+.confirm-ok { color: #fff; background: #b91c1c; border: 0; }
+.confirm-ok:hover { filter: brightness(1.08); }
+
+/* ---------- painel de backups (só acesso completo) ---------- */
+.backups-overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.backups-modal {
+  width: min(560px, 100%); max-height: 80vh; overflow: auto;
+  background: var(--bg-elevated, #16161c); color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px;
+  padding: 20px;
+}
+.backups-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.backups-title { margin: 0; font-size: 18px; }
+.backups-close {
+  background: none; border: none; color: #fff; font-size: 24px; line-height: 1;
+  cursor: pointer; opacity: 0.75;
+}
+.backups-close:hover { opacity: 1; }
+.backups-actions { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.backups-action {
+  padding: 8px 14px; font-size: 13px; color: #fff; cursor: pointer;
+  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 6px;
+}
+.backups-action:hover { background: rgba(255, 255, 255, 0.14); }
+.backups-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.backups-empty { color: #9a9a9a; font-size: 13px; padding: 8px 0; }
+.backups-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 12px; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px;
+}
+.backups-item-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.backups-item-when { font-size: 13px; }
+.backups-item-sum { font-size: 11px; color: #9a9a9a; }
+.backups-restore {
+  flex: none; padding: 6px 12px; font-size: 12px; color: #fff; cursor: pointer;
+  background: rgba(108, 92, 231, 0.25); border: 1px solid rgba(108, 92, 231, 0.7); border-radius: 5px;
+}
+.backups-restore:hover { background: rgba(108, 92, 231, 0.4); }

@@ -7,5 +7,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     globals: true,
+    // temp/ guarda projetos-fonte não versionados (ex.: deck da Caixa) cujos
+    // testes node:test não são suítes vitest — fora da varredura.
+    exclude: ["**/node_modules/**", "**/dist/**", "temp/**"],
   },
 });
