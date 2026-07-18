@@ -34,10 +34,10 @@ function slug(str) {
     .toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-// nome do .pptx: <deck>-territorios-AAAA-MM-DD.pptx
+// nome do .pptx: <deck>-slides-AAAA-MM-DD.pptx
 export function pptxFileName(meta, date) {
-  var base = slug((meta && (meta.deck || meta.title)) || "aerolito-portobello") || "aerolito-portobello";
-  return base + "-territorios-" + isoDate(date) + ".pptx";
+  var base = slug((meta && (meta.deck || meta.title)) || "portobello") || "portobello";
+  return base + "-slides-" + isoDate(date) + ".pptx";
 }
 
 export const PPTX_DIMS = { w: 1920, h: 1080 };                         // px de captura

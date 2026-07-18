@@ -69,11 +69,13 @@ img { display: block; max-width: 100%; }
   transition: opacity 0.6s var(--ease-ui);
 }
 
-/* partículas do índice — mesmo campo do login (continuidade na entrada).
-   Só aparecem no slide de abertura (body.on-intro), no lugar do starfield. */
-#index-particles {
+/* gradiente animado do índice (WebGL) — só aparece no slide de
+   abertura (body.on-intro), no lugar do starfield. */
+#index-gradient {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
   z-index: 0;
   pointer-events: none;
   opacity: 0;
@@ -81,7 +83,7 @@ img { display: block; max-width: 100%; }
   transition: opacity 0.6s var(--ease-ui), visibility 0.6s var(--ease-ui);
 }
 body.on-intro #starfield { opacity: 0; }
-body.on-intro #index-particles { opacity: 1; visibility: visible; }
+body.on-intro #index-gradient { opacity: 1; visibility: visible; }
 
 /* ============================================================
    DECK / SLIDES
@@ -1616,7 +1618,6 @@ body.vote-page {
 }
 #login.lift { opacity: 0; pointer-events: none; }
 
-#login-particles { position: absolute; inset: 0; z-index: 0; display: block; }
 .login-video {
   position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; z-index: 1;

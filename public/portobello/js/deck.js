@@ -26,9 +26,9 @@
   // opções do seletor de layout no botão "+ Novo slide" (índice, só @aeroli.to).
   // value "" = território clássico (imagem de fundo + painel de texto).
   var LAYOUT_CHOICES = [
-    { value: "",          name: "Território",          desc: "Imagem de fundo + painel de texto" },
+    { value: "",          name: "Abertura + Texto",    desc: "Imagem de fundo + painel de texto" },
     { value: "grid",      name: "Grade de miniaturas", desc: "Vários cards/logos placeholder" },
-    { value: "wordmark",  name: "Sinais",              desc: "Nome grande + linha" },
+    { value: "wordmark",  name: "Thumbs",              desc: "Nome grande + linha" },
     { value: "hero",      name: "Imagem em destaque",  desc: "Imagem cheia + legenda" },
     { value: "manifesto", name: "Frase-manifesto",     desc: "Texto grande centralizado" },
     { value: "video",     name: "Vídeo",               desc: "YouTube embed centralizado" },
@@ -1064,7 +1064,7 @@
       var pos = territories.indexOf(s);
       if (pos < 0 || !els[i]) return;
       var eb = els[i].querySelector(".panel-eyebrow");
-      if (eb) eb.textContent = "Território " + pad(pos + 1) + " / " + pad(total);
+      if (eb) eb.textContent = "Slide " + pad(pos + 1) + " / " + pad(total);
     });
   }
 
@@ -1435,7 +1435,7 @@
         base.media = {};   // { url, kind }, definido no modo de edição
         break;
       default:   // clássico (imagem de fundo + painel de texto)
-        base.title = "Novo Território";
+        base.title = "Novo Slide";
         base.body = [""];
         base.items = [];
     }
@@ -1466,8 +1466,8 @@
   function requestDeleteSlide(s) {
     if (!fullAccess || !s) return;
     confirmModal(
-      "Deletar território",
-      "Tem certeza que deseja deletar “" + (s.title || "este território") +
+      "Deletar slide",
+      "Tem certeza que deseja deletar “" + (s.title || "este slide") +
         "”? Ele sairá do deck para todos.",
       function () {
         postContent({ action: "hideSlide", slideId: s.id })
@@ -1517,7 +1517,7 @@
     if (editing) { cancelEdit(); return; }
     var s = slides[index];
     if (!s || s.type === "intro") {
-      window.alert("Só territórios podem ser editados (título, corpo e imagem).");
+      window.alert("Só slides de conteúdo podem ser editados (título, corpo e imagem).");
       return;
     }
     enterEdit(s);
