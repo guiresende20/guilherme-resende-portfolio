@@ -77,7 +77,7 @@ export function territoryPageHTML(slide, num) {
     bgIMG(slide.image) +
     '<div class="print-scrim"></div>' +
     '<div class="print-panel">' +
-      '<p class="print-eyebrow">Território ' + pad2(num) + '</p>' +
+      '<p class="print-eyebrow">Slide ' + pad2(num) + '</p>' +
       '<h2 class="print-title">' + esc(slide.title) + '</h2>' +
       '<div class="print-copy">' + bodyHTML(slide.body) + '</div>' +
       (chips ? '<div class="print-chips">' + chips + '</div>' : '') +
