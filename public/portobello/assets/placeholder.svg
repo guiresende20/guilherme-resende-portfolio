@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="262" height="240" viewBox="0 0 262 240" fill="none">
+  <!-- placeholder neutro de imagem: moldura + paisagem estilizada, tom cinza discreto -->
+  <g stroke="#7d8590" stroke-width="4" opacity="0.55">
+    <rect x="41" y="50" width="180" height="140" rx="10"/>
+    <circle cx="95" cy="98" r="14"/>
+    <path d="M63 168l44-52 34 38 26-28 32 42" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

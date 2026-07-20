@@ -13,9 +13,12 @@
     cyan:   "var(--accent-cyan)"
   };
 
-  // imagem-placeholder do território novo (logo Aerolito): renderizada "contida"
-  // e centralizada (sem cover/zoom) até o usuário trocar a imagem.
-  var PLACEHOLDER_IMAGE = "assets/logo-aero.png";
+  // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
+  // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
+  var PLACEHOLDER_IMAGE = "assets/placeholder.svg";
+  // valor antigo (logo Aerolito) que pode ter sido persistido em overrides/added
+  // no servidor — normalizado para o placeholder atual ao montar o deck.
+  var LEGACY_PLACEHOLDER = "assets/logo-aero.png";
 
   // layouts-base adicionais (além do território clássico): mesmo modelo de dados
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
@@ -2080,6 +2083,10 @@
     slides = slides.filter(function (s) {
       // hidden publicado (deletar pelo índice): some para todos
       return publishedHidden.indexOf(s.id) === -1;
+    });
+    // slides salvos com o placeholder antigo (logo Aerolito) migram pro atual
+    slides.forEach(function (s) {
+      if (s.image === LEGACY_PLACEHOLDER) s.image = PLACEHOLDER_IMAGE;
     });
     slides = applySavedOrder(slides);   // restaura ordem reordenada anteriormente
     els = slides.map(buildSlide);

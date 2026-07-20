@@ -17,10 +17,10 @@ export function fmtInline(escaped) {
     .replace(/\n/g, "<br>");
 }
 
-// imagem-placeholder (logo Aerolito) — igual ao deck.js. Território/hero sem
-// imagem própria usam este PNG pequeno (262×240); marcamos com is-placeholder
+// imagem-placeholder (glifo neutro 262×240) — igual ao deck.js. Território/hero
+// sem imagem própria usam este SVG pequeno; marcamos com is-placeholder
 // para o CSS não ampliá-lo além do nativo (senão fica "estourado").
-export var PLACEHOLDER_IMAGE = "assets/logo-aero.png";
+export var PLACEHOLDER_IMAGE = "assets/placeholder.svg";
 
 // marca Aerolito (PNG) — mesmo logo do canto dos slides e da capa ao vivo.
 export function staticMarkIMG() {
