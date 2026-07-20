@@ -2,7 +2,7 @@
    gradient-bg.js — fundo animado do slide de abertura
    Port vanilla do componente React <AnimatedGradient> (WebGL2,
    shader de gradiente com distorção + swirl). Preset "Aurora"
-   com a paleta trocada para o verde do portfólio (#00ff80).
+   com a paleta trocada para tons de verde do portfólio.
    Renderiza no <canvas id="index-gradient">; só desenha enquanto
    body.on-intro (o canvas fica invisível fora da capa).
    ============================================================ */
@@ -16,7 +16,7 @@
   var PARAMS = {
     color1: [0x02 / 255, 0x12 / 255, 0x0a / 255, 1],   // preto-esverdeado
     color2: [0x0b / 255, 0x2e / 255, 0x1c / 255, 1],   // verde escuro
-    color3: [0x00 / 255, 0xff / 255, 0x80 / 255, 1],   // verde neon (--primary do portfólio)
+    color3: [0x00 / 255, 0x8f / 255, 0x48 / 255, 1],   // verde médio (era #00ff80, escurecido p/ contraste)
     rotation: -45,
     proportion: 60,
     scale: 0.6,
