@@ -1076,6 +1076,14 @@
       '<span class="thumb-fig-text-in">' + esc(text) + "</span></span>";
   }
 
+  // tile de vídeo: selo ▶ + título (mostra qual é o vídeo na miniatura)
+  function thumbVideoTile(title) {
+    return '<span class="thumb-fig-text thumb-fig-video" aria-hidden="true">' +
+      '<svg class="thumb-fig-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' +
+      (title ? '<span class="thumb-fig-text-in">' + esc(title) + "</span>" : "") +
+      "</span>";
+  }
+
   // <img> comum da miniatura (foto real, GIF ou 1ª imagem da galeria)
   function thumbImg(src, placeholder) {
     return '<img' + (placeholder ? ' class="is-placeholder"' : '') +
@@ -1086,8 +1094,8 @@
   function thumbBgHTML(s) {
     // imagem real (não-placeholder) tem precedência sobre a miniatura por layout
     if (s.image && s.image !== PLACEHOLDER_IMAGE) return thumbImg(s.image, false);
-    // layouts de vídeo: selo ▶ (media com GIF mostra o próprio GIF)
-    if (s.layout === "video") return thumbVideoBadge();
+    // vídeo: selo ▶ + título na miniatura (media com GIF mostra o próprio GIF)
+    if (s.layout === "video") return thumbVideoTile(s.title);
     if (s.layout === "media") {
       var m = s.media || {};
       var kind = m.kind || (m.url ? mediaKind(m.url) : "");

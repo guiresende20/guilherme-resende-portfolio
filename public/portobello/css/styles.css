@@ -1488,6 +1488,9 @@ body.vote-page {
   font-size: 11px; line-height: 1.25; text-align: center;
   color: var(--text-primary, #f2f2f2);
 }
+/* tile de vídeo: selo ▶ acima do título */
+.thumb-fig-video { flex-direction: column; gap: 8px; }
+.thumb-fig-play { width: 26px; height: 26px; fill: var(--accent-violet); flex: none; }
 
 /* ---------- botão "Gerar PDF" + menu de orientação (intro) ---------- */
 /* z-index alto: a grade de thumbnails cria contexto de empilhamento (animação),
