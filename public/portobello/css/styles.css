@@ -567,26 +567,62 @@ button.chip { cursor: pointer; font: inherit; }
     linear-gradient(160deg, #0b1310 0%, var(--bg-base, #050505) 62%);
 }
 .slide--profile > .slide-scrim { display: none; }
-.slide--profile .panel {
-  background: color-mix(in srgb, var(--bg-elevated) 64%, transparent);
+/* painel largo e arejado (sem o card estreito) */
+.slide--profile > .panel {
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1100px, 88vw);
+  max-width: none;
+  padding: clamp(28px, 4vw, 56px);
+  background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
 }
 /* nome + retrato lado a lado */
 .panel-headline {
   display: flex;
   align-items: center;
-  gap: clamp(14px, 1.6vw, 24px);
-  margin-bottom: 22px;
+  gap: clamp(18px, 2.2vw, 34px);
+  margin-bottom: clamp(18px, 2.4vw, 30px);
 }
-.panel-headline .panel-title { margin-bottom: 0; }
-.panel-portrait {
+.panel-headline .panel-title {
+  margin-bottom: 0;
+  font-size: clamp(40px, 6vw, 92px);
+}
+.slide--profile .panel-portrait {
   flex: none;
-  width: clamp(64px, 7vw, 104px);
+  width: clamp(120px, 16vw, 220px);
   aspect-ratio: 1;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--accent);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
+  border: 3px solid var(--accent);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
 }
+.slide--profile .panel-subtitle {
+  font-size: clamp(16px, 1.6vw, 24px);
+  max-width: 60ch;
+}
+/* Formação | Experiência em duas colunas, texto maior */
+.slide--profile .panel-copy {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(20px, 3vw, 48px);
+  align-items: start;
+}
+.slide--profile .panel-body {
+  font-size: clamp(14px, 1.2vw, 20px);
+  line-height: 1.5;
+  max-width: none;
+  margin-bottom: 0;
+}
+.slide--profile .panel-subhead {
+  font-size: clamp(13px, 1vw, 15px);
+  margin-bottom: 12px;
+}
+@media (max-width: 760px) {
+  .slide--profile .panel-copy { grid-template-columns: 1fr; }
+  .slide--profile .panel-headline { flex-direction: column; text-align: center; }
+}
+/* chip-âncora (link externo) */
+.chip-link { text-decoration: none; }
 
 /* ---------- 4) frase-manifesto ---------- */
 .slide--manifesto .panel-eyebrow { margin-bottom: clamp(18px, 3vh, 34px); }

@@ -151,6 +151,13 @@
       return '<li><span class="chip">' + esc(label) + "</span></li>";
     }).join("");
 
+    // links externos (abrem em nova aba) — distintos dos chips de sinal (items)
+    var linkChips = (s.links || []).map(function (lk) {
+      if (!lk || !lk.url) return "";
+      return '<li><a class="chip chip-link" href="' + esc(lk.url) + '" ' +
+        'target="_blank" rel="noopener noreferrer">' + esc(lk.label || lk.url) + "</a></li>";
+    }).join("");
+
     // body aceita string (formato antigo) ou array de parágrafos (formato novo).
     // descarta entradas não-string (slide sem body não deve quebrar o deck inteiro)
     var paras = (Array.isArray(s.body) ? s.body : [s.body]).filter(function (p) {
@@ -180,7 +187,8 @@
     // eyebrow editorial: "Território 03 / 10". O número é preenchido por
     // updateTerritoryNumbers() — assim acompanha a reordenação em tempo real.
     // Só o layout clássico é território; os layouts-base novos não recebem eyebrow.
-    var eyebrowHtml = isTerritorySlide(s) ? '<p class="panel-eyebrow"></p>' : "";
+    // perfil não recebe o rótulo "Slide NN / NN"
+    var eyebrowHtml = (isTerritorySlide(s) && !s.portrait) ? '<p class="panel-eyebrow"></p>' : "";
 
     // epígrafe flutuante (fora do card de texto), ex.: citação de abertura
     var epigraphHtml = s.epigraph ?
@@ -221,7 +229,7 @@
         titleHtml +
         '<p class="panel-subtitle" data-placeholder="Subtítulo (opcional)">' + esc(s.subtitle || "") + "</p>" +
         '<div class="panel-copy">' + bodyHtml + "</div>" +
-        '<ul class="chips">' + chips + "</ul>" +
+        '<ul class="chips">' + chips + linkChips + "</ul>" +
       "</div>";
 
     // fecha sobre o objeto s (sobrevive ao reorder — nunca usa índice posicional)

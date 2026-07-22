@@ -24,7 +24,10 @@
         "### Experiência Profissional",
         "**Head de Pesquisa** — Aerolito · atual\n**Designer e Pesquisador de Inovação** — CriaLab / Tecnopuc · 2021–presente\n**Pesquisador** — UFRGS / LdSM · 2017–presente\n**Professor** — ESPM Porto Alegre · 2018–2022"
       ],
-      "items": ["UX/UI", "VR/AR", "IA aplicada", "Design de Inovação"]
+      "items": ["UX/UI", "VR/AR", "IA aplicada", "Design de Inovação"],
+      "links": [
+        { "label": "Repositório 3D — UFRGS", "url": "https://www.ufrgs.br/ldsm/3d/" }
+      ]
     }
   ]
 }
