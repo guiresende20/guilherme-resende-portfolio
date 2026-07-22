@@ -604,11 +604,15 @@ button.chip { cursor: pointer; font: inherit; }
   font-size: clamp(16px, 1.6vw, 24px);
   max-width: 60ch;
 }
-/* Formação | Experiência em duas colunas, texto maior */
+/* Formação | Experiência em duas colunas, texto maior.
+   fluxo por coluna (2 linhas: subtítulo + corpo) → cada seção vira uma coluna:
+   col 1 = Formação (subhead + lista), col 2 = Experiência (subhead + lista). */
 .slide--profile .panel-copy {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: clamp(20px, 3vw, 48px);
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  gap: clamp(10px, 1.4vw, 18px) clamp(20px, 3vw, 48px);
   align-items: start;
 }
 .slide--profile .panel-body {
