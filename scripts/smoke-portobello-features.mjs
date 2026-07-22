@@ -33,9 +33,12 @@ try {
   page.on("pageerror", (e) => errors.push(e.message));
 
   // stub do /api/chat: devolve texto canned p/ o typewriter
-  await page.route("**/api/chat", (route) =>
-    route.fulfill({ status: 200, contentType: "application/json",
-      body: JSON.stringify({ text: "Resposta simulada da IA em dois parágrafos.\n\nSegundo parágrafo aqui.", actions: [] }) }));
+  let chatCalls = 0;
+  await page.route("**/api/chat", (route) => {
+    chatCalls++;
+    return route.fulfill({ status: 200, contentType: "application/json",
+      body: JSON.stringify({ text: "Resposta simulada da IA em dois parágrafos.\n\nSegundo parágrafo aqui.", actions: [] }) });
+  });
 
   // stub do /api/portobello-tts: PCM de silêncio (2400 amostras 16-bit = 0,1s)
   let ttsCalls = 0;
@@ -80,6 +83,11 @@ try {
     await page.waitForTimeout(120);
   }
   await page.waitForSelector(".slide--frase-ia.is-current", { timeout: 5000 });
+
+  // pré-geração: ao ABRIR o slide (antes de clicar) o chat + a voz já disparam
+  await page.waitForTimeout(400);
+  if (chatCalls > 0 && ttsCalls > 0) ok(`frase-ia: pré-geração no open (chat ${chatCalls}x, tts ${ttsCalls}x antes do clique)`);
+  else bad("frase-ia pré-geração no open", `chat=${chatCalls} tts=${ttsCalls}`);
 
   const askBtn = await page.$(".slide--frase-ia.is-current [data-ai-ask]");
   if (askBtn) {

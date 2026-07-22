@@ -288,10 +288,48 @@
     return el;
   }
 
-  // frase-ia: envia (instrução + frase) ao /api/chat e digita a resposta ASSIM
-  // que ela chega (não espera o áudio — o TTS é bem mais lento). A voz é buscada
-  // em paralelo e tocada quando fica pronta. Texto via textContent (sem injeção).
-  var ttsGen = 0;   // guarda: só toca o áudio da pergunta mais recente
+  // frase-ia: a geração (resposta do /api/chat + voz TTS) começa ASSIM que o
+  // slide abre (prewarmFraseIa em go()), em background, e o resultado fica
+  // cacheado na própria slide (s._ai). O botão só REVELA o que já foi gerado —
+  // se ainda estiver gerando, mostra "Pensando…" até ficar pronto. Isso paga o
+  // cold-start + a geração antes do clique, então a voz é ouvida na íntegra.
+  var ttsGen = 0;   // guarda: só toca o áudio da revelação mais recente
+
+  // gera uma vez por slide (cacheado em s._ai): { text, audioP }.
+  // audioP é a Promise da voz (não bloqueia o texto). Falha → limpa p/ retentar.
+  function generateFraseIa(s) {
+    if (s._ai) return s._ai;
+    var instr = s.aiInstruction || FRASE_IA_INSTRUCTION;
+    var message = instr + "\n\n\"" + String(s.title || "") + "\"";
+    var p = fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: message, history: [] }),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("chat " + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        var text = (j && typeof j.text === "string") ? j.text : "";
+        if (!text) throw new Error("resposta vazia");
+        // voz começa a ser gerada já (em background); null se o TTS falhar
+        var audioP = fetchTts(text).then(function (a) { return a; }, function () { return null; });
+        return { text: text, audioP: audioP };
+      });
+    p.catch(function () { if (s._ai === p) s._ai = null; });   // permite nova tentativa
+    s._ai = p;
+    return p;
+  }
+
+  // dispara a geração ao abrir o slide (fora do modo de edição)
+  function prewarmFraseIa(s) {
+    if (s && s.layout === "frase-ia" && !editing) {
+      try { generateFraseIa(s); } catch (_) {}
+    }
+  }
+
+  // botão: só revela o resultado (gerado no open) — digita o texto e toca a voz
   function askAI(s, btn, answerEl) {
     if (!answerEl || btn.disabled) return;
     var gen = ++ttsGen;
@@ -299,32 +337,17 @@
     answerEl.hidden = false;
     answerEl.textContent = "Pensando…";
     stopTts();
-    var instr = s.aiInstruction || FRASE_IA_INSTRUCTION;
-    var message = instr + "\n\n\"" + String(s.title || "") + "\"";
     var reenable = function () { btn.disabled = false; };
-    fetch("/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: message, history: [] }),
-    })
-      .then(function (r) {
-        if (!r.ok) throw new Error("status " + r.status);
-        return r.json();
-      })
-      .then(function (j) {
-        var text = (j && typeof j.text === "string") ? j.text : "";
-        if (!text) throw new Error("resposta vazia");
-        // mostra o texto já (caminho crítico = só o /api/chat)
-        typeOut(answerEl, text, 0, reenable);
-        // voz em paralelo: toca quando chegar, se ainda for a pergunta atual
-        fetchTts(text).then(function (audio) {
-          if (gen === ttsGen) playPcm(audio.audioBase64, audio.sampleRate);
-        }, function () {});
-      })
-      .catch(function () {
-        answerEl.textContent = "Não consegui responder agora — tente de novo.";
-        reenable();
+    generateFraseIa(s).then(function (res) {
+      if (gen !== ttsGen) return;   // outra revelação assumiu
+      typeOut(answerEl, res.text, 0, reenable);
+      res.audioP.then(function (audio) {
+        if (audio && gen === ttsGen) playPcm(audio.audioBase64, audio.sampleRate);
       });
+    }, function () {
+      answerEl.textContent = "Não consegui responder agora — tente de novo.";
+      reenable();
+    });
   }
 
   // busca o áudio da resposta (PCM base64 24kHz) na voz da IA
@@ -387,17 +410,21 @@
     var interval = durationMs > 0
       ? Math.max(18, Math.min(140, durationMs / tokens.length))
       : 45;
-    var i = 0, timer = null;
-    function finish() {
+    var i = 0, timer = null, finished = false;
+    function complete() {
+      if (finished) return;
+      finished = true;
       if (timer) { clearInterval(timer); timer = null; }
       el.textContent = text;
-      el.removeEventListener("click", finish);
-      stopTts();
+      el.removeEventListener("click", reveal);
       if (done) done();
     }
-    el.addEventListener("click", finish);
+    // clique = "pular": revela tudo E corta a voz. Fim natural NÃO corta a voz
+    // (ela é mais lenta e precisa ser ouvida na íntegra).
+    function reveal() { complete(); stopTts(); }
+    el.addEventListener("click", reveal);
     timer = setInterval(function () {
-      if (i >= tokens.length) { finish(); return; }
+      if (i >= tokens.length) { complete(); return; }
       el.textContent += tokens[i++];
     }, interval);
   }
@@ -1058,6 +1085,8 @@
       var slug = slugForSlide(slides[i], i);
       try { history.replaceState(null, "", "#" + slug); } catch (e) {}
     }
+    // frase-ia: começa a gerar a resposta + voz já na abertura (o botão só revela)
+    prewarmFraseIa(slides[i]);
   }
 
   function next() { if (editing) return; go(index + 1); }
