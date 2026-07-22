@@ -22,9 +22,10 @@ export function fmtInline(escaped) {
 // para o CSS não ampliá-lo além do nativo (senão fica "estourado").
 export var PLACEHOLDER_IMAGE = "assets/placeholder.svg";
 
-// marca Aerolito (PNG) — mesmo logo do canto dos slides e da capa ao vivo.
+// marca do canto: removida do PDF gerado (não deve aparecer em nenhuma página).
+// Mantida como função (retornando vazio) para não mexer em todos os call sites.
 export function staticMarkIMG() {
-  return '<img class="print-mark" src="assets/logo-aero.png" alt="" aria-hidden="true">';
+  return "";
 }
 
 // <img> de fundo da página; recebe is-placeholder quando é o logo (sem imagem
