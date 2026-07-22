@@ -10,7 +10,8 @@
   var ACCENTS = {
     violet: "var(--accent-violet)",
     pink:   "var(--accent-pink)",
-    cyan:   "var(--accent-cyan)"
+    cyan:   "var(--accent-cyan)",
+    green:  "var(--accent-green)"
   };
 
   // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
@@ -192,16 +193,32 @@
       '<button type="button" class="slide-close" data-slide-close ' +
         'aria-label="Voltar ao índice" title="Voltar ao índice">×</button>' : "";
 
+    // slide de perfil: retrato circular ao lado do nome, sobre fundo neutro
+    // (sem foto full-bleed). O DOM e os campos continuam os do slide clássico.
+    var isProfile = !!s.portrait;
+    if (isProfile) el.classList.add("slide--profile");
+
     var bgClass = "slide-bg" + (s.image === PLACEHOLDER_IMAGE ? " is-placeholder" : "");
-    el.innerHTML =
+    var bgHtml = isProfile ? "" :
       '<img class="' + bgClass + '" src="' + esc(s.image) + '" alt="" ' +
-        (i === 0 ? "" : 'loading="lazy" ') + 'decoding="async">' +
+        (i === 0 ? "" : 'loading="lazy" ') + 'decoding="async">';
+
+    var titleHtml = isProfile ?
+      '<div class="panel-headline">' +
+        '<img class="panel-portrait" src="' + esc(s.portrait) + '" ' +
+          'alt="' + esc(s.title) + '" loading="lazy" decoding="async">' +
+        '<h2 class="panel-title">' + esc(s.title) + "</h2>" +
+      "</div>" :
+      '<h2 class="panel-title">' + esc(s.title) + "</h2>";
+
+    el.innerHTML =
+      bgHtml +
       '<div class="slide-scrim"></div>' +
       closeHtml +
       epigraphHtml +
       '<div class="panel">' +
         eyebrowHtml +
-        '<h2 class="panel-title">' + esc(s.title) + "</h2>" +
+        titleHtml +
         '<p class="panel-subtitle" data-placeholder="Subtítulo (opcional)">' + esc(s.subtitle || "") + "</p>" +
         '<div class="panel-copy">' + bodyHtml + "</div>" +
         '<ul class="chips">' + chips + "</ul>" +

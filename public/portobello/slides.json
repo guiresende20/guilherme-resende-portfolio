@@ -10,6 +10,21 @@
       "title": "Portobello/Eletromec",
       "lead": "Deck em construção. Navegue pelas miniaturas ou gere o report completo em PDF.",
       "accent": "violet"
+    },
+    {
+      "id": "sobre-guilherme",
+      "title": "Guilherme Resende Muniz",
+      "subtitle": "Designer de Inovação · Pesquisador · Doutorando em Design (UFRGS)",
+      "portrait": "assets/guilherme.webp",
+      "image": "assets/guilherme.webp",
+      "accent": "green",
+      "body": [
+        "### Formação Acadêmica",
+        "**Doutorado em Design** — UFRGS · em andamento\n**Mestrado em Design e Tecnologia** — UFRGS · 2013–2015\n**Bacharelado em Comunicação Social / Publicidade** — UFRGS · 2004–2010",
+        "### Experiência Profissional",
+        "**Head de Pesquisa** — Aerolito · atual\n**Designer e Pesquisador de Inovação** — CriaLab / Tecnopuc · 2021–presente\n**Pesquisador** — UFRGS / LdSM · 2017–presente\n**Professor** — ESPM Porto Alegre · 2018–2022"
+      ],
+      "items": ["UX/UI", "VR/AR", "IA aplicada", "Design de Inovação"]
     }
   ]
 }

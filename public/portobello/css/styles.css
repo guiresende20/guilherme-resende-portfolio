@@ -21,6 +21,7 @@
   --accent-violet:  #6C5CE7;
   --accent-pink:    #F4538A;
   --accent-cyan:    #5CE1E6;
+  --accent-green:   #35C97F;
 
   /* acento ativo por slide (sobrescrito inline por data-accent) */
   --accent: var(--accent-violet);
@@ -555,6 +556,36 @@ button.chip { cursor: pointer; font: inherit; }
 .slide--hero-static .slide-bg:not(.is-placeholder) {
   object-fit: contain;
   background: var(--bg-base, #050505);
+}
+
+/* ---------- 3b) slide de perfil (bio com retrato ao lado do nome) ---------- */
+/* fundo neutro com leve halo do acento — a foto vira retrato, não fundo. */
+.slide--profile {
+  background:
+    radial-gradient(120% 120% at 14% 0%,
+      color-mix(in srgb, var(--accent) 20%, transparent) 0%, transparent 55%),
+    linear-gradient(160deg, #0b1310 0%, var(--bg-base, #050505) 62%);
+}
+.slide--profile > .slide-scrim { display: none; }
+.slide--profile .panel {
+  background: color-mix(in srgb, var(--bg-elevated) 64%, transparent);
+}
+/* nome + retrato lado a lado */
+.panel-headline {
+  display: flex;
+  align-items: center;
+  gap: clamp(14px, 1.6vw, 24px);
+  margin-bottom: 22px;
+}
+.panel-headline .panel-title { margin-bottom: 0; }
+.panel-portrait {
+  flex: none;
+  width: clamp(64px, 7vw, 104px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
 }
 
 /* ---------- 4) frase-manifesto ---------- */
