@@ -37,6 +37,15 @@ try {
     route.fulfill({ status: 200, contentType: "application/json",
       body: JSON.stringify({ text: "Resposta simulada da IA em dois parágrafos.\n\nSegundo parágrafo aqui.", actions: [] }) }));
 
+  // stub do /api/portobello-tts: PCM de silêncio (2400 amostras 16-bit = 0,1s)
+  let ttsCalls = 0;
+  const silencePcm = Buffer.alloc(4800).toString("base64");
+  await page.route("**/api/portobello-tts", (route) => {
+    ttsCalls++;
+    return route.fulfill({ status: 200, contentType: "application/json",
+      body: JSON.stringify({ audioBase64: silencePcm, sampleRate: 24000 }) });
+  });
+
   await page.goto(`${base}/portobello/`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(1000);
   await page.evaluate(() => document.dispatchEvent(new Event("enter-deck")));
@@ -84,6 +93,10 @@ try {
   const ff = await page.$eval(".slide--frase-ia.is-current [data-ai-answer]",
     (e) => getComputedStyle(e).fontFamily);
   if (/times/i.test(ff)) ok(`resposta em Times New Roman (${ff})`); else bad("resposta Times New Roman", ff);
+
+  // voz: o deck pediu o áudio da resposta (TTS) ao mesmo botão
+  await page.waitForTimeout(300);
+  if (ttsCalls > 0) ok(`voz: /api/portobello-tts chamado (${ttsCalls}x)`); else bad("voz: TTS chamado", "0 chamadas");
 
   if (errors.length) bad("sem erros de página JS", errors.join(" | ")); else ok("sem erros de página JS");
 } finally {
