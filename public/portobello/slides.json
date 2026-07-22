@@ -28,6 +28,12 @@
       "links": [
         { "label": "Repositório 3D — UFRGS", "url": "https://www.ufrgs.br/ldsm/3d/" }
       ]
+    },
+    {
+      "id": "frase-ia-exemplo",
+      "layout": "frase-ia",
+      "title": "Inovação real acontece quando design, pesquisa e tecnologia trabalham juntos.",
+      "accent": "green"
     }
   ]
 }

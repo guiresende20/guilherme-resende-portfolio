@@ -14,6 +14,11 @@
     green:  "var(--accent-green)"
   };
 
+  // instrução fixa enviada junto com a frase ao /api/chat no layout "frase-ia"
+  var FRASE_IA_INSTRUCTION =
+    "Reaja a esta frase e amplie a ideia em 2–3 parágrafos curtos, " +
+    "conectando com a trajetória e a visão do Guilherme. Responda em português.";
+
   // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
   // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
   var PLACEHOLDER_IMAGE = "assets/placeholder.svg";
@@ -25,7 +30,7 @@
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
   // <section>. Assim a edição inline, o índice, o PDF e a visibilidade do
   // cliente continuam funcionando iguais aos territórios.
-  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, video: 1, media: 1 };
+  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, video: 1, media: 1 };
 
   // opções do seletor de layout no botão "+ Novo slide" (índice, só @aeroli.to).
   // value "" = território clássico (imagem de fundo + painel de texto).
@@ -36,6 +41,7 @@
     { value: "hero",        name: "Imagem em destaque",            desc: "Imagem cheia + legenda" },
     { value: "hero-static", name: "Imagem em destaque (sem zoom)",  desc: "Imagem cheia + legenda" },
     { value: "manifesto",   name: "Frase-manifesto",               desc: "Texto grande centralizado" },
+    { value: "frase-ia",    name: "Frase + IA",                   desc: "Frase-manifesto + resposta da IA" },
     { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
     { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
@@ -219,6 +225,16 @@
       "</div>" :
       '<h2 class="panel-title">' + esc(s.title) + "</h2>";
 
+    // bloco interativo do layout "frase-ia": botão + área de resposta digitada
+    var fraseIaHtml = s.layout === "frase-ia" ?
+      '<div class="frase-ia">' +
+        '<button type="button" class="frase-ia-btn" data-ai-ask>' +
+          '<span class="frase-ia-ico" aria-hidden="true">▶</span>' +
+          esc(s.aiButtonLabel || "Perguntar à IA") +
+        '</button>' +
+        '<div class="frase-ia-answer" data-ai-answer hidden></div>' +
+      "</div>" : "";
+
     el.innerHTML =
       bgHtml +
       '<div class="slide-scrim"></div>' +
@@ -230,6 +246,7 @@
         '<p class="panel-subtitle" data-placeholder="Subtítulo (opcional)">' + esc(s.subtitle || "") + "</p>" +
         '<div class="panel-copy">' + bodyHtml + "</div>" +
         '<ul class="chips">' + chips + linkChips + "</ul>" +
+        fraseIaHtml +
       "</div>";
 
     // fecha sobre o objeto s (sobrevive ao reorder — nunca usa índice posicional)
@@ -238,6 +255,12 @@
         openSignal(s, parseInt(btn.getAttribute("data-item"), 10), btn);
       });
     });
+
+    var askBtn = el.querySelector("[data-ai-ask]");
+    if (askBtn) {
+      var answerEl = el.querySelector("[data-ai-answer]");
+      askBtn.addEventListener("click", function () { askAI(s, askBtn, answerEl); });
+    }
 
     var closeBtn = el.querySelector("[data-slide-close]");
     if (closeBtn) {
@@ -248,6 +271,53 @@
     }
 
     return el;
+  }
+
+  // frase-ia: envia (instrução + frase) ao /api/chat e digita a resposta.
+  // Resposta inserida como TEXTO (textContent) — sem injeção de HTML.
+  function askAI(s, btn, answerEl) {
+    if (!answerEl || btn.disabled) return;
+    btn.disabled = true;
+    answerEl.hidden = false;
+    answerEl.textContent = "Pensando…";
+    var instr = s.aiInstruction || FRASE_IA_INSTRUCTION;
+    var message = instr + "\n\n\"" + String(s.title || "") + "\"";
+    fetch("/api/chat", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: message, history: [] }),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("status " + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        var text = (j && typeof j.text === "string") ? j.text : "";
+        if (!text) throw new Error("resposta vazia");
+        typeOut(answerEl, text, function () { btn.disabled = false; });
+      })
+      .catch(function () {
+        answerEl.textContent = "Não consegui responder agora — tente de novo.";
+        btn.disabled = false;
+      });
+  }
+
+  // efeito máquina de escrever: revela `text` por palavras; clicar revela tudo.
+  function typeOut(el, text, done) {
+    el.textContent = "";
+    var tokens = text.match(/\S+\s*|\s+/g) || [text];
+    var i = 0, timer = null;
+    function finish() {
+      if (timer) { clearInterval(timer); timer = null; }
+      el.textContent = text;
+      el.removeEventListener("click", finish);
+      if (done) done();
+    }
+    el.addEventListener("click", finish);
+    timer = setInterval(function () {
+      if (i >= tokens.length) { finish(); return; }
+      el.textContent += tokens[i++];
+    }, 45);
   }
 
   /* slide de introdução: miniaturas dos territórios + download do report em PDF.
@@ -1450,6 +1520,13 @@
       case "manifesto":
         base.layout = "manifesto";
         base.title = "Uma frase-manifesto que resume a visão.";
+        base.subtitle = "";
+        base.body = [];
+        base.items = [];
+        break;
+      case "frase-ia":
+        base.layout = "frase-ia";
+        base.title = "Uma frase-manifesto que a IA vai comentar.";
         base.subtitle = "";
         base.body = [];
         base.items = [];

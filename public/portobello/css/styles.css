@@ -395,18 +395,22 @@ button.chip { cursor: pointer; font: inherit; }
 /* fundo preto sólido nos layouts sem foto (grade, wordmark, manifesto) */
 .slide--grid,
 .slide--wordmark,
-.slide--manifesto { background: var(--bg-base); }
+.slide--manifesto,
+.slide--frase-ia { background: var(--bg-base); }
 .slide--grid > .slide-bg,
 .slide--wordmark > .slide-bg,
 .slide--manifesto > .slide-bg,
 .slide--grid > .slide-scrim,
 .slide--wordmark > .slide-scrim,
 .slide--manifesto > .slide-scrim { display: none; }
+.slide--frase-ia > .slide-bg { display: none; }
+.slide--frase-ia > .slide-scrim { display: none; }
 
 /* painel = área centralizada, sem card/borda (grade, wordmark, manifesto) */
 .slide--grid > .panel,
 .slide--wordmark > .panel,
-.slide--manifesto > .panel {
+.slide--manifesto > .panel,
+.slide--frase-ia > .panel {
   position: absolute; inset: 0;
   left: 0; top: 0; transform: none;
   width: 100%; min-width: 0; max-width: none;
@@ -626,7 +630,8 @@ button.chip { cursor: pointer; font: inherit; }
 
 /* ---------- 4) frase-manifesto ---------- */
 .slide--manifesto .panel-eyebrow { margin-bottom: clamp(18px, 3vh, 34px); }
-.slide--manifesto .panel-title {
+.slide--manifesto .panel-title,
+.slide--frase-ia .panel-title {
   margin: 0;
   max-width: 18ch;
   font-family: var(--font-brand);
@@ -642,6 +647,41 @@ button.chip { cursor: pointer; font: inherit; }
   color: var(--text-secondary);
   max-width: 46ch;
   margin: clamp(18px, 3vh, 30px) auto 0;
+}
+
+/* ---------- 4b) frase + IA ---------- */
+.frase-ia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 2vh, 24px);
+  margin-top: clamp(20px, 3vh, 36px);
+  width: 100%;
+}
+.frase-ia-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font: inherit; font-family: var(--font-brand); font-weight: 700;
+  font-size: clamp(14px, 1.2vw, 17px);
+  color: var(--bg-base);
+  background: var(--accent);
+  border: 0; border-radius: var(--radius-base);
+  padding: 12px 22px; cursor: pointer;
+  transition: opacity 0.2s var(--ease-ui), transform 0.2s var(--ease-ui);
+}
+.frase-ia-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.frase-ia-btn:disabled { opacity: 0.5; cursor: default; }
+.frase-ia-ico { font-size: 0.8em; }
+.frase-ia-answer[hidden] { display: none; }
+.frase-ia-answer {
+  font-family: "Times New Roman", Times, serif;
+  font-size: clamp(16px, 1.4vw, 22px);
+  line-height: 1.55;
+  color: var(--text-primary, #fff);
+  max-width: 70ch;
+  white-space: pre-wrap;
+  text-align: left;
+  border-top: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  padding-top: clamp(14px, 2vh, 22px);
 }
 
 /* ---------- 5) vídeo (YouTube embed) ---------- */
