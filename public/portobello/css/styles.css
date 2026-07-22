@@ -373,6 +373,32 @@ body.vote-page .deck-logo { position: fixed; }
 /* chips clicáveis (painel de sinal) */
 button.chip { cursor: pointer; font: inherit; }
 
+/* botões de link direto (item com url e sem descrição): empilhados, abrem em
+   nova aba e ficam fora do PDF. Estilo de botão sólido (ação, não tag). */
+.link-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: clamp(14px, 2vh, 22px);
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: clamp(13px, 1vw, 16px);
+  color: var(--bg-base);
+  background: var(--accent);
+  border: 0;
+  border-radius: var(--radius-base);
+  padding: 12px 22px;
+  text-decoration: none;
+  transition: transform 0.2s var(--ease-ui), opacity 0.2s var(--ease-ui);
+}
+.link-btn:hover { transform: translateY(-1px); opacity: 0.92; }
+
 /* entrada de conteúdo: fade-up sutil (design.md §8) */
 .slide.is-current .panel > * { animation: fade-up 0.6s var(--ease-ui) both; }
 .slide.is-current .panel > *:nth-child(1) { animation-delay: 0.05s; }
@@ -1095,6 +1121,10 @@ button.chip { cursor: pointer; font: inherit; }
 
 .thumb {
   display: block;
+  /* a altura vem daqui (16/9), não da propagação do aspect-ratio do <span>
+     .thumb-figure — que colapsava o botão para ~34px (com overflow:hidden
+     cortando a figura e o título), sobretudo com imagens loading="lazy". */
+  aspect-ratio: 16 / 9;
   text-align: left;
   padding: 0;
   background: var(--bg-elevated);

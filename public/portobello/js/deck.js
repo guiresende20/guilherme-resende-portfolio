@@ -146,16 +146,29 @@
     el.setAttribute("aria-label", (i + 1) + " de " + slides.length + ": " + s.title);
     el.style.setProperty("--accent", ACCENTS[s.accent] || ACCENTS.violet);
 
-    var chips = (s.items || []).map(function (it, k) {
-      // aceita string (formato antigo) ou objeto { label, url, description }
-      var label = (it && typeof it === "object") ? it.label : it;
-      var hasPanel = !!(it && typeof it === "object" && (it.url || it.description));
-      if (hasPanel) {
-        return '<li><button type="button" class="chip chip-btn" data-item="' + k + '" ' +
-               'aria-haspopup="dialog">' + esc(label) + "</button></li>";
+    // aceita string (formato antigo) ou objeto { label, url, description }.
+    // Regra: objeto com `url` e SEM `description` vira botão de link direto
+    // (abre em nova aba, empilhado, fora do PDF). Com description (ou sem url)
+    // segue como chip de sinal (abre o diálogo) ou chip simples.
+    var chips = "", actionBtns = "";
+    (s.items || []).forEach(function (it, k) {
+      var isObj = it && typeof it === "object";
+      var label = isObj ? it.label : it;
+      var url = isObj ? it.url : "";
+      var desc = isObj ? it.description : "";
+      if (url && !desc) {
+        actionBtns += '<a class="link-btn" href="' + esc(url) + '" ' +
+          'target="_blank" rel="noopener noreferrer">' + esc(label) + "</a>";
+        return;
       }
-      return '<li><span class="chip">' + esc(label) + "</span></li>";
-    }).join("");
+      var hasPanel = !!(isObj && (url || desc));
+      if (hasPanel) {
+        chips += '<li><button type="button" class="chip chip-btn" data-item="' + k + '" ' +
+                 'aria-haspopup="dialog">' + esc(label) + "</button></li>";
+      } else {
+        chips += '<li><span class="chip">' + esc(label) + "</span></li>";
+      }
+    });
 
     // links externos (abrem em nova aba) — distintos dos chips de sinal (items)
     var linkChips = (s.links || []).map(function (lk) {
@@ -246,6 +259,7 @@
         '<p class="panel-subtitle" data-placeholder="Subtítulo (opcional)">' + esc(s.subtitle || "") + "</p>" +
         '<div class="panel-copy">' + bodyHtml + "</div>" +
         '<ul class="chips">' + chips + linkChips + "</ul>" +
+        (actionBtns ? '<div class="link-actions">' + actionBtns + "</div>" : "") +
         fraseIaHtml +
       "</div>";
 
@@ -273,15 +287,18 @@
     return el;
   }
 
-  // frase-ia: envia (instrução + frase) ao /api/chat e digita a resposta.
-  // Resposta inserida como TEXTO (textContent) — sem injeção de HTML.
+  // frase-ia: envia (instrução + frase) ao /api/chat, pede o áudio (TTS) da
+  // resposta e a digita sincronizada com a fala. Texto via textContent (sem
+  // injeção de HTML). Se o TTS falhar, digita sem voz (fallback).
   function askAI(s, btn, answerEl) {
     if (!answerEl || btn.disabled) return;
     btn.disabled = true;
     answerEl.hidden = false;
     answerEl.textContent = "Pensando…";
+    stopTts();
     var instr = s.aiInstruction || FRASE_IA_INSTRUCTION;
     var message = instr + "\n\n\"" + String(s.title || "") + "\"";
+    var reenable = function () { btn.disabled = false; };
     fetch("/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -294,30 +311,95 @@
       .then(function (j) {
         var text = (j && typeof j.text === "string") ? j.text : "";
         if (!text) throw new Error("resposta vazia");
-        typeOut(answerEl, text, function () { btn.disabled = false; });
+        // pede a voz; ao chegar, toca e digita no ritmo do áudio.
+        // se o TTS falhar, digita sem voz (mesma resposta).
+        return fetchTts(text).then(
+          function (audio) {
+            var durationMs = playPcm(audio.audioBase64, audio.sampleRate);
+            typeOut(answerEl, text, durationMs, reenable);
+          },
+          function () { typeOut(answerEl, text, 0, reenable); }
+        );
       })
       .catch(function () {
         answerEl.textContent = "Não consegui responder agora — tente de novo.";
-        btn.disabled = false;
+        reenable();
       });
   }
 
+  // busca o áudio da resposta (PCM base64 24kHz) na voz da IA
+  function fetchTts(text) {
+    return fetch("/api/portobello-tts", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: text }),
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error("tts " + r.status);
+        return r.json();
+      })
+      .then(function (j) {
+        if (!j || !j.audioBase64) throw new Error("sem áudio");
+        return j;
+      });
+  }
+
+  // reprodução de PCM (Web Audio) — reusa um AudioContext do módulo.
+  // retorna a duração em ms (0 se não deu pra tocar).
+  var ttsCtx = null, ttsSources = [];
+  function stopTts() {
+    ttsSources.forEach(function (src) { try { src.stop(); } catch (_) {} });
+    ttsSources = [];
+  }
+  function playPcm(base64, sampleRate) {
+    try {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return 0;
+      if (!ttsCtx) ttsCtx = new Ctx();
+      if (ttsCtx.state === "suspended") ttsCtx.resume();
+      var bin = window.atob(base64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var int16 = new Int16Array(bytes.buffer);
+      var f32 = new Float32Array(int16.length);
+      for (var j = 0; j < int16.length; j++) f32[j] = int16[j] / 32768;
+      var buf = ttsCtx.createBuffer(1, f32.length, sampleRate || 24000);
+      buf.copyToChannel(f32, 0);
+      var src = ttsCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ttsCtx.destination);
+      src.start();
+      ttsSources.push(src);
+      src.onended = function () {
+        ttsSources = ttsSources.filter(function (x) { return x !== src; });
+      };
+      return buf.duration * 1000;
+    } catch (_) {
+      return 0;
+    }
+  }
+
   // efeito máquina de escrever: revela `text` por palavras; clicar revela tudo.
-  function typeOut(el, text, done) {
+  // Se durationMs > 0, ritma a digitação para terminar junto com o áudio.
+  function typeOut(el, text, durationMs, done) {
     el.textContent = "";
     var tokens = text.match(/\S+\s*|\s+/g) || [text];
+    var interval = durationMs > 0
+      ? Math.max(18, Math.min(140, durationMs / tokens.length))
+      : 45;
     var i = 0, timer = null;
     function finish() {
       if (timer) { clearInterval(timer); timer = null; }
       el.textContent = text;
       el.removeEventListener("click", finish);
+      stopTts();
       if (done) done();
     }
     el.addEventListener("click", finish);
     timer = setInterval(function () {
       if (i >= tokens.length) { finish(); return; }
       el.textContent += tokens[i++];
-    }, 45);
+    }, interval);
   }
 
   /* slide de introdução: miniaturas dos territórios + download do report em PDF.
@@ -1013,7 +1095,7 @@
       return thumbVideoBadge();
     }
     // layouts de texto: mini-render da frase/nome
-    if ((s.layout === "manifesto" || s.layout === "wordmark") && s.title) {
+    if ((s.layout === "manifesto" || s.layout === "wordmark" || s.layout === "frase-ia") && s.title) {
       return thumbTextTile(s.title);
     }
     // galeria: 1ª imagem, se houver
