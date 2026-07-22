@@ -550,6 +550,12 @@ button.chip { cursor: pointer; font: inherit; }
   animation: none;
   transform: none;
 }
+/* imagem inteira (sem recorte): contain no lugar de cover; as bordas
+   sobrando ganham o fundo-base pra não ficar transparente/preto puro. */
+.slide--hero-static .slide-bg:not(.is-placeholder) {
+  object-fit: contain;
+  background: var(--bg-base, #050505);
+}
 
 /* ---------- 4) frase-manifesto ---------- */
 .slide--manifesto .panel-eyebrow { margin-bottom: clamp(18px, 3vh, 34px); }
