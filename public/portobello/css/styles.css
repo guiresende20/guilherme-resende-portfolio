@@ -518,8 +518,11 @@ button.chip { cursor: pointer; font: inherit; }
 }
 
 /* ---------- 3) imagem em destaque + legenda ---------- */
-.slide--hero > .slide-scrim { display: none; }
-.slide--hero > .panel {
+/* hero-static = mesmo visual do hero, mas sem o Ken Burns (imagem parada). */
+.slide--hero > .slide-scrim,
+.slide--hero-static > .slide-scrim { display: none; }
+.slide--hero > .panel,
+.slide--hero-static > .panel {
   top: auto; bottom: 0; left: 0;
   transform: none;
   width: 100%; min-width: 0; max-width: none;
@@ -532,12 +535,21 @@ button.chip { cursor: pointer; font: inherit; }
   backdrop-filter: none; -webkit-backdrop-filter: none;
   overflow: visible;
 }
-.slide--hero .panel-title {
+.slide--hero .panel-title,
+.slide--hero-static .panel-title {
   font-size: clamp(26px, 3vw, 44px);
   margin-bottom: 6px;
 }
-.slide--hero .panel-subtitle { margin: 0 0 8px; }
-.slide--hero .panel-copy .panel-body { max-width: 72ch; margin-bottom: 0; }
+.slide--hero .panel-subtitle,
+.slide--hero-static .panel-subtitle { margin: 0 0 8px; }
+.slide--hero .panel-copy .panel-body,
+.slide--hero-static .panel-copy .panel-body { max-width: 72ch; margin-bottom: 0; }
+
+/* imagem parada: sem o zoom/pan Ken Burns aplicado ao slide ativo */
+.slide.slide--hero-static.is-current .slide-bg {
+  animation: none;
+  transform: none;
+}
 
 /* ---------- 4) frase-manifesto ---------- */
 .slide--manifesto .panel-eyebrow { margin-bottom: clamp(18px, 3vh, 34px); }

@@ -231,6 +231,7 @@ export function slidePageHTML(slide, territoryNum) {
     case "grid":      return gridPageHTML(slide);
     case "wordmark":  return brandPageHTML(slide);
     case "hero":      return heroPageHTML(slide);
+    case "hero-static": return heroPageHTML(slide);
     case "manifesto": return manifestoPageHTML(slide);
     case "video":     return videoPageHTML(slide);
     case "media":     return mediaPageHTML(slide);

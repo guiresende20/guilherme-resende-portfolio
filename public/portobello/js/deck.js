@@ -24,18 +24,19 @@
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
   // <section>. Assim a edição inline, o índice, o PDF e a visibilidade do
   // cliente continuam funcionando iguais aos territórios.
-  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, manifesto: 1, video: 1, media: 1 };
+  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, video: 1, media: 1 };
 
   // opções do seletor de layout no botão "+ Novo slide" (índice, só @aeroli.to).
   // value "" = território clássico (imagem de fundo + painel de texto).
   var LAYOUT_CHOICES = [
-    { value: "",          name: "Abertura + Texto",    desc: "Imagem de fundo + painel de texto" },
-    { value: "grid",      name: "Grade de miniaturas", desc: "Vários cards/logos placeholder" },
-    { value: "wordmark",  name: "Thumbs",              desc: "Nome grande + linha" },
-    { value: "hero",      name: "Imagem em destaque",  desc: "Imagem cheia + legenda" },
-    { value: "manifesto", name: "Frase-manifesto",     desc: "Texto grande centralizado" },
-    { value: "video",     name: "Vídeo",               desc: "YouTube embed centralizado" },
-    { value: "media",     name: "GIF / Vídeo",         desc: "GIF ou MP4 em loop, centralizado" }
+    { value: "",            name: "Abertura + Texto",              desc: "Imagem de fundo + painel de texto" },
+    { value: "grid",        name: "Grade de miniaturas",           desc: "Vários cards/logos placeholder" },
+    { value: "wordmark",    name: "Thumbs",                        desc: "Nome grande + linha" },
+    { value: "hero",        name: "Imagem em destaque",            desc: "Imagem cheia + legenda" },
+    { value: "hero-static", name: "Imagem em destaque (sem zoom)",  desc: "Imagem cheia + legenda" },
+    { value: "manifesto",   name: "Frase-manifesto",               desc: "Texto grande centralizado" },
+    { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
+    { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
 
   // "Território" de verdade = só o layout clássico (sem s.layout). Intro
@@ -1409,6 +1410,13 @@
         break;
       case "hero":
         base.layout = "hero";
+        base.title = "Legenda da imagem";
+        base.subtitle = "";
+        base.body = [""];
+        base.items = [];
+        break;
+      case "hero-static":
+        base.layout = "hero-static";
         base.title = "Legenda da imagem";
         base.subtitle = "";
         base.body = [""];
