@@ -239,14 +239,13 @@ export function slidePageHTML(slide, territoryNum) {
   }
 }
 
-// documento completo: capa + TODOS os slides de conteúdo (cada layout com sua
-// página). opts.orientation: "landscape" | "portrait". opts.ids (opcional):
+// documento completo: TODOS os slides de conteúdo (cada layout com sua página),
+// sem a capa da Aerolito. opts.orientation: "landscape" | "portrait". opts.ids (opcional):
 // restringe por id; ausente = todos. Só o layout clássico recebe número de
 // território, contado só entre os territórios (igual ao deck).
 export function buildPrintDocHTML(slides, opts) {
   var orientation = (opts && opts.orientation) === "portrait" ? "portrait" : "landscape";
   var ids = opts && opts.ids;
-  var intro = slides.find(function (s) { return s.type === "intro"; });
   var content = contentSlides(slides).filter(function (s) {
     return !ids || ids.indexOf(s.id) !== -1;
   });
@@ -254,7 +253,7 @@ export function buildPrintDocHTML(slides, opts) {
   var pages = content.map(function (s) {
     return slidePageHTML(s, isTerritory(s) ? ++terrNum : 0);
   }).join("");
-  return '<div id="print-root" class="is-' + orientation + '">' + coverPageHTML(intro) + pages + '</div>';
+  return '<div id="print-root" class="is-' + orientation + '">' + pages + '</div>';
 }
 
 // regra @page injetada no print (orientação dinâmica — @page não muda por classe).
