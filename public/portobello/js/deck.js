@@ -146,16 +146,29 @@
     el.setAttribute("aria-label", (i + 1) + " de " + slides.length + ": " + s.title);
     el.style.setProperty("--accent", ACCENTS[s.accent] || ACCENTS.violet);
 
-    var chips = (s.items || []).map(function (it, k) {
-      // aceita string (formato antigo) ou objeto { label, url, description }
-      var label = (it && typeof it === "object") ? it.label : it;
-      var hasPanel = !!(it && typeof it === "object" && (it.url || it.description));
-      if (hasPanel) {
-        return '<li><button type="button" class="chip chip-btn" data-item="' + k + '" ' +
-               'aria-haspopup="dialog">' + esc(label) + "</button></li>";
+    // aceita string (formato antigo) ou objeto { label, url, description }.
+    // Regra: objeto com `url` e SEM `description` vira botão de link direto
+    // (abre em nova aba, empilhado, fora do PDF). Com description (ou sem url)
+    // segue como chip de sinal (abre o diálogo) ou chip simples.
+    var chips = "", actionBtns = "";
+    (s.items || []).forEach(function (it, k) {
+      var isObj = it && typeof it === "object";
+      var label = isObj ? it.label : it;
+      var url = isObj ? it.url : "";
+      var desc = isObj ? it.description : "";
+      if (url && !desc) {
+        actionBtns += '<a class="link-btn" href="' + esc(url) + '" ' +
+          'target="_blank" rel="noopener noreferrer">' + esc(label) + "</a>";
+        return;
       }
-      return '<li><span class="chip">' + esc(label) + "</span></li>";
-    }).join("");
+      var hasPanel = !!(isObj && (url || desc));
+      if (hasPanel) {
+        chips += '<li><button type="button" class="chip chip-btn" data-item="' + k + '" ' +
+                 'aria-haspopup="dialog">' + esc(label) + "</button></li>";
+      } else {
+        chips += '<li><span class="chip">' + esc(label) + "</span></li>";
+      }
+    });
 
     // links externos (abrem em nova aba) — distintos dos chips de sinal (items)
     var linkChips = (s.links || []).map(function (lk) {
@@ -246,6 +259,7 @@
         '<p class="panel-subtitle" data-placeholder="Subtítulo (opcional)">' + esc(s.subtitle || "") + "</p>" +
         '<div class="panel-copy">' + bodyHtml + "</div>" +
         '<ul class="chips">' + chips + linkChips + "</ul>" +
+        (actionBtns ? '<div class="link-actions">' + actionBtns + "</div>" : "") +
         fraseIaHtml +
       "</div>";
 
@@ -1081,7 +1095,7 @@
       return thumbVideoBadge();
     }
     // layouts de texto: mini-render da frase/nome
-    if ((s.layout === "manifesto" || s.layout === "wordmark") && s.title) {
+    if ((s.layout === "manifesto" || s.layout === "wordmark" || s.layout === "frase-ia") && s.title) {
       return thumbTextTile(s.title);
     }
     // galeria: 1ª imagem, se houver

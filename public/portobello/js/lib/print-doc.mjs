@@ -71,7 +71,11 @@ function bodyHTML(body) {
 
 // uma página de território.
 export function territoryPageHTML(slide, num) {
-  var chips = (slide.items || []).map(chipHTML).join("");
+  // botões de link direto (item com url e sem descrição) não vão para o PDF —
+  // são ações do deck ao vivo e evitam expor URLs sensíveis (ex.: token admin).
+  var chips = (slide.items || [])
+    .filter(function (it) { return !(it && typeof it === "object" && it.url && !it.description); })
+    .map(chipHTML).join("");
   return '<section class="print-page print-territory">' +
     staticMarkIMG() +
     bgIMG(slide.image) +
