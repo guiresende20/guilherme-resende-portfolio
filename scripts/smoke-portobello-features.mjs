@@ -82,7 +82,11 @@ try {
   await page.waitForSelector(".slide--frase-ia.is-current", { timeout: 5000 });
 
   const askBtn = await page.$(".slide--frase-ia.is-current [data-ai-ask]");
-  if (askBtn) ok("frase-ia: botão Perguntar à IA presente"); else bad("frase-ia botão", "ausente");
+  if (askBtn) {
+    const lbl = (await askBtn.textContent())?.trim() ?? "";
+    if (lbl.includes("Perguntar para a IA do Gui")) ok(`frase-ia: botão "${lbl}"`);
+    else bad("frase-ia rótulo do botão", `"${lbl}"`);
+  } else bad("frase-ia botão", "ausente");
   await askBtn.click();
   await page.waitForFunction(() => {
     const a = document.querySelector(".slide--frase-ia.is-current [data-ai-answer]");

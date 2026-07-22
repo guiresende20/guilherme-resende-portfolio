@@ -14,10 +14,11 @@
     green:  "var(--accent-green)"
   };
 
-  // instrução fixa enviada junto com a frase ao /api/chat no layout "frase-ia"
+  // instrução fixa enviada junto com a frase ao /api/chat no layout "frase-ia".
+  // Curta de propósito: resposta menor = /api/chat e a voz (TTS) bem mais rápidos.
   var FRASE_IA_INSTRUCTION =
-    "Reaja a esta frase e amplie a ideia em 2–3 parágrafos curtos, " +
-    "conectando com a trajetória e a visão do Guilherme. Responda em português.";
+    "Reaja a esta frase em 1 parágrafo curto (no máximo 3 frases), em português, " +
+    "conectando com a visão do Guilherme. Seja direto, sem rodeios.";
 
   // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
   // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
@@ -243,7 +244,7 @@
       '<div class="frase-ia">' +
         '<button type="button" class="frase-ia-btn" data-ai-ask>' +
           '<span class="frase-ia-ico" aria-hidden="true">▶</span>' +
-          esc(s.aiButtonLabel || "Perguntar à IA") +
+          esc(s.aiButtonLabel || "Perguntar para a IA do Gui") +
         '</button>' +
         '<div class="frase-ia-answer" data-ai-answer hidden></div>' +
       "</div>" : "";
@@ -287,11 +288,13 @@
     return el;
   }
 
-  // frase-ia: envia (instrução + frase) ao /api/chat, pede o áudio (TTS) da
-  // resposta e a digita sincronizada com a fala. Texto via textContent (sem
-  // injeção de HTML). Se o TTS falhar, digita sem voz (fallback).
+  // frase-ia: envia (instrução + frase) ao /api/chat e digita a resposta ASSIM
+  // que ela chega (não espera o áudio — o TTS é bem mais lento). A voz é buscada
+  // em paralelo e tocada quando fica pronta. Texto via textContent (sem injeção).
+  var ttsGen = 0;   // guarda: só toca o áudio da pergunta mais recente
   function askAI(s, btn, answerEl) {
     if (!answerEl || btn.disabled) return;
+    var gen = ++ttsGen;
     btn.disabled = true;
     answerEl.hidden = false;
     answerEl.textContent = "Pensando…";
@@ -311,15 +314,12 @@
       .then(function (j) {
         var text = (j && typeof j.text === "string") ? j.text : "";
         if (!text) throw new Error("resposta vazia");
-        // pede a voz; ao chegar, toca e digita no ritmo do áudio.
-        // se o TTS falhar, digita sem voz (mesma resposta).
-        return fetchTts(text).then(
-          function (audio) {
-            var durationMs = playPcm(audio.audioBase64, audio.sampleRate);
-            typeOut(answerEl, text, durationMs, reenable);
-          },
-          function () { typeOut(answerEl, text, 0, reenable); }
-        );
+        // mostra o texto já (caminho crítico = só o /api/chat)
+        typeOut(answerEl, text, 0, reenable);
+        // voz em paralelo: toca quando chegar, se ainda for a pergunta atual
+        fetchTts(text).then(function (audio) {
+          if (gen === ttsGen) playPcm(audio.audioBase64, audio.sampleRate);
+        }, function () {});
       })
       .catch(function () {
         answerEl.textContent = "Não consegui responder agora — tente de novo.";
