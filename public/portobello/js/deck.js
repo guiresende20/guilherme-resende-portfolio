@@ -63,7 +63,7 @@
     { value: "frase-ia",    name: "Frase + IA",                   desc: "Frase-manifesto + resposta da IA" },
     { value: "pontos",      name: "Pontos com ícones",            desc: "Título + grade de cards (ícone + texto)" },
     { value: "background1",  name: "Texto destaque + fundo gradiente", desc: "Frase grande sobre o gradiente verde da capa" },
-    { value: "shader",      name: "Capa/Fecho + shader",           desc: "Título/bordão sobre o fundo WebGL verde" },
+    { value: "shader",      name: "Capa",                          desc: "Título + bordão sobre o fundo shader verde" },
     { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
     { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
@@ -502,6 +502,29 @@
       });
     }
     return el;
+  }
+
+  // campos editáveis (contenteditable) do layout shader. Renderiza os cinco
+  // campos SEMPRE (mesmo vazios, com placeholder) p/ permitir adicioná-los.
+  // O texto é o valor cru (o bordão só recebe fmtInline na renderização final).
+  var SHADER_FIELDS = [
+    { key: "kicker",   tag: "p",          cls: "shader-kicker",   ph: "Kicker (opcional)" },
+    { key: "title",    tag: "h2",         cls: "shader-title",    ph: "Título" },
+    { key: "subtitle", tag: "p",          cls: "shader-subtitle", ph: "Subtítulo (opcional)" },
+    { key: "quote",    tag: "blockquote", cls: "shader-quote",    ph: "Bordão (opcional)" },
+    { key: "byline",   tag: "p",          cls: "shader-byline",   ph: "Assinatura (opcional)" }
+  ];
+  function buildShaderEditor(el, s) {
+    var panel = el.querySelector(".shader-panel");
+    if (!panel) return;
+    panel.innerHTML = SHADER_FIELDS.map(function (f) {
+      return "<" + f.tag + ' class="' + f.cls + ' edit-block" contenteditable="true" ' +
+        'data-shader-field="' + f.key + '" data-placeholder="' + esc(f.ph) + '"></' + f.tag + ">";
+    }).join("");
+    SHADER_FIELDS.forEach(function (f) {
+      var node = panel.querySelector('[data-shader-field="' + f.key + '"]');
+      if (node) node.textContent = s[f.key] || "";
+    });
   }
 
   function buildIntroSlide(s, i) {
@@ -1828,6 +1851,13 @@
     var el = els[index];
     if (!el) return;
 
+    // capa/fecho (shader): campos próprios (kicker/título/subtítulo/bordão/
+    // assinatura), sem painel clássico/chips/imagem
+    if (s.layout === "shader") {
+      buildShaderEditor(el, s);
+      return;
+    }
+
     var titleEl = el.querySelector(".panel-title");
     if (titleEl) { titleEl.contentEditable = "true"; titleEl.textContent = s.title; }
 
@@ -2202,6 +2232,16 @@
 
   function collectPatch(s, el) {
     var patch = {};
+    // capa/fecho (shader): lê os cinco campos próprios; "" limpa o campo
+    if (s.layout === "shader") {
+      SHADER_FIELDS.forEach(function (f) {
+        var node = el.querySelector('[data-shader-field="' + f.key + '"]');
+        if (!node) return;
+        var v = (node.innerText || node.textContent || "").replace(/\r/g, "").trim();
+        if (v !== (s[f.key] || "")) patch[f.key] = v;
+      });
+      return patch;
+    }
     var titleEl = el.querySelector(".panel-title");
     if (titleEl) {
       var t = titleEl.textContent.trim();
@@ -2299,6 +2339,9 @@
         .then(function () {
           if (patch.title != null) s.title = patch.title;
           if (patch.subtitle != null) s.subtitle = patch.subtitle;
+          if (patch.kicker != null) s.kicker = patch.kicker;
+          if (patch.quote != null) s.quote = patch.quote;
+          if (patch.byline != null) s.byline = patch.byline;
           if (patch.body != null) s.body = patch.body;
           if (patch.image != null) s.image = patch.image;
           if (patch.items != null) s.items = patch.items;
@@ -2433,6 +2476,9 @@
       if (typeof o.title === "string") s.title = o.title;
       if (typeof o.layout === "string") s.layout = o.layout;
       if (typeof o.subtitle === "string") s.subtitle = o.subtitle;
+      if (typeof o.kicker === "string") s.kicker = o.kicker;
+      if (typeof o.quote === "string") s.quote = o.quote;
+      if (typeof o.byline === "string") s.byline = o.byline;
       if (Array.isArray(o.body)) s.body = o.body;
       if (typeof o.image === "string") s.image = o.image;
       if (Array.isArray(o.items)) s.items = o.items;

@@ -9,7 +9,7 @@ const OVERRIDES_KEY = "overrides";
 const ADDED_KEY = "added";     // slides novos criados pelo editor (lista)
 const HIDDEN_KEY = "hidden";   // ids de slides ocultados (publicado, lista)
 const ORDER_KEY = "order";     // ordem publicada dos slides (lista de ids)
-const EDITABLE = ["title", "subtitle", "body", "image", "items", "gallery", "video", "media", "layout"];
+const EDITABLE = ["title", "subtitle", "body", "image", "items", "gallery", "video", "media", "layout", "kicker", "quote", "byline"];
 const ALLOWED_UPLOAD_TYPES = new Set([
   "image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"
 ]);
