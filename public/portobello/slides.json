@@ -5,6 +5,16 @@
   },
   "slides": [
     {
+      "id": "capa-palestra",
+      "layout": "shader",
+      "kicker": "Palestra · Portobello + Eletromec",
+      "title": "Da Prancheta ao Prompt",
+      "subtitle": "Como a IA está redesenhando o trabalho dos escritórios de arquitetura.",
+      "quote": "Você não precisa aprender a programar. Precisa aprender a perguntar.",
+      "byline": "Guilherme Resende Muniz",
+      "accent": "green"
+    },
+    {
       "id": "intro",
       "type": "intro",
       "title": "Portobello/Eletromec",
@@ -50,6 +60,15 @@
         { "icon": "nodes",   "text": "Integração entre design, negócio e tecnologia" },
         { "icon": "target",  "text": "Foco em impacto real nas pessoas" }
       ]
+    },
+    {
+      "id": "fecho-palestra",
+      "layout": "shader",
+      "role": "closing",
+      "kicker": "Obrigado",
+      "quote": "A IA desenha rápido. Só você sabe o que vale a pena desenhar.",
+      "byline": "Guilherme Resende Muniz · Da Prancheta ao Prompt",
+      "accent": "green"
     }
   ]
 }
