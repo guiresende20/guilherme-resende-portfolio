@@ -88,6 +88,22 @@ body.on-gradient #starfield { opacity: 0; }
 body.on-intro #index-gradient,
 body.on-gradient #index-gradient { opacity: 1; visibility: visible; }
 
+/* shader "Verdant Swirl" (WebGL) — fundo dos slides shader (capa/fecho);
+   só aparece em body.on-shader, no lugar do starfield. */
+#shader-bg {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s var(--ease-ui), visibility 0.6s var(--ease-ui);
+}
+body.on-shader #starfield { opacity: 0; }
+body.on-shader #shader-bg { opacity: 1; visibility: visible; }
+
 /* ============================================================
    DECK / SLIDES
    ============================================================ */
@@ -440,6 +456,102 @@ button.chip { cursor: pointer; font: inherit; }
 .slide--background1 { background: transparent; }
 .slide--background1 > .slide-bg { display: none; }
 .slide--background1 > .slide-scrim { display: none; }
+
+/* ---------- layout "shader": capa/fecho sobre o fundo WebGL (#shader-bg) ----------
+   O slide é transparente para deixar o canvas verde animado aparecer atrás;
+   um scrim radial escuro garante contraste do texto branco. */
+.slide--shader { background: transparent; }
+.slide--shader > .slide-bg { display: none; }
+.slide--shader > .slide-scrim { display: none; }
+.slide--shader .shader-scrim {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(120% 90% at 50% 45%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.28) 55%, rgba(0,0,0,0.62) 100%),
+    linear-gradient(0deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 45%);
+}
+.slide--shader .shader-panel {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: center;
+  text-align: left;
+  gap: clamp(14px, 2.4vh, 30px);
+  padding: clamp(80px, 11vh, 132px) clamp(32px, 9vw, 150px);
+  z-index: 2;
+}
+.shader-kicker {
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: clamp(12px, 1.15vw, 15px);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.shader-title {
+  font-family: var(--font-brand);
+  font-weight: 800;
+  font-size: clamp(44px, 8.2vw, 132px);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-shadow: 0 2px 40px rgba(0,0,0,0.5);
+  max-width: 16ch;
+}
+.shader-subtitle {
+  font-family: var(--font-display);
+  font-size: clamp(18px, 2.3vw, 32px);
+  line-height: 1.3;
+  color: rgba(255,255,255,0.9);
+  max-width: 30ch;
+  text-shadow: 0 1px 20px rgba(0,0,0,0.45);
+}
+.shader-quote {
+  position: relative;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: clamp(19px, 2.5vw, 34px);
+  line-height: 1.32;
+  color: var(--text-primary);
+  max-width: 34ch;
+  padding-left: clamp(16px, 1.4vw, 22px);
+  border-left: 3px solid var(--accent);
+  text-shadow: 0 1px 20px rgba(0,0,0,0.5);
+}
+.shader-byline {
+  font-family: var(--font-brand);
+  font-weight: 700;
+  font-size: clamp(13px, 1.25vw, 17px);
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.82);
+}
+/* fecho: o bordão é o herói (grande, sem borda); o resto recua */
+.slide--shader.slide--shader-closing .shader-panel {
+  align-items: center; text-align: center;
+}
+.slide--shader-closing .shader-quote {
+  border-left: 0; padding-left: 0;
+  font-size: clamp(30px, 5.2vw, 80px);
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  max-width: 22ch;
+}
+.slide--shader-closing .shader-kicker { align-self: center; }
+.slide--shader-closing .shader-byline { align-self: center; }
+/* entrada em cascata (mesma pegada da intro) */
+.slide--shader.is-current .shader-panel > * {
+  animation: fade-up 0.6s var(--ease-ui) both;
+}
+.slide--shader.is-current .shader-kicker  { animation-delay: 0.02s; }
+.slide--shader.is-current .shader-title   { animation-delay: 0.08s; }
+.slide--shader.is-current .shader-subtitle{ animation-delay: 0.16s; }
+.slide--shader.is-current .shader-quote   { animation-delay: 0.24s; }
+.slide--shader.is-current .shader-byline  { animation-delay: 0.32s; }
+@media (prefers-reduced-motion: reduce) {
+  .slide--shader.is-current .shader-panel > * { animation: none !important; }
+}
+@media (max-width: 640px) {
+  .slide--shader .shader-panel { align-items: flex-start; }
+  .shader-title { font-size: clamp(38px, 13vw, 64px); }
+}
 
 /* painel = área centralizada, sem card/borda (grade, wordmark, manifesto) */
 .slide--grid > .panel,

@@ -29,7 +29,7 @@ describe("portobello content handlers", () => {
   it("GET vazio retorna overrides/added/hidden default", async () => {
     const res = await handleGetContent(fakeStore());
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ overrides: {}, added: [], hidden: [] });
+    expect(res.body).toEqual({ overrides: {}, added: [], hidden: [], order: [] });
   });
 
   it("saveContent grava patch e GET reflete", async () => {

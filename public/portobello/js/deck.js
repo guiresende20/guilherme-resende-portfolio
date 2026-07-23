@@ -31,7 +31,7 @@
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
   // <section>. Assim a edição inline, o índice, o PDF e a visibilidade do
   // cliente continuam funcionando iguais aos territórios.
-  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, pontos: 1, background1: 1, video: 1, media: 1 };
+  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, pontos: 1, background1: 1, shader: 1, video: 1, media: 1 };
 
   // ícones (SVG de traço) para os cards do layout "pontos". Cada chave é um
   // nome usado no campo `points[].icon`; o glifo procura representar o conceito.
@@ -63,6 +63,7 @@
     { value: "frase-ia",    name: "Frase + IA",                   desc: "Frase-manifesto + resposta da IA" },
     { value: "pontos",      name: "Pontos com ícones",            desc: "Título + grade de cards (ícone + texto)" },
     { value: "background1",  name: "Texto destaque + fundo gradiente", desc: "Frase grande sobre o gradiente verde da capa" },
+    { value: "shader",      name: "Capa/Fecho + shader",           desc: "Título/bordão sobre o fundo WebGL verde" },
     { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
     { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
@@ -153,6 +154,7 @@
 
   function buildSlide(s, i) {
     if (s.type === "intro") return buildIntroSlide(s, i);
+    if (s.layout === "shader") return buildShaderSlide(s, i);
     if (s.layout === "grid") return buildGridSlide(s, i);
     if (s.layout === "video") return buildVideoSlide(s, i);
     if (s.layout === "media") return buildMediaSlide(s, i);
@@ -463,6 +465,45 @@
   /* slide de introdução: miniaturas dos territórios + download do report em PDF.
      As miniaturas levam ao slide correspondente; o índice é resolvido em tempo
      de clique (slides.indexOf) para sobreviver a reordenações do deck. */
+  // layout "shader": capa/fecho de palestra sobre o fundo WebGL (#shader-bg).
+  // Campos: kicker, title, subtitle, quote (bordão), byline. role:"closing"
+  // faz o bordão virar o herói central (fecho). Todos opcionais.
+  function buildShaderSlide(s, i) {
+    var el = document.createElement("section");
+    el.className = "slide slide--shader";
+    if (s.role === "closing") el.classList.add("slide--shader-closing");
+    if (s.id) el.dataset.id = s.id;
+    el.dataset.layout = "shader";
+    el.setAttribute("aria-roledescription", "slide");
+    el.setAttribute("aria-label", (i + 1) + " de " + slides.length + ": " + s.title);
+    el.style.setProperty("--accent", ACCENTS[s.accent] || ACCENTS.green || ACCENTS.violet);
+
+    var closeHtml = fullAccess ?
+      '<button type="button" class="slide-close" data-slide-close ' +
+        'aria-label="Voltar ao índice" title="Voltar ao índice">×</button>' : "";
+
+    var parts = "";
+    if (s.kicker)   parts += '<p class="shader-kicker">' + esc(s.kicker) + "</p>";
+    if (s.title)    parts += '<h2 class="shader-title">' + esc(s.title) + "</h2>";
+    if (s.subtitle) parts += '<p class="shader-subtitle">' + esc(s.subtitle) + "</p>";
+    if (s.quote)    parts += '<blockquote class="shader-quote">' + fmtInline(esc(s.quote)) + "</blockquote>";
+    if (s.byline)   parts += '<p class="shader-byline">' + esc(s.byline) + "</p>";
+
+    el.innerHTML =
+      '<div class="shader-scrim"></div>' +
+      closeHtml +
+      '<div class="shader-panel">' + parts + "</div>";
+
+    var closeBtn = el.querySelector("[data-slide-close]");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        openOverview();
+      });
+    }
+    return el;
+  }
+
   function buildIntroSlide(s, i) {
     var el = document.createElement("section");
     el.className = "slide slide-intro";
@@ -1055,6 +1096,8 @@
     document.body.classList.toggle("on-intro", !!slides[i] && slides[i].type === "intro");
     // background1: reusa o canvas do gradiente da capa atrás do texto destaque
     document.body.classList.toggle("on-gradient", !!slides[i] && slides[i].layout === "background1");
+    // shader: mostra o fundo WebGL verde (#shader-bg) na capa/fecho
+    document.body.classList.toggle("on-shader", !!slides[i] && slides[i].layout === "shader");
     if (!fromHash) {
       var slug = slugForSlide(slides[i], i);
       try { history.replaceState(null, "", "#" + slug); } catch (e) {}
@@ -1108,6 +1151,9 @@
     // layouts de texto: mini-render da frase/nome
     if ((s.layout === "manifesto" || s.layout === "wordmark" || s.layout === "frase-ia") && s.title) {
       return thumbTextTile(s.title);
+    }
+    if (s.layout === "shader" && (s.title || s.quote)) {
+      return thumbTextTile(s.title || s.quote);
     }
     // galeria: 1ª imagem, se houver
     if (s.layout === "grid") {
@@ -1651,6 +1697,17 @@
         base.layout = "background1";
         base.title = "Texto em destaque sobre o gradiente.";
         base.subtitle = "";
+        base.body = [];
+        base.items = [];
+        break;
+      case "shader":
+        base.layout = "shader";
+        base.kicker = "Palestra";
+        base.title = "Título da capa";
+        base.subtitle = "Subtítulo opcional.";
+        base.quote = "Bordão em destaque.";
+        base.byline = "";
+        base.accent = "green";
         base.body = [];
         base.items = [];
         break;
