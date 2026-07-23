@@ -1906,6 +1906,43 @@ body.vote-page {
     font-family: "Manrope", system-ui, sans-serif;
   }
 
+  /* capa/fecho (layout shader): sem WebGL no PDF — fundo verde escuro evoca o shader */
+  .print-shader {
+    background:
+      radial-gradient(120% 90% at 20% 10%, rgba(53,201,127,0.22) 0%, rgba(53,201,127,0) 55%),
+      linear-gradient(160deg, #0b1a13 0%, #05100b 60%, #030805 100%);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .print-shader-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 9vh 9%;
+    display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left;
+  }
+  .print-shader.is-closing .print-shader-inner { align-items: center; text-align: center; }
+  .print-shader-kicker {
+    margin: 0 0 14px; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #35C97F; font-family: "Manrope", system-ui, sans-serif; font-weight: 700;
+  }
+  .print-shader-title {
+    margin: 0; max-width: 22ch;
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    font-size: 52px; line-height: 1.05; letter-spacing: -0.02em; color: #fff;
+  }
+  .print-shader-sub {
+    margin: 18px 0 0; max-width: 48ch; font-size: 15px; color: #cfe6d9;
+    font-family: "Manrope", system-ui, sans-serif;
+  }
+  .print-shader-quote {
+    margin: 22px 0 0; max-width: 30ch; border: 0; padding: 0;
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    font-size: 40px; line-height: 1.1; letter-spacing: -0.02em; color: #fff;
+  }
+  .print-shader.is-closing .print-shader-quote { font-size: 46px; max-width: 26ch; }
+  .print-shader-byline {
+    margin: 22px 0 0; font-size: 14px; color: #9fc7b3;
+    font-family: "Manrope", system-ui, sans-serif;
+  }
+
   /* pontos: título + grade de cards (ícone + texto) */
   .print-pontos-inner {
     position: relative; z-index: 2; box-sizing: border-box;

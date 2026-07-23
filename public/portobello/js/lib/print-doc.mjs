@@ -49,9 +49,11 @@ export function chipHTML(item) {
 function pad2(n) { return (n < 10 ? "0" : "") + n; }
 
 // parágrafos do corpo — mesmas regras de buildSlide (###, >, **, \n).
+// tolera body ausente/não-string (layouts sem corpo, ex.: shader) sem quebrar.
 function bodyHTML(body) {
-  var paras = Array.isArray(body) ? body : [body];
+  var paras = Array.isArray(body) ? body : (body == null ? [] : [body]);
   return paras.map(function (p) {
+    if (typeof p !== "string") return "";
     if (p.indexOf("### ") === 0) {
       return '<h3 class="panel-subhead">' + esc(p.slice(4)) + "</h3>";
     }
@@ -264,6 +266,23 @@ export function pontosPageHTML(slide) {
   '</section>';
 }
 
+// capa/fecho (layout shader): kicker/título/bordão/assinatura sobre um fundo
+// verde escuro — o shader WebGL não existe no PDF, então evocamos com gradiente.
+// role "closing" (fecho) destaca o bordão como herói. Todos os campos opcionais.
+export function shaderPageHTML(slide) {
+  var closing = slide.role === "closing";
+  var parts = "";
+  if (slide.kicker)   parts += '<p class="print-shader-kicker">' + esc(slide.kicker) + "</p>";
+  if (slide.title)    parts += '<h2 class="print-shader-title">' + esc(slide.title) + "</h2>";
+  if (slide.subtitle) parts += '<p class="print-shader-sub">' + esc(slide.subtitle) + "</p>";
+  if (slide.quote)    parts += '<blockquote class="print-shader-quote">' + fmtInline(esc(slide.quote)) + "</blockquote>";
+  if (slide.byline)   parts += '<p class="print-shader-byline">' + esc(slide.byline) + "</p>";
+  return '<section class="print-page print-shader' + (closing ? " is-closing" : "") + '">' +
+    staticMarkIMG() +
+    '<div class="print-shader-inner">' + parts + "</div>" +
+  "</section>";
+}
+
 // escolhe a página conforme o layout (território clássico recebe o número).
 export function slidePageHTML(slide, territoryNum) {
   switch (slide.layout) {
@@ -274,6 +293,7 @@ export function slidePageHTML(slide, territoryNum) {
     case "manifesto": return manifestoPageHTML(slide);
     case "frase-ia":  return manifestoPageHTML(slide);
     case "background1": return manifestoPageHTML(slide);
+    case "shader":    return shaderPageHTML(slide);
     case "pontos":    return pontosPageHTML(slide);
     case "video":     return videoPageHTML(slide);
     case "media":     return mediaPageHTML(slide);
