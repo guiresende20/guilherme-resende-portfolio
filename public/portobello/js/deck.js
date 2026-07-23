@@ -64,6 +64,7 @@
     { value: "pontos",      name: "Pontos com ícones",            desc: "Título + grade de cards (ícone + texto)" },
     { value: "background1",  name: "Texto destaque + fundo gradiente", desc: "Frase grande sobre o gradiente verde da capa" },
     { value: "shader",      name: "Capa",                          desc: "Título + bordão sobre o fundo shader verde" },
+    { value: "shader-closing", name: "Fecho",                      desc: "Bordão de encerramento (herói) sobre o fundo shader verde" },
     { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
     { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
@@ -1729,6 +1730,18 @@
         base.title = "Título da capa";
         base.subtitle = "Subtítulo opcional.";
         base.quote = "Bordão em destaque.";
+        base.byline = "";
+        base.accent = "green";
+        base.body = [];
+        base.items = [];
+        break;
+      case "shader-closing":   // template "Fecho": mesmo layout shader, bordão herói
+        base.layout = "shader";
+        base.role = "closing";
+        base.kicker = "Obrigado";
+        base.title = "";
+        base.subtitle = "";
+        base.quote = "Bordão de encerramento.";
         base.byline = "";
         base.accent = "green";
         base.body = [];
