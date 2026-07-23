@@ -8,7 +8,7 @@ import { createHash } from "node:crypto";
 const OVERRIDES_KEY = "overrides";
 const ADDED_KEY = "added";     // slides novos criados pelo editor (lista)
 const HIDDEN_KEY = "hidden";   // ids de slides ocultados (publicado, lista)
-const EDITABLE = ["title", "subtitle", "body", "image", "items", "gallery", "video", "media"];
+const EDITABLE = ["title", "subtitle", "body", "image", "items", "gallery", "video", "media", "layout"];
 const ALLOWED_UPLOAD_TYPES = new Set([
   "image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"
 ]);

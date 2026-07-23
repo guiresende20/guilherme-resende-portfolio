@@ -31,7 +31,7 @@
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
   // <section>. Assim a edição inline, o índice, o PDF e a visibilidade do
   // cliente continuam funcionando iguais aos territórios.
-  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, pontos: 1, video: 1, media: 1 };
+  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, pontos: 1, background1: 1, video: 1, media: 1 };
 
   // ícones (SVG de traço) para os cards do layout "pontos". Cada chave é um
   // nome usado no campo `points[].icon`; o glifo procura representar o conceito.
@@ -62,6 +62,7 @@
     { value: "manifesto",   name: "Frase-manifesto",               desc: "Texto grande centralizado" },
     { value: "frase-ia",    name: "Frase + IA",                   desc: "Frase-manifesto + resposta da IA" },
     { value: "pontos",      name: "Pontos com ícones",            desc: "Título + grade de cards (ícone + texto)" },
+    { value: "background1",  name: "Texto destaque + fundo gradiente", desc: "Frase grande sobre o gradiente verde da capa" },
     { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
     { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
@@ -1110,6 +1111,8 @@
     if (btnNext) btnNext.disabled = (i === slides.length - 1);
     // só o slide de abertura (intro) usa as partículas como fundo (no lugar do starfield)
     document.body.classList.toggle("on-intro", !!slides[i] && slides[i].type === "intro");
+    // background1: reusa o canvas do gradiente da capa atrás do texto destaque
+    document.body.classList.toggle("on-gradient", !!slides[i] && slides[i].layout === "background1");
     if (!fromHash) {
       var slug = slugForSlide(slides[i], i);
       try { history.replaceState(null, "", "#" + slug); } catch (e) {}
@@ -1691,6 +1694,13 @@
           { icon: "user",   text: "Ponto 3" },
           { icon: "nodes",  text: "Ponto 4" }
         ];
+        break;
+      case "background1":
+        base.layout = "background1";
+        base.title = "Texto em destaque sobre o gradiente.";
+        base.subtitle = "";
+        base.body = [];
+        base.items = [];
         break;
       case "video":
         base.layout = "video";
@@ -2403,6 +2413,7 @@
       var o = overrides[s.id];
       if (!o) return;
       if (typeof o.title === "string") s.title = o.title;
+      if (typeof o.layout === "string") s.layout = o.layout;
       if (typeof o.subtitle === "string") s.subtitle = o.subtitle;
       if (Array.isArray(o.body)) s.body = o.body;
       if (typeof o.image === "string") s.image = o.image;

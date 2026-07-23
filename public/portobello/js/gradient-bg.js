@@ -212,8 +212,10 @@
   }
 
   function loop(now) {
-    // o canvas só é visível na capa (body.on-intro) — fora dela, poupa GPU
-    if (document.body.classList.contains("on-intro")) draw(now);
+    // o canvas é visível na capa (on-intro) e nos slides "background1"
+    // (on-gradient) — fora deles, não desenha p/ poupar GPU
+    var b = document.body.classList;
+    if (b.contains("on-intro") || b.contains("on-gradient")) draw(now);
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);

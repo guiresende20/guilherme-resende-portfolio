@@ -83,8 +83,10 @@ img { display: block; max-width: 100%; }
   visibility: hidden;
   transition: opacity 0.6s var(--ease-ui), visibility 0.6s var(--ease-ui);
 }
-body.on-intro #starfield { opacity: 0; }
-body.on-intro #index-gradient { opacity: 1; visibility: visible; }
+body.on-intro #starfield,
+body.on-gradient #starfield { opacity: 0; }
+body.on-intro #index-gradient,
+body.on-gradient #index-gradient { opacity: 1; visibility: visible; }
 
 /* ============================================================
    DECK / SLIDES
@@ -434,13 +436,18 @@ button.chip { cursor: pointer; font: inherit; }
 .slide--frase-ia > .slide-scrim { display: none; }
 .slide--pontos > .slide-bg { display: none; }
 .slide--pontos > .slide-scrim { display: none; }
+/* background1: SEM fundo preto (transparente) p/ revelar o canvas do gradiente */
+.slide--background1 { background: transparent; }
+.slide--background1 > .slide-bg { display: none; }
+.slide--background1 > .slide-scrim { display: none; }
 
 /* painel = área centralizada, sem card/borda (grade, wordmark, manifesto) */
 .slide--grid > .panel,
 .slide--wordmark > .panel,
 .slide--manifesto > .panel,
 .slide--frase-ia > .panel,
-.slide--pontos > .panel {
+.slide--pontos > .panel,
+.slide--background1 > .panel {
   position: absolute; inset: 0;
   left: 0; top: 0; transform: none;
   width: 100%; min-width: 0; max-width: none;
@@ -459,9 +466,11 @@ button.chip { cursor: pointer; font: inherit; }
 .slide--wordmark .panel-copy:empty,
 .slide--manifesto .panel-copy:empty,
 .slide--pontos .panel-copy:empty,
+.slide--background1 .panel-copy:empty,
 .slide--wordmark .chips:empty,
 .slide--manifesto .chips:empty,
 .slide--pontos .chips:empty,
+.slide--background1 .chips:empty,
 .slide--hero .chips:empty { display: none; }
 
 /* ---------- layout "pontos": título + grade de cards (ícone + texto) ---------- */
@@ -720,7 +729,8 @@ button.chip { cursor: pointer; font: inherit; }
 /* ---------- 4) frase-manifesto ---------- */
 .slide--manifesto .panel-eyebrow { margin-bottom: clamp(18px, 3vh, 34px); }
 .slide--manifesto .panel-title,
-.slide--frase-ia .panel-title {
+.slide--frase-ia .panel-title,
+.slide--background1 .panel-title {
   margin: 0;
   max-width: 18ch;
   font-family: var(--font-brand);
@@ -730,13 +740,16 @@ button.chip { cursor: pointer; font: inherit; }
   line-height: 1.03;
   letter-spacing: -0.02em;
 }
-.slide--manifesto .panel-subtitle {
+.slide--manifesto .panel-subtitle,
+.slide--background1 .panel-subtitle {
   font-family: var(--font-brand);
   font-style: normal;
   color: var(--text-secondary);
   max-width: 46ch;
   margin: clamp(18px, 3vh, 30px) auto 0;
 }
+/* background1: leve sombra no texto p/ legibilidade sobre o gradiente animado */
+.slide--background1 .panel-title { text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45); }
 
 /* ---------- 4b) frase + IA ---------- */
 .frase-ia {

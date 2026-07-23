@@ -273,6 +273,7 @@ export function slidePageHTML(slide, territoryNum) {
     case "hero-static": return heroPageHTML(slide);
     case "manifesto": return manifestoPageHTML(slide);
     case "frase-ia":  return manifestoPageHTML(slide);
+    case "background1": return manifestoPageHTML(slide);
     case "pontos":    return pontosPageHTML(slide);
     case "video":     return videoPageHTML(slide);
     case "media":     return mediaPageHTML(slide);
