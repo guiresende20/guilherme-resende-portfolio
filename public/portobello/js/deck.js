@@ -31,7 +31,25 @@
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
   // <section>. Assim a edição inline, o índice, o PDF e a visibilidade do
   // cliente continuam funcionando iguais aos territórios.
-  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, video: 1, media: 1 };
+  var LAYOUTS = { grid: 1, wordmark: 1, hero: 1, "hero-static": 1, manifesto: 1, "frase-ia": 1, pontos: 1, video: 1, media: 1 };
+
+  // ícones (SVG de traço) para os cards do layout "pontos". Cada chave é um
+  // nome usado no campo `points[].icon`; o glifo procura representar o conceito.
+  var POINT_ICONS = {
+    eye:        '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+    bulb:       '<path d="M9.5 18h5M10 21h4"/><path d="M12 3a6 6 0 0 0-3.9 10.6c.6.5 1 1.2 1.1 2h5.6c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/>',
+    user:       '<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c0-4 3.4-6 7.5-6s7.5 2 7.5 6"/>',
+    code:       '<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>',
+    funnel:     '<path d="M3 4.5h18l-7 8.5v5.5l-4 2v-7.5z"/>',
+    palette:    '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-1 1.6-2 0-1.6 1.1-2 2.2-2H18a3 3 0 0 0 3-3c0-5-4-9-9-9z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="12" cy="7.6" r="1.1"/><circle cx="16.4" cy="11" r="1.1"/>',
+    nodes:      '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M7.8 7.4l2.9 8.9M16.2 7.4l-2.9 8.9M8.2 6h7.6"/>',
+    target:     '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6"/>',
+    dot:        '<circle cx="12" cy="12" r="4"/>'
+  };
+  function iconSVG(name) {
+    var path = POINT_ICONS[name] || POINT_ICONS.dot;
+    return '<svg class="point-icon" viewBox="0 0 24 24" aria-hidden="true">' + path + "</svg>";
+  }
 
   // opções do seletor de layout no botão "+ Novo slide" (índice, só @aeroli.to).
   // value "" = território clássico (imagem de fundo + painel de texto).
@@ -43,6 +61,7 @@
     { value: "hero-static", name: "Imagem em destaque (sem zoom)",  desc: "Imagem cheia + legenda" },
     { value: "manifesto",   name: "Frase-manifesto",               desc: "Texto grande centralizado" },
     { value: "frase-ia",    name: "Frase + IA",                   desc: "Frase-manifesto + resposta da IA" },
+    { value: "pontos",      name: "Pontos com ícones",            desc: "Título + grade de cards (ícone + texto)" },
     { value: "video",       name: "Vídeo",                         desc: "YouTube embed centralizado" },
     { value: "media",       name: "GIF / Vídeo",                   desc: "GIF ou MP4 em loop, centralizado" }
   ];
@@ -249,6 +268,15 @@
         '<div class="frase-ia-answer" data-ai-answer hidden></div>' +
       "</div>" : "";
 
+    // layout "pontos": grade de cards, cada um com ícone (por conceito) + texto
+    var pointsHtml = s.layout === "pontos" ?
+      '<ul class="points-grid">' + (s.points || []).map(function (p) {
+        var txt = (p && typeof p === "object") ? (p.text || p.label || "") : p;
+        var ico = (p && typeof p === "object") ? p.icon : "";
+        return '<li class="point-card">' + iconSVG(ico) +
+          '<span class="point-label">' + esc(txt) + "</span></li>";
+      }).join("") + "</ul>" : "";
+
     el.innerHTML =
       bgHtml +
       '<div class="slide-scrim"></div>' +
@@ -262,6 +290,7 @@
         '<ul class="chips">' + chips + linkChips + "</ul>" +
         (actionBtns ? '<div class="link-actions">' + actionBtns + "</div>" : "") +
         fraseIaHtml +
+        pointsHtml +
       "</div>";
 
     // fecha sobre o objeto s (sobrevive ao reorder — nunca usa índice posicional)
@@ -1649,6 +1678,19 @@
         base.subtitle = "";
         base.body = [];
         base.items = [];
+        break;
+      case "pontos":
+        base.layout = "pontos";
+        base.title = "Título do slide";
+        base.subtitle = "";
+        base.body = [];
+        base.items = [];
+        base.points = [
+          { icon: "bulb",   text: "Ponto 1" },
+          { icon: "target", text: "Ponto 2" },
+          { icon: "user",   text: "Ponto 3" },
+          { icon: "nodes",  text: "Ponto 4" }
+        ];
         break;
       case "video":
         base.layout = "video";

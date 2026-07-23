@@ -34,6 +34,22 @@
       "layout": "frase-ia",
       "title": "Inovação real acontece quando design, pesquisa e tecnologia trabalham juntos.",
       "accent": "green"
+    },
+    {
+      "id": "pontos-diferenciais",
+      "layout": "pontos",
+      "title": "Título do slide",
+      "accent": "green",
+      "points": [
+        { "icon": "eye",     "text": "Repertório e visão crítica" },
+        { "icon": "bulb",    "text": "Conceitos autorais" },
+        { "icon": "user",    "text": "Entendimento profundo do usuário" },
+        { "icon": "code",    "text": "Domínio técnico e execução" },
+        { "icon": "funnel",  "text": "Curadoria dos resultados da IA" },
+        { "icon": "palette", "text": "Linguagem estética própria" },
+        { "icon": "nodes",   "text": "Integração entre design, negócio e tecnologia" },
+        { "icon": "target",  "text": "Foco em impacto real nas pessoas" }
+      ]
     }
   ]
 }

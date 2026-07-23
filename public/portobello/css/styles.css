@@ -422,7 +422,8 @@ button.chip { cursor: pointer; font: inherit; }
 .slide--grid,
 .slide--wordmark,
 .slide--manifesto,
-.slide--frase-ia { background: var(--bg-base); }
+.slide--frase-ia,
+.slide--pontos { background: var(--bg-base); }
 .slide--grid > .slide-bg,
 .slide--wordmark > .slide-bg,
 .slide--manifesto > .slide-bg,
@@ -431,12 +432,15 @@ button.chip { cursor: pointer; font: inherit; }
 .slide--manifesto > .slide-scrim { display: none; }
 .slide--frase-ia > .slide-bg { display: none; }
 .slide--frase-ia > .slide-scrim { display: none; }
+.slide--pontos > .slide-bg { display: none; }
+.slide--pontos > .slide-scrim { display: none; }
 
 /* painel = área centralizada, sem card/borda (grade, wordmark, manifesto) */
 .slide--grid > .panel,
 .slide--wordmark > .panel,
 .slide--manifesto > .panel,
-.slide--frase-ia > .panel {
+.slide--frase-ia > .panel,
+.slide--pontos > .panel {
   position: absolute; inset: 0;
   left: 0; top: 0; transform: none;
   width: 100%; min-width: 0; max-width: none;
@@ -454,9 +458,64 @@ button.chip { cursor: pointer; font: inherit; }
 /* some com corpo/chips vazios p/ não abrir espaço morto no centro */
 .slide--wordmark .panel-copy:empty,
 .slide--manifesto .panel-copy:empty,
+.slide--pontos .panel-copy:empty,
 .slide--wordmark .chips:empty,
 .slide--manifesto .chips:empty,
+.slide--pontos .chips:empty,
 .slide--hero .chips:empty { display: none; }
+
+/* ---------- layout "pontos": título + grade de cards (ícone + texto) ---------- */
+.slide--pontos .panel-title {
+  font-family: var(--font-brand);
+  font-style: normal;
+  font-weight: 800;
+  font-size: clamp(26px, 3.4vw, 46px);
+  letter-spacing: -0.01em;
+  margin-bottom: clamp(18px, 3vh, 36px);
+  max-width: 26ch;
+}
+.points-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(14px, 1.8vw, 28px);
+  width: 100%;
+  max-width: 1100px;
+}
+.point-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: clamp(10px, 1.4vh, 16px);
+  padding: clamp(16px, 2vw, 26px) clamp(12px, 1.4vw, 20px);
+  background: color-mix(in srgb, var(--bg-elevated) 70%, transparent);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-base);
+}
+.point-icon {
+  width: clamp(34px, 3.2vw, 46px);
+  height: clamp(34px, 3.2vw, 46px);
+  flex: none;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.point-label {
+  font-family: var(--font-editorial);
+  font-style: italic;
+  font-size: clamp(13px, 1vw, 17px);
+  line-height: 1.28;
+  color: var(--text-primary);
+}
+@media (max-width: 900px) {
+  .points-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .points-grid { grid-template-columns: 1fr; }
+}
 
 /* ---------- 1) grade de miniaturas ---------- */
 /* galeria = thumbs pequenas quadradas, lado a lado (imagens enviadas) */
@@ -1718,6 +1777,34 @@ body.vote-page {
   .print-manifesto-sub {
     margin: 18px 0 0; max-width: 46ch; font-size: 14px; color: #9A9A9A;
     font-family: "Manrope", system-ui, sans-serif;
+  }
+
+  /* pontos: título + grade de cards (ícone + texto) */
+  .print-pontos-inner {
+    position: relative; z-index: 2; box-sizing: border-box;
+    min-height: 100vh; padding: 7vh 7%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  }
+  .print-pontos-title {
+    font-family: "Manrope", system-ui, sans-serif; font-weight: 800;
+    font-size: 32px; line-height: 1.1; margin: 0 0 28px; max-width: 26ch;
+  }
+  .print-points-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; width: 100%; max-width: 1000px;
+  }
+  .print-point-card {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 18px 12px; text-align: center;
+    border: 1px solid #2A2A35; border-radius: 2px; background: #121218;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .print-point-icon {
+    width: 40px; height: 40px; fill: none; stroke: #00E58A; stroke-width: 1.6;
+    stroke-linecap: round; stroke-linejoin: round;
+  }
+  .print-point-label {
+    font-family: "Fraunces", Georgia, serif; font-style: italic;
+    font-size: 14px; line-height: 1.25; color: #E8E8E8;
   }
 
   /* vídeo (título + link, com moldura branca) */

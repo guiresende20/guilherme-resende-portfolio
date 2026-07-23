@@ -230,6 +230,40 @@ export function mediaPageHTML(slide) {
   '</section>';
 }
 
+// ícones (SVG de traço) dos cards do layout "pontos" — espelham os do deck.
+var POINT_ICONS_PRINT = {
+  eye:     '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  bulb:    '<path d="M9.5 18h5M10 21h4"/><path d="M12 3a6 6 0 0 0-3.9 10.6c.6.5 1 1.2 1.1 2h5.6c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3z"/>',
+  user:    '<circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c0-4 3.4-6 7.5-6s7.5 2 7.5 6"/>',
+  code:    '<path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/>',
+  funnel:  '<path d="M3 4.5h18l-7 8.5v5.5l-4 2v-7.5z"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-1 1.6-2 0-1.6 1.1-2 2.2-2H18a3 3 0 0 0 3-3c0-5-4-9-9-9z"/><circle cx="7.5" cy="11" r="1.1"/><circle cx="12" cy="7.6" r="1.1"/><circle cx="16.4" cy="11" r="1.1"/>',
+  nodes:   '<circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="6" r="2.2"/><circle cx="12" cy="18" r="2.2"/><path d="M7.8 7.4l2.9 8.9M16.2 7.4l-2.9 8.9M8.2 6h7.6"/>',
+  target:  '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6"/>',
+  dot:     '<circle cx="12" cy="12" r="4"/>'
+};
+function pointIconPrint(name) {
+  return '<svg class="print-point-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+    (POINT_ICONS_PRINT[name] || POINT_ICONS_PRINT.dot) + '</svg>';
+}
+
+// pontos: título + grade de cards (ícone + texto).
+export function pontosPageHTML(slide) {
+  var cards = (slide.points || []).map(function (p) {
+    var txt = (p && typeof p === "object") ? (p.text || p.label || "") : p;
+    var ico = (p && typeof p === "object") ? p.icon : "";
+    return '<div class="print-point-card">' + pointIconPrint(ico) +
+      '<span class="print-point-label">' + esc(txt) + '</span></div>';
+  }).join("");
+  return '<section class="print-page print-pontos">' +
+    staticMarkIMG() +
+    '<div class="print-pontos-inner">' +
+      (slide.title ? '<h2 class="print-title print-pontos-title">' + esc(slide.title) + '</h2>' : '') +
+      '<div class="print-points-grid">' + cards + '</div>' +
+    '</div>' +
+  '</section>';
+}
+
 // escolhe a página conforme o layout (território clássico recebe o número).
 export function slidePageHTML(slide, territoryNum) {
   switch (slide.layout) {
@@ -239,6 +273,7 @@ export function slidePageHTML(slide, territoryNum) {
     case "hero-static": return heroPageHTML(slide);
     case "manifesto": return manifestoPageHTML(slide);
     case "frase-ia":  return manifestoPageHTML(slide);
+    case "pontos":    return pontosPageHTML(slide);
     case "video":     return videoPageHTML(slide);
     case "media":     return mediaPageHTML(slide);
     default:          return territoryPageHTML(slide, territoryNum);
