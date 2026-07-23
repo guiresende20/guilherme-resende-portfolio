@@ -508,9 +508,8 @@
           '<span class="intro-download-label">Backups</span>' +
         '</button>' : '') +
       '<div class="intro-pdf">' +
-        '<button type="button" class="intro-generate-pdf" data-pdf-toggle ' +
-          'aria-haspopup="dialog" aria-expanded="false" ' +
-          'aria-label="Gerar PDF com todos os slides">' +
+        '<button type="button" class="intro-generate-pdf" data-pdf-go ' +
+          'aria-label="Gerar PDF (horizontal) com todos os slides">' +
           '<span class="intro-download-icon">' +
             '<svg viewBox="0 0 24 24" aria-hidden="true">' +
               '<path d="M12 4v10m0 0l-4-4m4 4l4-4M5 19h14" ' +
@@ -519,20 +518,6 @@
           '</span>' +
           '<span class="intro-download-label">Gerar PDF</span>' +
         '</button>' +
-        '<div class="intro-pdf-menu" data-pdf-menu hidden role="dialog" aria-label="Opções do PDF">' +
-          '<div class="pdf-field">' +
-            '<span class="pdf-field-label">Orientação</span>' +
-            '<div class="pdf-seg" role="radiogroup" aria-label="Orientação">' +
-              '<button type="button" class="pdf-seg-btn is-active" data-orientation="landscape" ' +
-                'role="radio" aria-checked="true">Horizontal</button>' +
-              '<button type="button" class="pdf-seg-btn" data-orientation="portrait" ' +
-                'role="radio" aria-checked="false">Vertical</button>' +
-            '</div>' +
-          '</div>' +
-          '<p class="pdf-all-note">O PDF inclui todos os slides do deck.</p>' +
-          '<button type="button" class="pdf-generate-btn" data-pdf-go>Gerar PDF</button>' +
-          '<button type="button" class="pdf-generate-btn pdf-generate-pptx" data-pptx-go>Exportar PPTX</button>' +
-        '</div>' +
       '</div>' +
       '</div>';
 
@@ -555,54 +540,10 @@
       });
     });
 
-    var pdfToggle = el.querySelector("[data-pdf-toggle]");
-    var pdfMenu = el.querySelector("[data-pdf-menu]");
-    if (pdfToggle && pdfMenu) {
-      var pdfOrientation = "landscape";
-      var closePdfMenu = function () {
-        pdfMenu.hidden = true;
-        pdfToggle.setAttribute("aria-expanded", "false");
-      };
-
-      pdfToggle.addEventListener("click", function (e) {
-        e.stopPropagation();
-        var willOpen = pdfMenu.hidden;
-        pdfMenu.hidden = !willOpen;
-        pdfToggle.setAttribute("aria-expanded", String(willOpen));
-      });
-      // cliques dentro do painel não fecham (interagir com checkboxes/segmented)
-      pdfMenu.addEventListener("click", function (e) { e.stopPropagation(); });
-      // clique fora fecha
-      document.addEventListener("click", function () {
-        if (!pdfMenu.hidden) closePdfMenu();
-      });
-
-      // orientação (segmented control)
-      Array.prototype.forEach.call(pdfMenu.querySelectorAll(".pdf-seg-btn"), function (btn) {
-        btn.addEventListener("click", function () {
-          pdfOrientation = btn.getAttribute("data-orientation");
-          Array.prototype.forEach.call(pdfMenu.querySelectorAll(".pdf-seg-btn"), function (b) {
-            var on = b === btn;
-            b.classList.toggle("is-active", on);
-            b.setAttribute("aria-checked", String(on));
-          });
-        });
-      });
-
-      // gerar com a orientação escolhida — sempre TODOS os slides
-      pdfMenu.querySelector("[data-pdf-go]").addEventListener("click", function () {
-        closePdfMenu();
-        generatePDF(pdfOrientation);
-      });
-
-      // exportar PPTX — todos os slides de conteúdo (sem intro)
-      var pptxGo = pdfMenu.querySelector("[data-pptx-go]");
-      if (pptxGo) {
-        pptxGo.addEventListener("click", function () {
-          closePdfMenu();
-          exportPPTX(pdfToggle);
-        });
-      }
+    // clicar em "Gerar PDF" gera direto, sempre horizontal, com todos os slides
+    var pdfGo = el.querySelector("[data-pdf-go]");
+    if (pdfGo) {
+      pdfGo.addEventListener("click", function () { generatePDF("landscape"); });
     }
 
     var backupsBtn = el.querySelector("[data-backups]");
