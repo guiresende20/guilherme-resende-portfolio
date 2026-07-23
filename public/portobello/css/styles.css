@@ -1185,7 +1185,8 @@ button.chip { cursor: pointer; font: inherit; }
 .overview-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: clamp(16px, 2vw, 28px);
+  /* gap: linha (Y) mais folgado que coluna, p/ os thumbs não encostarem */
+  gap: clamp(30px, 4vh, 52px) clamp(16px, 2vw, 28px);
   align-content: start;
   padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 56px) clamp(28px, 5vw, 64px);
   overflow-y: auto;
@@ -1193,12 +1194,14 @@ button.chip { cursor: pointer; font: inherit; }
 
 .thumb {
   display: block;
-  /* a altura vem daqui (16/9), não da propagação do aspect-ratio do <span>
-     .thumb-figure — que colapsava o botão para ~34px (com overflow:hidden
-     cortando a figura e o título), sobretudo com imagens loading="lazy". */
-  aspect-ratio: 16 / 9;
+  position: relative;
+  /* altura via padding-bottom (16/9): a % é relativa à largura da coluna, que o
+     grid resolve ANTES das linhas — então a trilha do grid fica com a altura
+     certa. (aspect-ratio no <button> desenhava 16/9 mas o grid dimensionava a
+     trilha pelo conteúdo colapsado, sobrepondo as linhas.) */
+  height: 0;
+  padding: 0 0 56.25%;
   text-align: left;
-  padding: 0;
   background: var(--bg-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-base);
@@ -1233,12 +1236,11 @@ button.chip { cursor: pointer; font: inherit; }
 .thumb-slide:hover .thumb-grip { opacity: 0.85; }
 
 .thumb-figure {
-  /* block (não o inline padrão do <span>): sem isto o aspect-ratio é ignorado
-     e cada thumb herda o aspecto da imagem, ficando de tamanhos diferentes. */
+  /* preenche o thumb (que tem a razão 16/9 via padding-bottom). Absoluto para
+     não depender de aspect-ratio dentro do <button> (que não propaga altura). */
   display: block;
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  position: absolute;
+  inset: 0;
   background: #050505;
 }
 .thumb-figure img {

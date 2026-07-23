@@ -110,6 +110,7 @@
   var thumbs = [];
   var fullAccess = false;   // chave de edição na sessão: controles de edição visíveis
   var publishedHidden = [];   // ids ocultados publicados (servidor): somem para todos
+  var publishedOrder = null;   // ordem publicada (servidor): vale para todos os visitantes
   var index = 0;
   var ready = false;
   var overviewOpen = false;
@@ -1320,20 +1321,30 @@
 
   /* ---------- persistência da ordem (localStorage) ---------- */
   function saveOrder() {
-    try {
-      localStorage.setItem(ORDER_KEY, JSON.stringify(slides.map(function (s) { return s.id; })));
-    } catch (_) {}
+    var ids = slides.map(function (s) { return s.id; });
+    try { localStorage.setItem(ORDER_KEY, JSON.stringify(ids)); } catch (_) {}
+    // publica no servidor (vale para todos os visitantes) — só no modo de edição
+    if (fullAccess) postContent({ action: "saveOrder", order: ids }).catch(function () {});
+  }
+  // reordena `arr` conforme uma lista de ids; ids ausentes vão ao fim
+  function reorderByIds(arr, ids) {
+    if (!Array.isArray(ids) || !ids.length) return arr;
+    var byId = {};
+    arr.forEach(function (s) { byId[s.id] = s; });
+    var out = [];
+    ids.forEach(function (id) { if (byId[id]) { out.push(byId[id]); delete byId[id]; } });
+    arr.forEach(function (s) { if (byId[s.id]) out.push(s); });   // slides novos vão ao fim
+    return out.length === arr.length ? out : arr;
   }
   function applySavedOrder(arr) {
     var saved = null;
     try { saved = JSON.parse(localStorage.getItem(ORDER_KEY) || "null"); } catch (_) {}
-    if (!saved || !Array.isArray(saved)) return arr;
-    var byId = {};
-    arr.forEach(function (s) { byId[s.id] = s; });
-    var out = [];
-    saved.forEach(function (id) { if (byId[id]) { out.push(byId[id]); delete byId[id]; } });
-    arr.forEach(function (s) { if (byId[s.id]) out.push(s); }); // slides novos vão ao fim
-    return out.length === arr.length ? out : arr;
+    return reorderByIds(arr, saved);
+  }
+  // ordem efetiva: a publicada (servidor) tem prioridade; senão, o localStorage
+  function applyOrder(arr) {
+    if (publishedOrder && publishedOrder.length) return reorderByIds(arr, publishedOrder);
+    return applySavedOrder(arr);
   }
 
   // remove um slide do deck ao vivo (mesma mecânica do reorder), preservando o
@@ -2369,7 +2380,16 @@
     slides.forEach(function (s) {
       if (s.image === LEGACY_PLACEHOLDER) s.image = PLACEHOLDER_IMAGE;
     });
-    slides = applySavedOrder(slides);   // restaura ordem reordenada anteriormente
+    slides = applyOrder(slides);   // ordem publicada (todos) ou, senão, localStorage
+    // bootstrap: se o owner já reordenou local mas nada foi publicado, publica
+    // agora — assim a ordem dele passa a valer em qualquer navegador/aba anônima.
+    if (fullAccess && (!publishedOrder || !publishedOrder.length)) {
+      var localOrder = null;
+      try { localOrder = JSON.parse(localStorage.getItem(ORDER_KEY) || "null"); } catch (_) {}
+      if (Array.isArray(localOrder) && localOrder.length) {
+        postContent({ action: "saveOrder", order: slides.map(function (s) { return s.id; }) }).catch(function () {});
+      }
+    }
     els = slides.map(buildSlide);
     els.forEach(function (el) { stage.appendChild(el); });
     updateTerritoryNumbers();   // preenche os eyebrows "Território NN / 10"
@@ -2423,6 +2443,7 @@
       if (o.media && typeof o.media === "object") s.media = o.media;
     });
     publishedHidden = Array.isArray(content.hidden) ? content.hidden : [];
+    publishedOrder = Array.isArray(content.order) ? content.order : null;
     return data;
   }
 

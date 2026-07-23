@@ -1,7 +1,7 @@
 import { getStore } from "@netlify/blobs";
 import {
   handleGetContent, handleSaveContent, handleSaveImage, handleGetImage,
-  handleAddSlide, handleHideSlide
+  handleAddSlide, handleHideSlide, handleSaveOrder
 } from "./_lib/portobello-content-handlers.mjs";
 import { handleCaptureSnapshot } from "./_lib/portobello-backup-handlers.mjs";
 import { isValidEditKey } from "./_lib/portobello-edit-key.mjs";
@@ -43,6 +43,7 @@ export default async (req) => {
     if (body.imageUpload) { fn = handleSaveImage; mutatesState = false; }
     else if (body.action === "addSlide") fn = handleAddSlide;
     else if (body.action === "hideSlide") fn = handleHideSlide;
+    else if (body.action === "saveOrder") fn = handleSaveOrder;
     const cStore = store();
     if (mutatesState) {
       // captura o estado PRE-save como ponto de rollback, antes de aplicar a mutação.

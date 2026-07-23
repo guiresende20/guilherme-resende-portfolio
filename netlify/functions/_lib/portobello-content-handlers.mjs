@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 const OVERRIDES_KEY = "overrides";
 const ADDED_KEY = "added";     // slides novos criados pelo editor (lista)
 const HIDDEN_KEY = "hidden";   // ids de slides ocultados (publicado, lista)
+const ORDER_KEY = "order";     // ordem publicada dos slides (lista de ids)
 const EDITABLE = ["title", "subtitle", "body", "image", "items", "gallery", "video", "media", "layout"];
 const ALLOWED_UPLOAD_TYPES = new Set([
   "image/jpeg", "image/png", "image/webp", "image/gif", "video/mp4", "video/webm"
@@ -17,7 +18,17 @@ export async function handleGetContent(store) {
   const overrides = (await store.get(OVERRIDES_KEY, { type: "json" })) || {};
   const added = (await store.get(ADDED_KEY, { type: "json" })) || [];
   const hidden = (await store.get(HIDDEN_KEY, { type: "json" })) || [];
-  return { status: 200, body: { overrides, added, hidden } };
+  const order = (await store.get(ORDER_KEY, { type: "json" })) || [];
+  return { status: 200, body: { overrides, added, hidden, order } };
+}
+
+// publica a ordem dos slides (lista de ids) — vale para todos os visitantes.
+export async function handleSaveOrder(body, store) {
+  const order = body && body.order;
+  if (!Array.isArray(order)) return { status: 400, body: { error: "order inválido" } };
+  const ids = order.filter((x) => typeof x === "string");
+  await store.setJSON(ORDER_KEY, ids);
+  return { status: 200, body: { ok: true } };
 }
 
 export async function handleAddSlide(body, store) {
