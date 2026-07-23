@@ -2082,6 +2082,18 @@ body.vote-page {
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* capa/fecho (shader) no editor: campos sempre visíveis, com placeholder,
+   p/ permitir adicionar kicker/subtítulo/bordão/assinatura mesmo vazios */
+.is-editing .slide--shader.is-current .shader-panel > [data-shader-field] {
+  display: block;
+  min-height: 1em;
+}
+.is-editing .slide--shader.is-current [data-shader-field]:empty::before {
+  content: attr(data-placeholder);
+  color: rgba(255, 255, 255, 0.4);
+  font-style: normal;
+}
+
 /* ferramentas de imagem (trocar + remover) no canto sup. direito */
 .edit-image-tools {
   position: absolute;
