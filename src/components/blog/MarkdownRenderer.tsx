@@ -1,9 +1,18 @@
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown, { defaultUrlTransform } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 
 interface MarkdownRendererProps {
   body: string;
+}
+
+// Google Docs' markdown export embeds inline images as `data:image/...;base64,`
+// URIs. react-markdown's default transform strips non-allowlisted protocols
+// (including `data:`), so allow it through unchanged and defer everything
+// else to the default sanitizer.
+function urlTransform(url: string): string {
+  if (url.startsWith("data:image/")) return url;
+  return defaultUrlTransform(url);
 }
 
 export default function MarkdownRenderer({ body }: MarkdownRendererProps) {
@@ -28,6 +37,7 @@ export default function MarkdownRenderer({ body }: MarkdownRendererProps) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeHighlight]}
+        urlTransform={urlTransform}
       >
         {body}
       </ReactMarkdown>
