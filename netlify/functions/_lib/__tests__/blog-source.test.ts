@@ -6,10 +6,11 @@ vi.mock("../drive", () => {
   return {
     downloadText: vi.fn(),
     exportDocAsMarkdown: vi.fn(),
+    getDocInlineImagesInOrder: vi.fn(),
   };
 });
 
-import { downloadText, exportDocAsMarkdown } from "../drive";
+import { downloadText, exportDocAsMarkdown, getDocInlineImagesInOrder } from "../drive";
 
 function file(partial: Partial<DriveFile>): DriveFile {
   return {
@@ -64,6 +65,7 @@ describe("fetchAndParse", () => {
   beforeEach(() => {
     vi.mocked(downloadText).mockReset();
     vi.mocked(exportDocAsMarkdown).mockReset();
+    vi.mocked(getDocInlineImagesInOrder).mockReset().mockResolvedValue([]);
   });
 
   it("uses downloadText + parsePost for .md files", async () => {
@@ -112,5 +114,32 @@ describe("fetchAndParse", () => {
     vi.mocked(exportDocAsMarkdown).mockRejectedValue(new Error("429 quota"));
     const f = file({ id: "x", name: "Doc", mimeType: "application/vnd.google-apps.document" });
     await expect(fetchAndParse(f)).rejects.toThrow("429 quota");
+  });
+
+  it("upgrades doc images to the high-res version fetched via Docs API", async () => {
+    vi.mocked(exportDocAsMarkdown).mockResolvedValue(
+      "Corpo.\n\n![][image1]\n\n[image1]: <data:image/png;base64,LOWRES>"
+    );
+    vi.mocked(getDocInlineImagesInOrder).mockResolvedValue([
+      { dataUri: "data:image/jpeg;base64,HIGHRES" },
+    ]);
+    const f = file({ id: "doc-id", name: "Doc com foto", mimeType: "application/vnd.google-apps.document" });
+
+    const parsed = await fetchAndParse(f);
+
+    expect(parsed.body).toContain("data:image/jpeg;base64,HIGHRES");
+    expect(parsed.body).not.toContain("LOWRES");
+  });
+
+  it("keeps low-res doc images when getDocInlineImagesInOrder fails", async () => {
+    vi.mocked(exportDocAsMarkdown).mockResolvedValue(
+      "Corpo.\n\n![][image1]\n\n[image1]: <data:image/png;base64,LOWRES>"
+    );
+    vi.mocked(getDocInlineImagesInOrder).mockRejectedValue(new Error("Docs API disabled"));
+    const f = file({ id: "doc-id", name: "Doc com foto", mimeType: "application/vnd.google-apps.document" });
+
+    const parsed = await fetchAndParse(f);
+
+    expect(parsed.body).toContain("LOWRES");
   });
 });
