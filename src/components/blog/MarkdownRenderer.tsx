@@ -29,7 +29,7 @@ export default function MarkdownRenderer({ body }: MarkdownRendererProps) {
                  prose-code:before:content-none prose-code:after:content-none
                  prose-pre:bg-card prose-pre:border prose-pre:border-border
                  prose-blockquote:border-l-neon prose-blockquote:text-muted-foreground prose-blockquote:italic
-                 prose-img:rounded-md
+                 prose-img:rounded-md prose-img:w-full prose-img:h-auto
                  prose-hr:border-neon/30
                  prose-li:marker:text-electric
                  prose-table:text-sm prose-th:bg-muted prose-th:border-border prose-td:border-border"
