@@ -183,3 +183,34 @@ Esperado: `200 { total: N, indexed: N, failed: 0 }`.
 - Indexação é síncrona dentro do revalidate. Post muito longo (>50 chunks) pode levar 2-3s — aceitável pra blog pessoal.
 - Drafts (`meta.draft === true` em `.md`, ou arquivos em `blog/drafts/` pra qualquer formato) e quaisquer posts em outras subpastas NÃO são indexados, por design.
 - Cache em memória da function pode ficar até ~1min defasado após reindex (warm function pode segurar índice velho). Não é problema em prática.
+
+### Automação do reindex (Apps Script)
+
+**Problema que isso resolve**: publicar um post no Drive não dispara reindex sozinho — sem
+rodar o curl manual, o post fica invisível pro chatbot (aconteceu com o post da Portobello
+em 2026-07-30: publicado, nunca reindexado, chatbot dizia que o trabalho não existia).
+
+**Solução**: script em `docs/blog-reindex-webhook.gs`, rodando via Google Apps Script,
+que faz *polling* (não push notification — evita complexidade de domain verification)
+da pasta `blog/` a cada 15min. Só chama `/api/blog/reindex` quando detecta arquivo
+novo, editado ou removido (compara um snapshot de `fileId + lastUpdated + nome`).
+
+**Setup (uma vez só)**:
+
+1. Abrir https://script.google.com/ → New project.
+2. Colar o conteúdo de `docs/blog-reindex-webhook.gs` no editor.
+3. Project Settings (ícone de engrenagem) → Script Properties → adicionar:
+   - `BLOG_FOLDER_ID` — mesmo ID de `GOOGLE_DRIVE_BLOG_FOLDER_ID` no Netlify.
+   - `BLOG_REVALIDATE_TOKEN` — mesmo valor do env var no Netlify.
+   - `SITE_URL` (opcional) — default já é `https://guiresende20.netlify.app`.
+4. Rodar a função `installTrigger` uma vez manualmente (▶ no editor, escolher
+   `installTrigger` no dropdown). Vai pedir autorização de OAuth (Drive + UrlFetch).
+5. Confirmar em Triggers (ícone de relógio na sidebar) que existe um trigger
+   `checkAndReindexBlog` rodando a cada 15min.
+
+**Como verificar que está funcionando**: publicar um post novo em `blog/`, esperar até
+15min, checar Executions (sidebar do Apps Script) — deve aparecer uma execução com
+`Reindex OK: ...`. Se falhar, chega um email de alerta na conta dona do script.
+
+**Se precisar trocar o token** (rotação do `BLOG_REVALIDATE_TOKEN`): atualizar tanto
+no Netlify quanto no Script Properties do Apps Script — os dois têm que ficar em sync.
