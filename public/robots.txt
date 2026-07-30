@@ -2,5 +2,6 @@ User-agent: *
 Allow: /
 Disallow: /aerolito
 Disallow: /portobello
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 
 Sitemap: https://guiresende20.netlify.app/sitemap.xml
