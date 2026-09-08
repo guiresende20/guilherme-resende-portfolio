@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
 
@@ -17,7 +17,14 @@ export default function About() {
           {/* Text — 3 cols */}
           <div className="md:col-span-3 space-y-5">
             <Reveal>
-              <p className="text-muted-foreground leading-[1.7] text-[15px]">{t('about.p1')}</p>
+              <p className="text-muted-foreground leading-[1.7] text-[15px]">
+                <Trans
+                  i18nKey="about.p1"
+                  components={{
+                    1: <a href="https://www.aeroli.to" target="_blank" rel="noopener noreferrer" className="text-neon hover:underline" />,
+                  }}
+                />
+              </p>
             </Reveal>
             <Reveal delay={0.1}>
               <p className="text-muted-foreground leading-[1.7] text-[15px]">{t('about.p2')}</p>

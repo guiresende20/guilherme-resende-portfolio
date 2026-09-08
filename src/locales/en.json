@@ -31,7 +31,7 @@
     "header_label": "About me",
     "header_title": "Trajectory",
     "header_outline": "academic & professional",
-    "p1": "Designer and researcher with a Master's degree in Design & Technology and a Bachelor's in Social Communication from UFRGS. I work at CriaLab - Tecnopuc leading innovation and technology projects, including immersive technologies (VR/AR), developing strategic solutions for companies like HP and public institutions (e.g., Semear Agrohub).",
+    "p1": "Designer and researcher with a Master's degree in Design & Technology and a Bachelor's in Social Communication from UFRGS. I currently work as Head of Research and AI at <1>Aerolito</1>, leading applied AI and innovation initiatives. I've also worked at CriaLab - Tecnopuc on immersive technologies (VR/AR) and strategic solutions for companies like HP and public institutions (e.g., Semear Agrohub).",
     "p2": "I have hands-on experience in rapid prototyping, 3D printing, and workshop facilitation. As a technology enthusiast, I leverage AI for strategic analysis, insight generation, and service design.",
     "p3": "My background includes working as a professor at ESPM, leading marketing at Anglo Vestibulares, and working at startup BSMotion—always at the intersection of tech, design, and innovation.",
     "areas": [
@@ -45,7 +45,7 @@
     "header_title": "Trajectory",
     "header_outline": "professional",
     "aerolito": {
-      "role": "Head of Research",
+      "role": "Head of Research and AI",
       "type": "Professional",
       "period": "JUN 2026 — present",
       "loc": "Porto Alegre, Brazil",

@@ -31,7 +31,7 @@
     "header_label": "Sobre mim",
     "header_title": "Trajetória",
     "header_outline": "acadêmica & profissional",
-    "p1": "Designer e pesquisador com mestrado em Design e Tecnologia e graduação em Comunicação Social pela UFRGS. Atuo no CriaLab - Tecnopuc com projetos de inovação e tecnologia, incluindo tecnologias imersivas (VR/AR), desenvolvendo soluções estratégicas para empresas como a HP e órgãos públicos (ex.: Semear Agrohub).",
+    "p1": "Designer e pesquisador com mestrado em Design e Tecnologia e graduação em Comunicação Social pela UFRGS. Atualmente atuo como Head de Pesquisa e de IA da <1>Aerolito</1>, liderando iniciativas de inteligência artificial aplicada e inovação. Também tenho passagem pelo CriaLab - Tecnopuc, com projetos de tecnologias imersivas (VR/AR) e soluções estratégicas para empresas como a HP e órgãos públicos (ex.: Semear Agrohub).",
     "p2": "Tenho experiência prática em prototipagem rápida, impressão 3D e facilitação de workshops. Sou entusiasta da tecnologia e utilizo IA para análises estratégicas, geração de insights e design de serviços.",
     "p3": "Minha trajetória inclui passagens pela ESPM como professor, pelo marketing do Anglo Vestibulares e pela startup BSMotion, sempre na intersecção entre tecnologia, design e inovação.",
     "areas": [
@@ -45,7 +45,7 @@
     "header_title": "Trajetória",
     "header_outline": "profissional",
     "aerolito": {
-      "role": "Head de Pesquisa",
+      "role": "Head de Pesquisa e de IA",
       "type": "Profissional",
       "period": "JUN 2026 — presente",
       "loc": "Porto Alegre, RS",
