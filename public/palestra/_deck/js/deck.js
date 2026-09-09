@@ -24,8 +24,11 @@
   // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
   var PLACEHOLDER_IMAGE = "/palestra/_deck/assets/placeholder.svg";
   // valor antigo (logo Aerolito) que pode ter sido persistido em overrides/added
-  // no servidor — normalizado para o placeholder atual ao montar o deck.
-  var LEGACY_PLACEHOLDER = "/palestra/_deck/assets/logo-aero.png";
+  // no servidor — normalizado para o placeholder atual ao montar o deck. Este é
+  // o literal exato gravado historicamente (relativo, de antes da Task 8 mover
+  // o engine pra /palestra/_deck/); NÃO absolutizar — nunca é renderizado
+  // diretamente, só comparado contra o valor persistido pra detectar dado legado.
+  var LEGACY_PLACEHOLDER = "assets/logo-aero.png";
 
   // slug do cliente vem do path: /palestra/<slug>
   var DECK_SLUG = (function () {
