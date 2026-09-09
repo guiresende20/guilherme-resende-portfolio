@@ -8,6 +8,7 @@ const BlogTag = lazy(() => import("./pages/BlogTag"));
 const AerolitoPage = lazy(() => import("./pages/AerolitoPage"));
 const AerolitoAdmin = lazy(() => import("./pages/AerolitoAdmin"));
 const Palestras = lazy(() => import("./pages/Palestras"));
+const PalestraAdmin = lazy(() => import("./pages/PalestraAdmin"));
 
 export default function App() {
   return (
@@ -43,6 +44,14 @@ export default function App() {
           element={
             <Suspense fallback={<div className="p-8">Carregando…</div>}>
               <Palestras />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/palestra/admin"
+          element={
+            <Suspense fallback={<div className="p-8">Carregando…</div>}>
+              <PalestraAdmin />
             </Suspense>
           }
         />
