@@ -23,12 +23,15 @@
   // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
   // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
   var PLACEHOLDER_IMAGE = "/palestra/_deck/assets/placeholder.svg";
-  // valor antigo (logo Aerolito) que pode ter sido persistido em overrides/added
-  // no servidor — normalizado para o placeholder atual ao montar o deck. Este é
-  // o literal exato gravado historicamente (relativo, de antes da Task 8 mover
-  // o engine pra /palestra/_deck/); NÃO absolutizar — nunca é renderizado
-  // diretamente, só comparado contra o valor persistido pra detectar dado legado.
-  var LEGACY_PLACEHOLDER = "assets/logo-aero.png";
+  // valores antigos que podem ter sido persistidos em overrides/added no
+  // servidor (slides criados/editados nessas eras ficaram com o literal
+  // gravado ao vivo) — normalizados para o placeholder atual ao montar o
+  // deck. NÃO absolutizar nenhum destes: nunca são renderizados diretamente,
+  // só comparados contra o valor persistido pra detectar dado legado.
+  //   1) "assets/logo-aero.png"   — logo Aerolito, era pré-Portobello
+  //   2) "assets/placeholder.svg" — glifo neutro, relativo, de antes da
+  //                                 Task 8 mover o engine pra /palestra/_deck/
+  var LEGACY_PLACEHOLDERS = ["assets/logo-aero.png", "assets/placeholder.svg"];
 
   // slug do cliente vem do path: /palestra/<slug>
   var DECK_SLUG = (function () {
@@ -2453,9 +2456,9 @@
       // hidden publicado (deletar pelo índice): some para todos
       return publishedHidden.indexOf(s.id) === -1;
     });
-    // slides salvos com o placeholder antigo (logo Aerolito) migram pro atual
+    // slides salvos com qualquer placeholder de era anterior migram pro atual
     slides.forEach(function (s) {
-      if (s.image === LEGACY_PLACEHOLDER) s.image = PLACEHOLDER_IMAGE;
+      if (LEGACY_PLACEHOLDERS.indexOf(s.image) !== -1) s.image = PLACEHOLDER_IMAGE;
     });
     slides = applyOrder(slides);   // ordem publicada (todos) ou, senão, localStorage
     // bootstrap: se o owner já reordenou local mas nada foi publicado, publica
