@@ -33,4 +33,11 @@ describe("deck auth handlers", () => {
     expect(verifyToken("acme", "lixo-sem-ponto", SECRET)).toBe(false);
     expect(verifyToken("acme", null, SECRET)).toBe(false);
   });
+
+  it("verifyToken e checkPassword falham fechado se o secret estiver ausente", () => {
+    const token = issueToken("acme", SECRET);
+    expect(verifyToken("acme", token, "")).toBe(false);
+    expect(verifyToken("acme", token, undefined)).toBe(false);
+    expect(checkPassword("abrepalavra", hmacHex("abrepalavra", SECRET), "")).toBe(false);
+  });
 });

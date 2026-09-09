@@ -12,6 +12,7 @@ export function issueToken(slug, secret) {
 }
 
 export function verifyToken(slug, token, secret) {
+  if (!secret || typeof secret !== "string") return false;
   if (!token || typeof token !== "string" || token.indexOf(".") === -1) return false;
   const [expiryStr, sig] = token.split(".");
   const expiry = Number(expiryStr);
@@ -21,6 +22,7 @@ export function verifyToken(slug, token, secret) {
 }
 
 export function checkPassword(senha, senhaHash, secret) {
+  if (!secret || typeof secret !== "string") return false;
   if (!senha || typeof senha !== "string" || !senhaHash) return false;
   return hmacEquals(hmacHex(senha, secret), senhaHash);
 }
