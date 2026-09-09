@@ -36,7 +36,7 @@ function slug(str) {
 
 // nome do .pptx: <deck>-slides-AAAA-MM-DD.pptx
 export function pptxFileName(meta, date) {
-  var base = slug((meta && (meta.deck || meta.title)) || "portobello") || "portobello";
+  var base = slug((meta && (meta.deck || meta.title)) || "palestra") || "palestra";
   return base + "-slides-" + isoDate(date) + ".pptx";
 }
 

@@ -1,8 +1,7 @@
 /* Núcleo da edição de slides do sistema /palestra/:slug — recebe o store (Blobs ou
    fake) injetado. Todas as chaves são namespaced por slug ("<slug>:overrides" etc)
    dentro de um único store compartilhado "deck-content", pra evitar duplicar store
-   por cliente. Funções puras retornando { status, body }. Adaptado dos handlers do
-   deck /portobello (única instância anterior). */
+   por cliente. Funções puras retornando { status, body }. */
 import { createHash } from "node:crypto";
 
 const EDITABLE = ["title", "subtitle", "body", "image", "items", "gallery", "video", "media", "layout", "kicker", "quote", "byline"];
