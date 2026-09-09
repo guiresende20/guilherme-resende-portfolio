@@ -14,9 +14,17 @@ export default function Palestras() {
 
   return (
     <div className="container mx-auto px-6 py-16">
-      <header className="mb-12">
-        <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em]">Palestras</span>
-        <h1 className="font-display text-5xl text-foreground mt-2">Apresentações</h1>
+      <header className="mb-12 flex items-start justify-between gap-4">
+        <div>
+          <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em]">Palestras</span>
+          <h1 className="font-display text-5xl text-foreground mt-2">Apresentações</h1>
+        </div>
+        <a
+          href="/palestra/admin"
+          className="mt-1 shrink-0 rounded-md border border-white/10 px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.08em] text-foreground/50 transition hover:border-white/30 hover:text-foreground/80"
+        >
+          Admin
+        </a>
       </header>
 
       {error && <p className="text-foreground/70">{error}</p>}
