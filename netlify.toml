@@ -89,10 +89,31 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
+# link antigo compartilhado com o cliente Portobello — preserva compatibilidade
 [[redirects]]
   from = "/portobello"
-  to = "/portobello/"
+  to = "/palestra/portobello"
   status = 301
+
+# painel admin e listagem passam pelo React normalmente (SPA)
+[[redirects]]
+  from = "/palestra/admin"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/palestra/admin/*"
+  to = "/index.html"
+  status = 200
+
+# qualquer outro /palestra/<slug> é servido pela engine de deck compartilhada
+[[redirects]]
+  from = "/palestra/:slug"
+  to = "/palestra/_deck/index.html"
+  status = 200
+[[redirects]]
+  from = "/palestra/:slug/*"
+  to = "/palestra/_deck/index.html"
+  status = 200
 
 [[redirects]]
   from = "/*"

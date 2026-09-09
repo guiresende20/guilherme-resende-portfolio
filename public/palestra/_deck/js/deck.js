@@ -1,6 +1,6 @@
 /* ============================================================
    deck.js — slideshow
-   Carrega slides.json, renderiza cada slide a partir do template
+   Carrega o conteúdo via /api/deck-content/:slug, renderiza cada slide a partir do template
    e cuida da navegação (setas, teclado, swipe, contador, fullscreen,
    deep-link por hash). Ativado pelo evento "enter-deck" da capa.
    ============================================================ */
@@ -22,10 +22,25 @@
 
   // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
   // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
-  var PLACEHOLDER_IMAGE = "assets/placeholder.svg";
+  var PLACEHOLDER_IMAGE = "/palestra/_deck/assets/placeholder.svg";
   // valor antigo (logo Aerolito) que pode ter sido persistido em overrides/added
   // no servidor — normalizado para o placeholder atual ao montar o deck.
-  var LEGACY_PLACEHOLDER = "assets/logo-aero.png";
+  var LEGACY_PLACEHOLDER = "/palestra/_deck/assets/logo-aero.png";
+
+  // slug do cliente vem do path: /palestra/<slug>
+  var DECK_SLUG = (function () {
+    var parts = location.pathname.split("/").filter(Boolean);
+    return parts[0] === "palestra" ? (parts[1] || "") : "";
+  })();
+
+  var DECK_TOKEN_STORE = "palestra-deck-token-" + DECK_SLUG;
+
+  function storedDeckToken() {
+    try { return sessionStorage.getItem(DECK_TOKEN_STORE); } catch (_) { return null; }
+  }
+  function storeDeckToken(t) {
+    try { sessionStorage.setItem(DECK_TOKEN_STORE, t); } catch (_) {}
+  }
 
   // layouts-base adicionais (além do território clássico): mesmo modelo de dados
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
@@ -108,7 +123,7 @@
 
   var slides = [];
   var els = [];
-  var deckMeta = null;   // meta do deck (slides.json) p/ o nome do arquivo PPTX
+  var deckMeta = null;   // meta do deck (via /api/deck-content) p/ o nome do arquivo PPTX
   var thumbs = [];
   var fullAccess = false;   // chave de edição na sessão: controles de edição visíveis
   var publishedHidden = [];   // ids ocultados publicados (servidor): somem para todos
@@ -122,7 +137,7 @@
   /* reordenar miniaturas (arrastar) — desktop, persistido em localStorage */
   // v2: a intro entrou como 1º slide; ordens v1 salvas empurrariam a intro
   // para o fim (applySavedOrder anexa ids novos ao final). Orfana ordens antigas.
-  var ORDER_KEY = "portobello-deck-order-v1";
+  var ORDER_KEY = "palestra-deck-order-" + DECK_SLUG + "-v1";
   var dragFrom = -1;
   var justDragged = false;
 
@@ -386,7 +401,7 @@
 
   // busca o áudio da resposta (PCM base64 24kHz) na voz da IA
   function fetchTts(text) {
-    return fetch("/api/portobello-tts", {
+    return fetch("/api/deck-tts", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text: text }),
@@ -770,8 +785,8 @@
     return el;
   }
 
-  /* ---------- edição: chave (validada no servidor via PORTOBELLO_EDIT_KEY) ---------- */
-  var EDIT_KEY_STORE = "portobello-edit-key";
+  /* ---------- edição: chave (validada no servidor via PALESTRA_EDIT_KEY) ---------- */
+  var EDIT_KEY_STORE = "palestra-edit-key";
 
   function storedEditKey() {
     try { return sessionStorage.getItem(EDIT_KEY_STORE); } catch (_) { return null; }
@@ -786,7 +801,7 @@
   function requestEditMode() {
     var k = window.prompt("Chave de edição:");
     if (!k) return;
-    fetch("/api/portobello-content", {
+    fetch("/api/deck-content/" + DECK_SLUG, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ action: "verify", key: k })
@@ -817,7 +832,7 @@
   function backupPost(action, extra) {
     var key = storedEditKey();
     if (!key) return Promise.reject(new Error("no-key"));
-    return fetch("/api/portobello-backup", {
+    return fetch("/api/deck-backup/" + DECK_SLUG, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(Object.assign({ action: action, key: key }, extra || {}))
@@ -836,7 +851,7 @@
     backupPost("export")
       .then(function (bundle) {
         var stamp = new Date().toISOString().slice(0, 10);
-        download("portobello-backup-" + stamp + ".json", JSON.stringify(bundle, null, 2), "application/json");
+        download("palestra-" + DECK_SLUG + "-backup-" + stamp + ".json", JSON.stringify(bundle, null, 2), "application/json");
       })
       .catch(function (err) {
         if (err && (err.message === "401" || err.message === "no-key")) return;
@@ -921,7 +936,12 @@
 
     function refresh() {
       var list = overlay.querySelector("[data-list]");
-      return fetch("/api/portobello-backup", { cache: "no-store" })
+      var headers = {};
+      var editKey = storedEditKey();
+      var token = storedDeckToken();
+      if (editKey) headers["x-edit-key"] = editKey;
+      if (token) headers["x-deck-token"] = token;
+      return fetch("/api/deck-backup/" + DECK_SLUG, { cache: "no-store", headers: headers })
         .then(function (r) { return r.ok ? r.json() : { backups: [] }; })
         .then(function (data) { renderBackupsList(list, data.backups || [], close); })
         .catch(function () { list.innerHTML = '<li class="backups-empty">Erro ao carregar.</li>'; });
@@ -1025,8 +1045,8 @@
 
   function ensurePptxLibs() {
     return Promise.all([
-      window.htmlToImage ? Promise.resolve() : loadScript("js/vendor/html-to-image.js"),
-      window.PptxGenJS ? Promise.resolve() : loadScript("js/vendor/pptxgen.bundle.js")
+      window.htmlToImage ? Promise.resolve() : loadScript("/palestra/_deck/js/vendor/html-to-image.js"),
+      window.PptxGenJS ? Promise.resolve() : loadScript("/palestra/_deck/js/vendor/pptxgen.bundle.js")
     ]);
   }
 
@@ -2294,7 +2314,7 @@
 
   function postContent(payload) {
     payload = Object.assign({ key: storedEditKey() }, payload);
-    return fetch("/api/portobello-content", {
+    return fetch("/api/deck-content/" + DECK_SLUG, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(payload)
@@ -2504,29 +2524,56 @@
     return data;
   }
 
-  // conteúdo do servidor; falha de rede / dev sem functions => null (usa a base)
-  function loadContent() {
-    return fetch("/api/portobello-content", { cache: "no-store" })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .catch(function () { return null; });
+  // busca o conteúdo completo (base + overrides/added/hidden/order) num único
+  // endpoint namespaced por slug; 401 com passwordRequired => pede a senha do
+  // cliente antes de tentar de novo.
+  function fetchDeckContent() {
+    var headers = {};
+    var editKey = storedEditKey();
+    var token = storedDeckToken();
+    if (editKey) headers["x-edit-key"] = editKey;
+    if (token) headers["x-deck-token"] = token;
+    return fetch("/api/deck-content/" + DECK_SLUG, { cache: "no-store", headers: headers })
+      .then(function (r) {
+        if (r.status === 401) return r.json().then(function (j) { throw { passwordRequired: !!(j && j.passwordRequired) }; });
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      });
   }
 
-  Promise.all([
-    fetch("slides.json", { cache: "no-cache" }).then(function (r) {
+  function askDeckPassword() {
+    var senha = window.prompt("Esta palestra tem acesso restrito. Senha:");
+    if (!senha) return Promise.reject(new Error("sem senha"));
+    return fetch("/api/deck-auth/" + DECK_SLUG, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ senha: senha })
+    }).then(function (r) {
+      if (r.status === 401) { window.alert("Senha incorreta."); return askDeckPassword(); }
       if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
-    }),
-    loadContent()
-  ])
-    .then(function (arr) { onData(applyContent(arr[0], arr[1])); })
-    .catch(function (err) {
-      stage.innerHTML =
-        '<div style="position:absolute;inset:0;display:flex;align-items:center;' +
-        'justify-content:center;color:var(--text-secondary);font-size:14px;padding:24px;' +
-        'text-align:center">Não foi possível carregar os slides (slides.json).<br>' +
-        esc(err.message) + "</div>";
-      loaded = true;      // mesmo em erro, ativa para mostrar a mensagem
-      maybeActivate();
-      console.error("[deck] erro ao carregar slides.json:", err);
+    }).then(function (j) {
+      if (j.token) storeDeckToken(j.token);
+      return fetchDeckContent();
     });
+  }
+
+  function showLoadError(err) {
+    stage.innerHTML =
+      '<div style="position:absolute;inset:0;display:flex;align-items:center;' +
+      'justify-content:center;color:var(--text-secondary);font-size:14px;padding:24px;' +
+      'text-align:center">Não foi possível carregar os slides.<br>' +
+      esc(err.message || "erro desconhecido") + "</div>";
+    loaded = true;      // mesmo em erro, ativa para mostrar a mensagem
+    maybeActivate();
+    console.error("[deck] erro ao carregar conteúdo:", err);
+  }
+
+  fetchDeckContent()
+    .catch(function (err) {
+      if (err && err.passwordRequired) return askDeckPassword();
+      throw err;
+    })
+    .then(function (content) { onData(applyContent(content.base, content)); })
+    .catch(showLoadError);
 })();

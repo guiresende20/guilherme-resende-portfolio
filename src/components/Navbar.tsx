@@ -38,6 +38,7 @@ export default function Navbar() {
     { href: "#projetos", label: t("navbar.links.projetos") },
     { href: "#formacao", label: t("navbar.links.formacao") },
     { href: "#contato", label: t("navbar.links.contato") },
+    { to: "/palestra", label: t("navbar.links.palestras") },
     { to: "/blog", label: t("navbar.links.blog") },
   ];
 

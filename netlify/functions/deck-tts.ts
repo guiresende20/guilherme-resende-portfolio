@@ -2,7 +2,7 @@ import type { Handler, HandlerEvent } from "@netlify/functions";
 import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
 
-// Text-to-speech para o slide "Frase + IA" do deck /portobello.
+// Text-to-speech para o slide "Frase + IA" dos decks /palestra/:slug.
 // Recebe { text } e devolve o áudio da resposta na voz da IA (Gemini TTS, voz
 // "Puck" — a mesma da voz Live do chatbot). Retorna PCM base64 24kHz/16-bit,
 // que o deck decodifica e toca via Web Audio, sincronizado com a digitação.
@@ -44,7 +44,7 @@ const handler: Handler = async (event: HandlerEvent) => {
   }
 
   const ip = getClientIp(event);
-  const rate = checkRateLimits("portobello-tts", ip, TTS_RATE_LIMITS);
+  const rate = checkRateLimits("deck-tts", ip, TTS_RATE_LIMITS);
   if (!rate.ok) {
     return {
       statusCode: 429,
@@ -68,7 +68,7 @@ const handler: Handler = async (event: HandlerEvent) => {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error("portobello-tts: GEMINI_API_KEY ausente");
+    console.error("deck-tts: GEMINI_API_KEY ausente");
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Erro interno" }) };
   }
 
@@ -93,7 +93,7 @@ const handler: Handler = async (event: HandlerEvent) => {
 
     if (!response.ok) {
       const errBody = await response.text().catch(() => "");
-      console.error("portobello-tts: Gemini TTS failed", response.status, errBody);
+      console.error("deck-tts: Gemini TTS failed", response.status, errBody);
       return { statusCode: 502, headers, body: JSON.stringify({ error: "Falha ao gerar áudio" }) };
     }
 
@@ -103,7 +103,7 @@ const handler: Handler = async (event: HandlerEvent) => {
     const part = data.candidates?.[0]?.content?.parts?.find((p) => p.inlineData?.data);
     const audioBase64 = part?.inlineData?.data;
     if (!audioBase64) {
-      console.error("portobello-tts: resposta sem áudio", JSON.stringify(data).slice(0, 300));
+      console.error("deck-tts: resposta sem áudio", JSON.stringify(data).slice(0, 300));
       return { statusCode: 502, headers, body: JSON.stringify({ error: "Sem áudio na resposta" }) };
     }
 
@@ -116,7 +116,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       }),
     };
   } catch (error: unknown) {
-    console.error("portobello-tts error:", error);
+    console.error("deck-tts error:", error);
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Erro interno" }) };
   }
 };
