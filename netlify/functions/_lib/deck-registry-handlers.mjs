@@ -18,9 +18,16 @@ export async function readRegistry(store) {
   return (await store.get(REGISTRY_KEY, { type: "json" })) || [];
 }
 
-export async function handleListRegistry(store) {
+export async function handleListRegistry(store, includePrivate) {
   const decks = await readRegistry(store);
-  return { status: 200, body: { decks } };
+  if (includePrivate) return { status: 200, body: { decks } };
+  const publicDecks = decks
+    .filter((d) => d.status === "publicado")
+    .map((d) => {
+      const { senhaHash, ...rest } = d;
+      return rest;
+    });
+  return { status: 200, body: { decks: publicDecks } };
 }
 
 export async function handleGetEntry(slug, store) {

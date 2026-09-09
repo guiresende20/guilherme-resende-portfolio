@@ -24,7 +24,10 @@ export default function PalestraAdmin() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
   async function loadDecks() {
-    const res = await fetch("/api/deck-registry", { cache: "no-store" });
+    const res = await fetch("/api/deck-registry", {
+      cache: "no-store",
+      headers: key ? { "x-edit-key": key } : {},
+    });
     const data = await res.json();
     setDecks(Array.isArray(data.decks) ? data.decks : []);
   }

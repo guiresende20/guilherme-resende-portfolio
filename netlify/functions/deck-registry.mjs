@@ -13,7 +13,8 @@ export default async (req, context) => {
   const slug = context.params && context.params.slug;
 
   if (req.method === "GET") {
-    const { status, body } = await handleListRegistry(registryStore());
+    const hasEditAccess = isValidEditKey(req.headers.get("x-edit-key"), process.env.PALESTRA_EDIT_KEY);
+    const { status, body } = await handleListRegistry(registryStore(), hasEditAccess);
     return Response.json(body, { status, headers: { "Cache-Control": "no-store" } });
   }
 

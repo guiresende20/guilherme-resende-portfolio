@@ -74,4 +74,25 @@ describe("deck registry handlers", () => {
     const registry = fakeStore();
     expect(await handleGetEntry("ghost", registry)).toBeNull();
   });
+
+  it("lista pública (sem includePrivate) esconde não-listados e remove senhaHash", async () => {
+    const registry = fakeStore();
+    const content = fakeStore();
+    await handleAddDeck({ slug: "a", titulo: "A", status: "publicado", senhaHash: "abc" }, registry, content);
+    await handleAddDeck({ slug: "b", titulo: "B", status: "nao-listado" }, registry, content);
+    const res = await handleListRegistry(registry);
+    expect(res.body.decks).toHaveLength(1);
+    expect(res.body.decks[0].slug).toBe("a");
+    expect(res.body.decks[0]).not.toHaveProperty("senhaHash");
+  });
+
+  it("lista privada (includePrivate=true) mostra tudo incluindo senhaHash", async () => {
+    const registry = fakeStore();
+    const content = fakeStore();
+    await handleAddDeck({ slug: "a", titulo: "A", status: "publicado", senhaHash: "abc" }, registry, content);
+    await handleAddDeck({ slug: "b", titulo: "B", status: "nao-listado" }, registry, content);
+    const res = await handleListRegistry(registry, true);
+    expect(res.body.decks).toHaveLength(2);
+    expect(res.body.decks.find((d: { slug: string }) => d.slug === "a")?.senhaHash).toBe("abc");
+  });
 });
