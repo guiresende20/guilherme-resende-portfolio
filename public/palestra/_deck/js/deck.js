@@ -22,10 +22,10 @@
 
   // imagem-placeholder do território novo (glifo neutro de imagem): renderizada
   // "contida" e centralizada (sem cover/zoom) até o usuário trocar a imagem.
-  var PLACEHOLDER_IMAGE = "assets/placeholder.svg";
+  var PLACEHOLDER_IMAGE = "/palestra/_deck/assets/placeholder.svg";
   // valor antigo (logo Aerolito) que pode ter sido persistido em overrides/added
   // no servidor — normalizado para o placeholder atual ao montar o deck.
-  var LEGACY_PLACEHOLDER = "assets/logo-aero.png";
+  var LEGACY_PLACEHOLDER = "/palestra/_deck/assets/logo-aero.png";
 
   // layouts-base adicionais (além do território clássico): mesmo modelo de dados
   // e mesmo DOM — a diferença é só visual, por classe "slide--<layout>" no
@@ -1025,8 +1025,8 @@
 
   function ensurePptxLibs() {
     return Promise.all([
-      window.htmlToImage ? Promise.resolve() : loadScript("js/vendor/html-to-image.js"),
-      window.PptxGenJS ? Promise.resolve() : loadScript("js/vendor/pptxgen.bundle.js")
+      window.htmlToImage ? Promise.resolve() : loadScript("/palestra/_deck/js/vendor/html-to-image.js"),
+      window.PptxGenJS ? Promise.resolve() : loadScript("/palestra/_deck/js/vendor/pptxgen.bundle.js")
     ]);
   }
 
