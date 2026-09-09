@@ -1,6 +1,6 @@
 /* ============================================================
    deck.js — slideshow
-   Carrega slides.json, renderiza cada slide a partir do template
+   Carrega o conteúdo via /api/deck-content/:slug, renderiza cada slide a partir do template
    e cuida da navegação (setas, teclado, swipe, contador, fullscreen,
    deep-link por hash). Ativado pelo evento "enter-deck" da capa.
    ============================================================ */
@@ -123,7 +123,7 @@
 
   var slides = [];
   var els = [];
-  var deckMeta = null;   // meta do deck (slides.json) p/ o nome do arquivo PPTX
+  var deckMeta = null;   // meta do deck (via /api/deck-content) p/ o nome do arquivo PPTX
   var thumbs = [];
   var fullAccess = false;   // chave de edição na sessão: controles de edição visíveis
   var publishedHidden = [];   // ids ocultados publicados (servidor): somem para todos
@@ -936,7 +936,12 @@
 
     function refresh() {
       var list = overlay.querySelector("[data-list]");
-      return fetch("/api/deck-backup/" + DECK_SLUG, { cache: "no-store" })
+      var headers = {};
+      var editKey = storedEditKey();
+      var token = storedDeckToken();
+      if (editKey) headers["x-edit-key"] = editKey;
+      if (token) headers["x-deck-token"] = token;
+      return fetch("/api/deck-backup/" + DECK_SLUG, { cache: "no-store", headers: headers })
         .then(function (r) { return r.ok ? r.json() : { backups: [] }; })
         .then(function (data) { renderBackupsList(list, data.backups || [], close); })
         .catch(function () { list.innerHTML = '<li class="backups-empty">Erro ao carregar.</li>'; });
@@ -2544,7 +2549,8 @@
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ senha: senha })
     }).then(function (r) {
-      if (!r.ok) { window.alert("Senha incorreta."); return askDeckPassword(); }
+      if (r.status === 401) { window.alert("Senha incorreta."); return askDeckPassword(); }
+      if (!r.ok) throw new Error("HTTP " + r.status);
       return r.json();
     }).then(function (j) {
       if (j.token) storeDeckToken(j.token);
