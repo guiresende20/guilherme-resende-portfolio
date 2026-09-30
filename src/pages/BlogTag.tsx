@@ -2,18 +2,21 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import type { PostMeta } from "../lib/blog/frontmatter";
 import { fetchPostList } from "../lib/blog/api";
+import { useLocale } from "../lib/blog/format";
 import PostCard from "../components/blog/PostCard";
 import BlogLayout from "../components/blog/BlogLayout";
 import TransitionLink from "../components/TransitionLink";
 
 export default function BlogTag() {
   const { tag } = useParams<{ tag: string }>();
+  const lang = useLocale();
   const [posts, setPosts] = useState<PostMeta[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchPostList().then(setPosts).catch((e) => setError(String(e)));
-  }, []);
+    setError(null);
+    fetchPostList(lang).then(setPosts).catch((e) => setError(String(e)));
+  }, [lang]);
 
   const filtered = useMemo(() => {
     if (!posts || !tag) return [];
