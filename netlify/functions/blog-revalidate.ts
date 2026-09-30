@@ -117,7 +117,7 @@ export const handler: Handler = async (event) => {
   return {
     statusCode: 200,
     body: JSON.stringify({
-      cleared: [`posts/list`, `posts/${slug}`, `posts/prompt-summary`],
+      cleared: keysToInvalidateForSlug(slug),
       rag: ragResult,
     }),
   };
