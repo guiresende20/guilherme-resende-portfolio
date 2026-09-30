@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetchPostList } from "../api";
 
 describe("fetchPostList", () => {
@@ -10,6 +10,10 @@ describe("fetchPostList", () => {
         json: async () => ({ posts: [], cached: true }),
       })
     );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("calls /api/blog/list with no query string when lang is omitted", async () => {
