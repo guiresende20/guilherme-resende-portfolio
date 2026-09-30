@@ -1,22 +1,25 @@
 import { useEffect, useState, useMemo } from "react";
 import type { PostMeta } from "../lib/blog/frontmatter";
 import { fetchPostList } from "../lib/blog/api";
+import { useLocale } from "../lib/blog/format";
 import PostCard from "../components/blog/PostCard";
 import BlogLayout from "../components/blog/BlogLayout";
 
 const PAGE_SIZE = 15;
 
 export default function Blog() {
+  const lang = useLocale();
   const [posts, setPosts] = useState<PostMeta[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   useEffect(() => {
-    fetchPostList()
+    setError(null);
+    fetchPostList(lang)
       .then(setPosts)
       .catch((e) => setError(String(e)));
-  }, []);
+  }, [lang]);
 
   const allTags = useMemo(() => {
     if (!posts) return [];

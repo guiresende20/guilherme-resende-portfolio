@@ -6,6 +6,16 @@ import { parsePost } from "../../src/lib/blog/frontmatter";
 import { indexPost, removePost as ragRemovePost } from "./_lib/rag";
 import { ensureBlobsContext } from "./_lib/blobs-context";
 
+export function keysToInvalidateForSlug(slug: string): string[] {
+  return [
+    "posts/list",
+    `posts/${slug}`,
+    "posts/prompt-summary", // chatbot summary uses same source
+    "posts/list/translation/en",
+    "posts/list/translation/es",
+  ];
+}
+
 async function listMdFiles(): Promise<DriveFile[]> {
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
@@ -91,9 +101,9 @@ export const handler: Handler = async (event) => {
     return { statusCode: 400, body: "slug required (or pass ?all=true)" };
   }
 
-  await deleteCached("posts/list");
-  await deleteCached(`posts/${slug}`);
-  await deleteCached("posts/prompt-summary"); // chatbot summary uses same source
+  for (const key of keysToInvalidateForSlug(slug)) {
+    await deleteCached(key);
+  }
 
   let ragResult: Awaited<ReturnType<typeof reindexSlug>> | { indexed: false; error: string };
   try {
@@ -107,7 +117,7 @@ export const handler: Handler = async (event) => {
   return {
     statusCode: 200,
     body: JSON.stringify({
-      cleared: [`posts/list`, `posts/${slug}`, `posts/prompt-summary`],
+      cleared: keysToInvalidateForSlug(slug),
       rag: ragResult,
     }),
   };

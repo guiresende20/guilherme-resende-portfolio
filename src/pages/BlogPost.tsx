@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import TransitionLink from "../components/TransitionLink";
-import { fetchPost, type PostResponse } from "../lib/blog/api";
+import { fetchPost, fetchPostList, type PostResponse } from "../lib/blog/api";
 import MarkdownRenderer from "../components/blog/MarkdownRenderer";
 import { formatDate, formatReadingTime, useLocale } from "../lib/blog/format";
 import BlogLayout from "../components/blog/BlogLayout";
@@ -52,6 +52,7 @@ export default function BlogPost() {
   const [error, setError] = useState<string | null>(null);
   const [translatedBody, setTranslatedBody] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [translatedTitle, setTranslatedTitle] = useState<string | null>(null);
 
   useEffect(() => {
     if (!slug) return;
@@ -71,6 +72,25 @@ export default function BlogPost() {
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    setTranslatedTitle(null);
+    if (!post || post.meta.lang !== "pt") return;
+    if (userLang !== "en" && userLang !== "es") return;
+    let cancelled = false;
+    fetchPostList(userLang)
+      .then((list) => {
+        if (cancelled) return;
+        const match = list.find((p) => p.slug === post.meta.slug);
+        if (match) setTranslatedTitle(match.title);
+      })
+      .catch(() => {
+        // best-effort: mantém o título em português se a tradução falhar
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [post, userLang]);
 
   useEffect(() => {
     if (!post) return;
@@ -154,7 +174,7 @@ export default function BlogPost() {
 
             <header className="mt-8 mb-12">
               <h1 className="font-display text-4xl md:text-5xl text-foreground leading-tight">
-                {post.meta.title}
+                {translatedTitle ?? post.meta.title}
               </h1>
               <div className="flex flex-wrap items-center gap-3 mt-4 font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">
                 <span>{formatDate(post.meta.date, userLang)}</span>

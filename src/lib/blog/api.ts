@@ -5,8 +5,9 @@ export interface ListResponse {
   cached: boolean;
 }
 
-export async function fetchPostList(): Promise<PostMeta[]> {
-  const res = await fetch("/api/blog/list");
+export async function fetchPostList(lang?: string): Promise<PostMeta[]> {
+  const url = lang && lang !== "pt" ? `/api/blog/list?lang=${encodeURIComponent(lang)}` : "/api/blog/list";
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch posts: ${res.status}`);
   const data = (await res.json()) as ListResponse;
   return data.posts;
