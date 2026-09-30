@@ -5,6 +5,7 @@ import { resolveBlogFolders } from "./_lib/blog-folders";
 import { getCached, setCached } from "./_lib/blob-cache";
 import { ensureBlobsContext } from "./_lib/blobs-context";
 import { isBlogPostSource, fetchAndParse } from "./_lib/blog-source";
+import type { PostMeta } from "../../src/lib/blog/frontmatter";
 import {
   corsHeaders,
   getClientIp,
@@ -12,6 +13,11 @@ import {
   isOriginAllowed,
 } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
+
+interface PostPayload {
+  meta: PostMeta;
+  body: string;
+}
 
 const ALLOWED_LANGS = new Set(["en", "es"]);
 const TRANSLATE_RATE_LIMITS = [
@@ -94,19 +100,27 @@ export const handler: Handler = async (event) => {
     };
   }
 
-  const folders = await resolveBlogFolders();
-  const files = await listFolder(folders.rootId);
-
+  // O post já foi buscado (e cacheado por 10min) pelo endpoint blog-post ao
+  // renderizar a página — reaproveita esse cache em vez de re-escanear o Drive
+  // inteiro aqui. Sem isso, o scan redundante somado à chamada ao Gemini
+  // estourava o tempo de execução da function em posts mais longos (504).
   let originalBody: string | null = null;
-  for (const f of files.filter(isBlogPostSource)) {
-    try {
-      const parsed = await fetchAndParse(f);
-      if (parsed.meta.slug === slug && !parsed.meta.draft && parsed.meta.lang === "pt") {
-        originalBody = parsed.body;
-        break;
+  const cachedPost = await getCached<PostPayload>(`posts/${slug}`);
+  if (cachedPost && cachedPost.meta.lang === "pt" && !cachedPost.meta.draft) {
+    originalBody = cachedPost.body;
+  } else {
+    const folders = await resolveBlogFolders();
+    const files = await listFolder(folders.rootId);
+    for (const f of files.filter(isBlogPostSource)) {
+      try {
+        const parsed = await fetchAndParse(f);
+        if (parsed.meta.slug === slug && !parsed.meta.draft && parsed.meta.lang === "pt") {
+          originalBody = parsed.body;
+          break;
+        }
+      } catch (err) {
+        console.error("blog-translate: skipping", { name: f.name, id: f.id, err });
       }
-    } catch (err) {
-      console.error("blog-translate: skipping", { name: f.name, id: f.id, err });
     }
   }
 
