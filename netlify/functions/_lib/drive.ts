@@ -1,25 +1,10 @@
 import { google, docs_v1 } from "googleapis";
 
-// PERF: instrumentação temporária p/ investigar latência esporádica no
-// scan do Drive — remover depois de identificada a causa raiz.
-async function perf<T>(label: string, fn: () => Promise<T>): Promise<T> {
-  const start = Date.now();
-  try {
-    const result = await fn();
-    console.log(`[PERF] ${label} ok ${Date.now() - start}ms`);
-    return result;
-  } catch (err) {
-    console.log(`[PERF] ${label} FAIL ${Date.now() - start}ms`);
-    throw err;
-  }
-}
-
 let cachedDrive: ReturnType<typeof google.drive> | null = null;
 
 function getDrive() {
   if (cachedDrive) return cachedDrive;
 
-  const start = Date.now();
   const raw = process.env.GOOGLE_DRIVE_SA_JSON;
   if (!raw) throw new Error("GOOGLE_DRIVE_SA_JSON missing");
 
@@ -30,7 +15,6 @@ function getDrive() {
   });
 
   cachedDrive = google.drive({ version: "v3", auth });
-  console.log(`[PERF] getDrive client-init ${Date.now() - start}ms`);
   return cachedDrive;
 }
 
@@ -39,7 +23,6 @@ let cachedDocs: ReturnType<typeof google.docs> | null = null;
 function getDocs() {
   if (cachedDocs) return cachedDocs;
 
-  const start = Date.now();
   const raw = process.env.GOOGLE_DRIVE_SA_JSON;
   if (!raw) throw new Error("GOOGLE_DRIVE_SA_JSON missing");
 
@@ -50,7 +33,6 @@ function getDocs() {
   });
 
   cachedDocs = google.docs({ version: "v1", auth });
-  console.log(`[PERF] getDocs client-init ${Date.now() - start}ms`);
   return cachedDocs;
 }
 
@@ -64,36 +46,30 @@ export interface DriveFile {
 
 export async function listFolder(folderId: string): Promise<DriveFile[]> {
   const drive = getDrive();
-  return perf("listFolder", async () => {
-    const res = await drive.files.list({
-      q: `'${folderId}' in parents and trashed = false`,
-      fields: "files(id, name, mimeType, modifiedTime, createdTime)",
-      pageSize: 1000,
-    });
-    return (res.data.files ?? []) as DriveFile[];
+  const res = await drive.files.list({
+    q: `'${folderId}' in parents and trashed = false`,
+    fields: "files(id, name, mimeType, modifiedTime, createdTime)",
+    pageSize: 1000,
   });
+  return (res.data.files ?? []) as DriveFile[];
 }
 
 export async function downloadText(fileId: string): Promise<string> {
   const drive = getDrive();
-  return perf(`downloadText ${fileId}`, async () => {
-    const res = await drive.files.get(
-      { fileId, alt: "media" },
-      { responseType: "text" }
-    );
-    return res.data as string;
-  });
+  const res = await drive.files.get(
+    { fileId, alt: "media" },
+    { responseType: "text" }
+  );
+  return res.data as string;
 }
 
 export async function exportDocAsMarkdown(fileId: string): Promise<string> {
   const drive = getDrive();
-  return perf(`exportDocAsMarkdown ${fileId}`, async () => {
-    const res = await drive.files.export(
-      { fileId, mimeType: "text/markdown" },
-      { responseType: "text" }
-    );
-    return res.data as string;
-  });
+  const res = await drive.files.export(
+    { fileId, mimeType: "text/markdown" },
+    { responseType: "text" }
+  );
+  return res.data as string;
 }
 
 export async function downloadBinary(fileId: string): Promise<Buffer> {
@@ -116,7 +92,7 @@ export interface DocInlineImage {
 // contentUri é uma URL assinada de curta duração, por isso baixamos na hora.
 export async function getDocInlineImagesInOrder(fileId: string): Promise<DocInlineImage[]> {
   const docs = getDocs();
-  const res = await perf(`docs.documents.get ${fileId}`, () => docs.documents.get({ documentId: fileId }));
+  const res = await docs.documents.get({ documentId: fileId });
   const inlineObjects = res.data.inlineObjects || {};
 
   const orderedIds: string[] = [];
@@ -139,12 +115,11 @@ export async function getDocInlineImagesInOrder(fileId: string): Promise<DocInli
   }
   walk(res.data.body?.content);
 
-  console.log(`[PERF] ${fileId} orderedIds=${orderedIds.length}`);
   const images: DocInlineImage[] = [];
   for (const id of orderedIds) {
     const uri = inlineObjects[id]?.inlineObjectProperties?.embeddedObject?.imageProperties?.contentUri;
     if (!uri) continue;
-    const r = await perf(`inline-image-fetch ${fileId} ${id}`, () => fetch(uri));
+    const r = await fetch(uri);
     if (!r.ok) continue;
     const buf = Buffer.from(await r.arrayBuffer());
     const contentType = r.headers.get("content-type") || "image/png";
