@@ -15,6 +15,7 @@ export default function Blog() {
   const [visible, setVisible] = useState(PAGE_SIZE);
 
   useEffect(() => {
+    setError(null);
     fetchPostList(lang)
       .then(setPosts)
       .catch((e) => setError(String(e)));
