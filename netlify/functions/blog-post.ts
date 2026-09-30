@@ -55,16 +55,20 @@ export const handler: Handler = async (event) => {
     };
   }
 
+  const reqStart = Date.now();
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
   const sources = files.filter(isBlogPostSource);
+  console.log(`[PERF] blog-post ${slug}: folders+list done at +${Date.now() - reqStart}ms, ${sources.length} sources`);
 
   // Fase 1: busca/parseia todos os candidatos em paralelo e sem imagens em
   // alta resolução, só para achar qual arquivo bate com o slug pedido — os
   // outros N-1 arquivos nunca precisam de imagem, então evita esse custo.
+  const phase1Start = Date.now();
   const quickResults = await Promise.allSettled(
     sources.map((file) => fetchAndParse(file, { withImages: false }))
   );
+  console.log(`[PERF] blog-post ${slug}: phase1 done at +${Date.now() - reqStart}ms (phase1 took ${Date.now() - phase1Start}ms)`);
 
   let matchFile: (typeof sources)[number] | null = null;
   for (let i = 0; i < quickResults.length; i++) {
@@ -83,6 +87,7 @@ export const handler: Handler = async (event) => {
   // Fase 2: só o arquivo vencedor é buscado de novo, agora com imagens.
   let found: PostPayload | null = null;
   if (matchFile) {
+    const phase2Start = Date.now();
     try {
       const parsed = await fetchAndParse(matchFile, { withImages: true });
       found = {
@@ -92,6 +97,7 @@ export const handler: Handler = async (event) => {
     } catch (err) {
       console.error("blog: skipping", { name: matchFile.name, id: matchFile.id, err });
     }
+    console.log(`[PERF] blog-post ${slug}: phase2 done at +${Date.now() - reqStart}ms (phase2 took ${Date.now() - phase2Start}ms)`);
   }
 
   if (!found) {
