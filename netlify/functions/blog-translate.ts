@@ -111,15 +111,23 @@ export const handler: Handler = async (event) => {
   } else {
     const folders = await resolveBlogFolders();
     const files = await listFolder(folders.rootId);
-    for (const f of files.filter(isBlogPostSource)) {
-      try {
-        const parsed = await fetchAndParse(f);
-        if (parsed.meta.slug === slug && !parsed.meta.draft && parsed.meta.lang === "pt") {
-          originalBody = parsed.body;
-          break;
-        }
-      } catch (err) {
-        console.error("blog-translate: skipping", { name: f.name, id: f.id, err });
+    const sources = files.filter(isBlogPostSource);
+    // Tradução só usa o texto do body — nunca precisou de imagens em alta
+    // resolução — e busca todos os candidatos em paralelo em vez de série.
+    const results = await Promise.allSettled(
+      sources.map((f) => fetchAndParse(f, { withImages: false }))
+    );
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      const f = sources[i];
+      if (result.status === "rejected") {
+        console.error("blog-translate: skipping", { name: f.name, id: f.id, err: result.reason });
+        continue;
+      }
+      const parsed = result.value;
+      if (parsed.meta.slug === slug && !parsed.meta.draft && parsed.meta.lang === "pt") {
+        originalBody = parsed.body;
+        break;
       }
     }
   }

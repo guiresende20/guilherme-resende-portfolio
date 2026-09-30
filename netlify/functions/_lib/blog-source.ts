@@ -12,17 +12,30 @@ export function isBlogPostSource(f: DriveFile): boolean {
   return false;
 }
 
-export async function fetchAndParse(f: DriveFile): Promise<ParsedPost> {
+export interface FetchAndParseOptions {
+  // Busca e faz upgrade das imagens embutidas em Docs para alta resolução.
+  // Custa uma chamada de rede sequencial por imagem — pular quando o
+  // chamador só precisa do frontmatter/meta ou não renderiza imagens.
+  withImages?: boolean;
+}
+
+export async function fetchAndParse(
+  f: DriveFile,
+  opts: FetchAndParseOptions = {}
+): Promise<ParsedPost> {
+  const withImages = opts.withImages ?? true;
   if (f.mimeType === DOC_MIMETYPE) {
     const raw = await exportDocAsMarkdown(f.id);
     let upgraded = raw;
-    try {
-      const images = await getDocInlineImagesInOrder(f.id);
-      upgraded = upgradeDocImages(raw, images);
-    } catch (err) {
-      // best-effort: mantém as imagens em baixa resolução do export markdown
-      // em vez de quebrar o post inteiro.
-      console.error("blog: falha ao buscar imagens em alta resolução do Doc", { name: f.name, id: f.id, err });
+    if (withImages) {
+      try {
+        const images = await getDocInlineImagesInOrder(f.id);
+        upgraded = upgradeDocImages(raw, images);
+      } catch (err) {
+        // best-effort: mantém as imagens em baixa resolução do export markdown
+        // em vez de quebrar o post inteiro.
+        console.error("blog: falha ao buscar imagens em alta resolução do Doc", { name: f.name, id: f.id, err });
+      }
     }
     return parseDocPost(upgraded, f.name, f.createdTime);
   }

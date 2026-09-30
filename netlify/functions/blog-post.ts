@@ -8,7 +8,7 @@ import type { PostMeta } from "../../src/lib/blog/frontmatter";
 import { rewriteImagePaths } from "../../src/lib/blog/image-paths";
 import { corsHeaders, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 
-const TTL_MS = 10 * 60_000;
+const TTL_MS = 24 * 60 * 60_000; // 24h — conteúdo é invalidado explicitamente via /api/blog/revalidate
 
 interface PostPayload {
   meta: PostMeta;
@@ -59,19 +59,38 @@ export const handler: Handler = async (event) => {
   const files = await listFolder(folders.rootId);
   const sources = files.filter(isBlogPostSource);
 
+  // Fase 1: busca/parseia todos os candidatos em paralelo e sem imagens em
+  // alta resolução, só para achar qual arquivo bate com o slug pedido — os
+  // outros N-1 arquivos nunca precisam de imagem, então evita esse custo.
+  const quickResults = await Promise.allSettled(
+    sources.map((file) => fetchAndParse(file, { withImages: false }))
+  );
+
+  let matchFile: (typeof sources)[number] | null = null;
+  for (let i = 0; i < quickResults.length; i++) {
+    const result = quickResults[i];
+    const file = sources[i];
+    if (result.status === "rejected") {
+      console.error("blog: skipping", { name: file.name, id: file.id, err: result.reason });
+      continue;
+    }
+    if (result.value.meta.slug === slug && !result.value.meta.draft) {
+      matchFile = file;
+      break;
+    }
+  }
+
+  // Fase 2: só o arquivo vencedor é buscado de novo, agora com imagens.
   let found: PostPayload | null = null;
-  for (const file of sources) {
+  if (matchFile) {
     try {
-      const parsed = await fetchAndParse(file);
-      if (parsed.meta.slug === slug && !parsed.meta.draft) {
-        found = {
-          meta: parsed.meta,
-          body: rewriteImagePaths(parsed.body),
-        };
-        break;
-      }
+      const parsed = await fetchAndParse(matchFile, { withImages: true });
+      found = {
+        meta: parsed.meta,
+        body: rewriteImagePaths(parsed.body),
+      };
     } catch (err) {
-      console.error("blog: skipping", { name: file.name, id: file.id, err });
+      console.error("blog: skipping", { name: matchFile.name, id: matchFile.id, err });
     }
   }
 
