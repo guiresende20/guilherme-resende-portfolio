@@ -1,6 +1,17 @@
-import { describe, it, expect } from "vitest";
-import { mergeTranslatedTitles, type TranslatedTitle } from "../blog-list-translate";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { mergeTranslatedTitles, translateTitles, type TranslatedTitle } from "../blog-list-translate";
 import type { PostMeta } from "../../../../src/lib/blog/frontmatter";
+
+const generateContentMock = vi.fn();
+
+vi.mock("@google/generative-ai", () => {
+  class MockGoogleGenerativeAI {
+    getGenerativeModel() {
+      return { generateContent: generateContentMock };
+    }
+  }
+  return { GoogleGenerativeAI: MockGoogleGenerativeAI };
+});
 
 function meta(partial: Partial<PostMeta>): PostMeta {
   return {
@@ -49,5 +60,71 @@ describe("mergeTranslatedTitles", () => {
     ]);
     mergeTranslatedTitles([original], translations);
     expect(original.title).toBe("Título original");
+  });
+});
+
+describe("translateTitles", () => {
+  beforeEach(() => {
+    generateContentMock.mockReset();
+    process.env.GEMINI_API_KEY = "test-key";
+  });
+
+  it("returns an empty map and never calls the API for empty input", async () => {
+    const result = await translateTitles([], "en");
+    expect(result.size).toBe(0);
+    expect(generateContentMock).not.toHaveBeenCalled();
+  });
+
+  it("returns an empty map when GEMINI_API_KEY is missing", async () => {
+    delete process.env.GEMINI_API_KEY;
+    const result = await translateTitles([{ slug: "a", title: "Título" }], "en");
+    expect(result.size).toBe(0);
+    expect(generateContentMock).not.toHaveBeenCalled();
+  });
+
+  it("parses a valid JSON array response into a Map keyed by slug", async () => {
+    generateContentMock.mockResolvedValue({
+      response: {
+        text: () =>
+          JSON.stringify([
+            { slug: "a", title: "Original title", excerpt: "Original summary" },
+          ]),
+      },
+    });
+    const result = await translateTitles(
+      [{ slug: "a", title: "Título", excerpt: "Resumo" }],
+      "en"
+    );
+    expect(result.get("a")).toEqual({ title: "Original title", excerpt: "Original summary" });
+  });
+
+  it("omits excerpt when the model response doesn't include one", async () => {
+    generateContentMock.mockResolvedValue({
+      response: { text: () => JSON.stringify([{ slug: "a", title: "Original title" }]) },
+    });
+    const result = await translateTitles([{ slug: "a", title: "Título" }], "en");
+    expect(result.get("a")).toEqual({ title: "Original title", excerpt: undefined });
+  });
+
+  it("extracts the JSON array even if the model wraps it in commentary", async () => {
+    generateContentMock.mockResolvedValue({
+      response: {
+        text: () => 'Here you go:\n```json\n[{"slug":"a","title":"Original title"}]\n```',
+      },
+    });
+    const result = await translateTitles([{ slug: "a", title: "Título" }], "en");
+    expect(result.get("a")?.title).toBe("Original title");
+  });
+
+  it("returns an empty map when the model response is not valid JSON", async () => {
+    generateContentMock.mockResolvedValue({ response: { text: () => "not json at all" } });
+    const result = await translateTitles([{ slug: "a", title: "Título" }], "en");
+    expect(result.size).toBe(0);
+  });
+
+  it("returns an empty map when the API call rejects", async () => {
+    generateContentMock.mockRejectedValue(new Error("429 quota"));
+    const result = await translateTitles([{ slug: "a", title: "Título" }], "en");
+    expect(result.size).toBe(0);
   });
 });
