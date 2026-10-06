@@ -6,6 +6,12 @@ const source = { id: "blog:aula:0", title: "Aula 360", text: "O protótipo foi a
 const answer = (overrides = {}) => JSON.stringify({ text: "O protótipo foi apresentado em 2015.", actions: [], references: [{ sourceId: source.id, quote: source.text }], ...overrides });
 
 describe("contexto e evidência do chat", () => {
+  it("aceita uma citação com negrito editorial removido sem mudar o conteúdo", () => {
+    const source = { id: "cargo", title: "Cargo", text: "**Cargo atual:** Head de Pesquisa e de IA — Aeroli.to (desde junho de 2026)", url: "#experiencia" };
+    const raw = JSON.stringify({ text: "Atuo na Aeroli.to desde junho de 2026.", actions: [], references: [{ sourceId: "cargo", quote: "Cargo atual: Head de Pesquisa e de IA — Aeroli.to (desde junho de 2026)" }] });
+    expect(parseGroundedAnswer(raw, "STOP", [source]).sources).toEqual([{ id: "cargo", title: "Cargo", url: "#experiencia" }]);
+    expect(() => parseGroundedAnswer(raw.replace(/2026/g, "2025"), "STOP", [source])).toThrow();
+  });
   it("não envia a pergunta atual duas vezes e preserva as mensagens anteriores", () => {
     const prior = [{ role: "user" as const, parts: [{ text: "Aula 360?" }] }, { role: "model" as const, parts: [{ text: "É um projeto educacional." }] }];
     expect(normalizeHistory([...prior, { role: "user", parts: [{ text: "e a data?" }] }], "e a data?")).toEqual(prior);

@@ -10,7 +10,7 @@ import { PORTFOLIO_SOURCES, PORTFOLIO_KNOWLEDGE_VERSION } from "../../src/lib/po
 import { normalizeHistory, buildRetrievalQuery, shouldSearchWeb, parseGroundedAnswer, InvalidChatAnswer, type ChatSource } from "../../src/lib/chat-grounding";
 
 const RATE_LIMITS = [{ limit: 10, windowMs: 60_000, label: "min" }, { limit: 50, windowMs: 3600_000, label: "hour" }];
-const RESPONSE_SCHEMA: Schema = {
+export const RESPONSE_SCHEMA: Schema = {
   type: SchemaType.OBJECT,
   properties: {
     text: { type: SchemaType.STRING },

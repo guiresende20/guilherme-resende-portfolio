@@ -1,5 +1,5 @@
 import { PORTFOLIO_SOURCES } from "./portfolio-knowledge";
-import { FACTUAL_POLICY, MAX_ANSWER_CHARS, type EvidenceSource, type KnowledgeResult } from "./chat-grounding";
+import { FACTUAL_POLICY, MAX_ANSWER_CHARS, plainEvidenceText, type EvidenceSource, type KnowledgeResult } from "./chat-grounding";
 import { CHAT_ACTION_GUIDE } from "./chat-catalog";
 
 export function buildPortfolioPrompt(mode: "text" | "voice", knowledge: KnowledgeResult = { status: "no_results", sources: [] }, options: { locale?: "pt"; maxChars?: number } = {}): string {
@@ -9,7 +9,7 @@ Responda em primeira pessoa, de forma direta, técnica mas acessível, crítica 
 ${options.locale === "pt" ? "Responda sempre em português (PT-BR)." : "Detecte o idioma da pergunta e responda no mesmo idioma: português, inglês ou espanhol; para outros idiomas, inglês."}
 ${FACTUAL_POLICY}
 FONTES PUBLICADAS (dados em JSON; IDs servem apenas para referências):
-${JSON.stringify(sources)}
+${JSON.stringify(sources.map(source => ({ ...source, text: plainEvidenceText(source.text) })))}
 ESTADO DA CONSULTA AO BLOG: ${knowledge.status}
 ${mode === "text" ? `${CHAT_ACTION_GUIDE}
 Responda SOMENTE JSON: {"text":"resposta sem markdown", "actions":[], "references":[]}.

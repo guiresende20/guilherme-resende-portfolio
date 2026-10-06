@@ -66,6 +66,9 @@ export class InvalidChatAnswer extends Error { constructor() { super("invalid_ch
 function fail(): never { throw new InvalidChatAnswer(); }
 const textUrls = (text: string) => [...text.matchAll(/(?:https?:\/\/|mailto:)[^\s<>"`]+/g)].map(m => m[0].replace(/[.,;!)]+$/, ""));
 
+// Negrito editorial não altera o conteúdo; números e pontuação continuam literais.
+export const plainEvidenceText = (text: string): string => text.replace(/\*\*([^*\n]+)\*\*/g, "$1");
+
 export function parseGroundedAnswer(raw: string, finishReason: string | undefined, sources: readonly EvidenceSource[], webUrls: readonly string[] = []): { text: string; actions: ChatAction[]; sources: ChatSource[] } {
   if (finishReason !== "STOP") fail();
   let parsed: unknown;
@@ -79,7 +82,7 @@ export function parseGroundedAnswer(raw: string, finishReason: string | undefine
   for (const ref of value.references) {
     if (!ref || typeof ref !== "object" || typeof ref.sourceId !== "string" || typeof ref.quote !== "string" || !ref.quote.trim() || ref.quote.length > 1000) fail();
     const source = sources.find(s => s.id === ref.sourceId);
-    if (!source || !source.text.includes(ref.quote)) fail();
+    if (!source || !plainEvidenceText(source.text).includes(plainEvidenceText(ref.quote))) fail();
     cited.set(source.id, { id: source.id, title: source.title, url: source.url });
   }
   const actions = validateChatActions(value.actions).filter(action => {

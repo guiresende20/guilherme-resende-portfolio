@@ -92,7 +92,7 @@ export const PORTFOLIO_SOURCES: readonly EvidenceSource[] = [
     "id": "profile:14",
     "title": "PORTOBELLO: APLICATIVO DE IA PARA ARQUITETURA",
     "text": "## EXPERIÊNCIA PROFISSIONAL\nPORTOBELLO: APLICATIVO DE IA PARA ARQUITETURA\nDesenvolvi com IA um aplicativo para uma palestra a pedido da Portobello.\nO aplicativo entrevista potenciais clientes de arquitetos para entender seus gostos pessoais e suas preferências para uma reforma.\nFluxo: o usuário tira uma foto do ambiente que quer reformar e responde a uma série de perguntas sobre seus gostos pessoais. A IA cruza essas respostas com o estilo do arquiteto e cria imagens de como o ambiente poderia ficar.\nO projeto conecta entrevista com clientes, arquitetura e geração de imagens com inteligência artificial.\nAplicativo: https://portobello-20260718.web.app/",
-    "url": "#experiencia"
+    "url": "#projetos"
   },
   {
     "id": "profile:15",
