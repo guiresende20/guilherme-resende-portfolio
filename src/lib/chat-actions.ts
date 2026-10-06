@@ -46,7 +46,7 @@ function validateOne(raw: unknown): ChatAction | null {
 
   switch (a.type) {
     case "link":
-      return isHttpsHost(a.url, null)
+      return (isHttpsHost(a.url, null) || (typeof a.url === "string" && /^\/blog\/[a-zA-Z0-9_-]+$/.test(a.url)))
         ? { type: "link", label, url: a.url as string }
         : null;
 

@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, type SingleRequestOptions } from "@google/generative-ai";
 
 export const EMBEDDING_MODEL = "gemini-embedding-001";
 export const EMBEDDING_DIM = 768;
@@ -30,19 +30,20 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-export async function embedText(text: string): Promise<number[]> {
+export async function embedText(text: string, options: SingleRequestOptions = {}): Promise<number[]> {
   const model = getClient().getGenerativeModel({ model: EMBEDDING_MODEL });
   const request = {
     content: { role: "user", parts: [{ text }] },
     ...DIM_CONFIG,
   } as Parameters<typeof model.embedContent>[0];
   try {
-    const result = await model.embedContent(request);
+    const result = await model.embedContent(request, options);
     return result.embedding.values;
   } catch (err) {
-    if (!isRetryable(err)) throw err;
+    if (options.signal?.aborted || !isRetryable(err)) throw err;
     await sleep(500);
-    const result = await model.embedContent(request);
+    if (options.signal?.aborted) throw err;
+    const result = await model.embedContent(request, options);
     return result.embedding.values;
   }
 }

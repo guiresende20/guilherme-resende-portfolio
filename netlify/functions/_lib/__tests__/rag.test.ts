@@ -98,3 +98,22 @@ describe("retrieveRelevantChunks", () => {
     expect(embedTextMock).not.toHaveBeenCalled();
   });
 });
+
+describe("retrieveKnowledge", () => {
+  it("distingue falha de embedding de nenhum resultado", async () => {
+    const { retrieveKnowledge } = await import("../rag");
+    embedTextMock.mockRejectedValue(new Error("api down"));
+    expect(await retrieveKnowledge("Aula 360")).toEqual({ status: "error", sources: [] });
+    embedTextMock.mockResolvedValue([1, 0]);
+    searchSimilarMock.mockResolvedValue([]);
+    expect(await retrieveKnowledge("Aula 360")).toEqual({ status: "no_results", sources: [] });
+  });
+  it("mantém título, ID, link e texto disponíveis para citar", async () => {
+    const { retrieveKnowledge } = await import("../rag");
+    embedTextMock.mockResolvedValue([1, 0]);
+    searchSimilarMock.mockResolvedValue([{ slug: "aula", chunkIdx: 3, text: "Fonte literal.", sourceTitle: "Aula", headingPath: "Teste", score: .9 }]);
+    const result = await retrieveKnowledge("Aula");
+    expect(result.status).toBe("ok");
+    expect(result.sources).toEqual([{ id: "blog:aula:3", title: "Aula — Teste", url: "/blog/aula", text: "Fonte literal." }]);
+  });
+});

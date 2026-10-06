@@ -56,6 +56,21 @@ describe("cosineSimilarity", () => {
 });
 
 describe("loadIndex", () => {
+  it("renova índice após o prazo para enxergar atualizações de outra instância", async () => {
+    const { loadIndex } = await import("../vector-store");
+    const clock = vi.spyOn(Date, "now").mockReturnValue(1000);
+    blobStore.set("embeddings/posts-index.json", { chunks: [] });
+    await loadIndex();
+    blobStore.set("embeddings/posts-index.json", { chunks: [{ slug: "novo", text: "Nova fonte" }] });
+    clock.mockReturnValue(62000);
+    expect((await loadIndex()).chunks[0].slug).toBe("novo");
+    clock.mockRestore();
+  });
+  it("propaga erro de armazenamento no modo estrito para não confundir com ausência", async () => {
+    const { loadIndex } = await import("../vector-store");
+    getMock.mockRejectedValue(new Error("offline"));
+    await expect(loadIndex({ strict: true })).rejects.toThrow();
+  });
   it("returns empty chunks when blob missing", async () => {
     const { loadIndex } = await import("../vector-store");
     const idx = await loadIndex();

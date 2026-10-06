@@ -1,4 +1,5 @@
 // Variante do Gemini Live para o /aerolito:
+import { KNOWLEDGE_TOOLS, answerKnowledgeCalls } from "./voice-knowledge";
 // - Input via texto (não via mic)
 // - Output: áudio + transcrição (outputTranscription)
 // - Sync typing: cada chunk de transcrição vira evento; consumer atualiza UI char-by-char
@@ -67,12 +68,14 @@ export class AerolitoLiveChat {
               },
               systemInstruction: { parts: [{ text: this.systemInstruction }] },
               outputAudioTranscription: {},
+              tools: KNOWLEDGE_TOOLS,
             },
           };
           this.ws?.send(JSON.stringify(setup));
         };
 
         this.ws.onmessage = async (event) => {
+          const connection = this.ws;
           let msg: unknown;
           try {
             const text = event.data instanceof Blob ? await event.data.text() : (event.data as string);
@@ -81,7 +84,7 @@ export class AerolitoLiveChat {
             console.error("aerolito-live: parse failed", e);
             return;
           }
-          this.handleMessage(msg);
+          if (connection && this.ws === connection && connection.readyState === WebSocket.OPEN) this.handleMessage(msg);
         };
 
         this.ws.onerror = (e) => {
@@ -128,6 +131,17 @@ export class AerolitoLiveChat {
       this.setupResolve?.();
       this.setupResolve = null;
       this.setupReject = null;
+      return;
+    }
+
+    const toolCall = obj.toolCall as { functionCalls?: unknown } | undefined;
+    if (toolCall?.functionCalls) {
+      const connection = this.ws;
+      void answerKnowledgeCalls(toolCall.functionCalls).then(functionResponses => {
+        if (connection && this.ws === connection && connection.readyState === WebSocket.OPEN) {
+          connection.send(JSON.stringify({ toolResponse: { functionResponses } }));
+        }
+      });
       return;
     }
 

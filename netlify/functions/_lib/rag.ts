@@ -1,5 +1,6 @@
 import { chunk as chunkMarkdown } from "./chunker";
 import { embedBatch, embedText } from "./embeddings";
+import type { KnowledgeResult } from "../../../src/lib/chat-grounding";
 import {
   removePost,
   replacePostChunks,
@@ -48,23 +49,24 @@ export async function indexPost(
   return { chunks: stored.length };
 }
 
-export async function retrieveRelevantChunks(query: string): Promise<string> {
+export async function retrieveKnowledge(query: string, signal?: AbortSignal): Promise<KnowledgeResult> {
   const start = Date.now();
   const trimmed = (query ?? "").trim();
-  if (!trimmed) return "";
+  if (!trimmed) return { status: "no_results", sources: [] };
   let queryVec: number[];
   try {
-    queryVec = await embedText(trimmed);
+    queryVec = await embedText(trimmed, { signal, timeout: 4500 });
   } catch (err) {
-    console.error("rag.retrieveRelevantChunks: degraded reason=embeddings_failed", err);
-    return "";
+    console.error("rag: embeddings_failed");
+    return { status: "error", sources: [] };
   }
   let hits;
+  if (signal?.aborted) return { status: "timeout", sources: [] };
   try {
-    hits = await searchSimilar(queryVec, { k: TOP_K, threshold: THRESHOLD, maxPerPost: MAX_PER_POST });
+    hits = await searchSimilar(queryVec, { k: TOP_K, threshold: THRESHOLD, maxPerPost: MAX_PER_POST, strict: true });
   } catch (err) {
-    console.error("rag.retrieveRelevantChunks: degraded reason=store_failed", err);
-    return "";
+    console.error("rag: store_failed");
+    return { status: "error", sources: [] };
   }
   if (hits.length === 0) {
     let bestBelow = 0;
@@ -77,13 +79,22 @@ export async function retrieveRelevantChunks(query: string): Promise<string> {
     console.log(
       `rag.retrieveRelevantChunks: hits=0 bestBelowThreshold=${bestBelow.toFixed(3)} threshold=${THRESHOLD} elapsedMs=${Date.now() - start}`,
     );
-    return "";
+    return { status: "no_results", sources: [] };
   }
-  const body = hits
-    .map((h) => `[${h.sourceTitle} — ${h.headingPath}] (/blog/${h.slug})\n${h.text}`)
-    .join(RAG_SEPARATOR);
   console.log(
     `rag.retrieveRelevantChunks: hits=${hits.length} topScore=${hits[0].score.toFixed(2)} elapsedMs=${Date.now() - start}`,
   );
-  return RAG_HEADER + body + "\n";
+  const sources = hits.filter(h => typeof h.slug === "string" && /^[a-zA-Z0-9_-]+$/.test(h.slug) && typeof h.text === "string" && h.text.trim()).map((h, i) => ({
+    id: `blog:${h.slug}:${h.chunkIdx ?? i}`,
+    title: `${h.sourceTitle}${h.headingPath ? ` — ${h.headingPath}` : ""}`.slice(0, 250),
+    text: h.text.slice(0, 6000), url: `/blog/${h.slug}`,
+  }));
+  return { status: sources.length ? "ok" : "no_results", sources };
+}
+
+// Compatibilidade com os consumidores anteriores; o chat novo usa o resultado tipado.
+export async function retrieveRelevantChunks(query: string): Promise<string> {
+  const result = await retrieveKnowledge(query);
+  if (result.status !== "ok") return "";
+  return RAG_HEADER + result.sources.map(s => `[${s.title}] (${s.url})\n${s.text}`).join(RAG_SEPARATOR) + "\n";
 }

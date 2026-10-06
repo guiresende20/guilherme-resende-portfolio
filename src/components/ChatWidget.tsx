@@ -3,13 +3,14 @@ import { useTranslation } from "react-i18next";
 import { sendChatMessage, WELCOME_MESSAGE, type ChatHistory, type ChatAction, type ChatResponse } from "@/lib/gemini";
 import type { CVType } from "@/lib/generateCV";
 import { GeminiLiveChat, type LiveChatStatus } from "@/lib/gemini-live";
-import { SYSTEM_PROMPT } from "@/lib/system-prompt";
+import type { ChatSource } from "@/lib/chat-grounding";
 import { Mic, MicOff } from "lucide-react";
 
 interface Message {
   role: "user" | "model";
   text: string;
   actions?: ChatAction[];
+  sources?: ChatSource[];
   id?: string;
 }
 
@@ -116,6 +117,7 @@ function ActionButton({ action, onVideo }: { action: ChatAction; onVideo: (url: 
 }
 
 function ChatBubble({ msg, isLast, onVideo }: { msg: Message; isLast: boolean; onVideo: (url: string) => void }) {
+  const { t } = useTranslation();
   const isUser = msg.role === "user";
   return (
     <div className={`flex flex-col ${isUser ? "items-end" : "items-start"} mb-4`}>
@@ -138,6 +140,17 @@ function ChatBubble({ msg, isLast, onVideo }: { msg: Message; isLast: boolean; o
       </div>
 
       {/* Action cards */}
+      {!isUser && !!msg.sources?.length && (
+        <div className="max-w-[78%] ml-9 mt-1.5 text-[10px] leading-relaxed text-muted-foreground/80">
+          <span>{t('chat.sources')}: </span>
+          {msg.sources.map((source, i) => (
+            <span key={source.id}>
+              {i > 0 && <span> · </span>}
+              <a href={source.url} target={source.url.startsWith('https:') ? '_blank' : undefined} rel="noopener noreferrer" className="underline underline-offset-2 hover:text-neon break-words">{source.title}</a>
+            </span>
+          ))}
+        </div>
+      )}
       {!isUser && msg.actions && msg.actions.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2 ml-9">
           {msg.actions.map((action, i) => (
@@ -173,8 +186,18 @@ export default function ChatWidget() {
   const [liveStatus, setLiveStatus] = useState<LiveChatStatus>("disconnected");
   const liveChatRef = useRef<GeminiLiveChat | null>(null);
   const historyRef = useRef<ChatHistory[]>([]);
+  const voiceTurnRef = useRef<string | null>(null);
+  const voiceSourcesRef = useRef<ChatSource[]>([]);
+  const voiceSessionRef = useRef(0);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => () => {
+    voiceSessionRef.current++;
+    const live = liveChatRef.current;
+    liveChatRef.current = null;
+    live?.stop();
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => setIsVisible(true), 1500);
@@ -207,23 +230,37 @@ export default function ChatWidget() {
 
   async function toggleLiveAudio() {
     if (liveStatus !== "disconnected") {
-      liveChatRef.current?.stop();
+      voiceSessionRef.current++;
+      const live = liveChatRef.current;
+      liveChatRef.current = null;
+      voiceTurnRef.current = null;
+      voiceSourcesRef.current = [];
+      live?.stop();
+      setLiveStatus("disconnected");
       return;
     }
+    const session = ++voiceSessionRef.current;
+    voiceTurnRef.current = null;
+    voiceSourcesRef.current = [];
+    setLiveStatus("connecting");
 
     // Buscar token efêmero do servidor. A master key (GEMINI_API_KEY) nunca chega no browser;
     // o token retornado é single-use, vive ~30min e só funciona com a Live API v1alpha.
     let token = "";
+    let systemPrompt = "";
     try {
       const resp = await fetch("/api/live-token", { method: "POST" });
       if (!resp.ok) throw new Error(`status ${resp.status}`);
       const data = await resp.json();
       token = data.token;
+      systemPrompt = typeof data.systemPrompt === "string" ? data.systemPrompt : "";
     } catch (e) {
       console.error("Falha ao obter token Live:", e);
     }
 
-    if (!token) {
+    if (session !== voiceSessionRef.current) return;
+    if (!token || !systemPrompt) {
+      setLiveStatus("disconnected");
       setMessages((prev) => [
         ...prev,
         { role: "model", text: t('chat.live_unavailable') },
@@ -232,11 +269,26 @@ export default function ChatWidget() {
     }
 
     const live = new GeminiLiveChat(token, {
-      onStatusChange: (status) => setLiveStatus(status),
-      onTextAction: (text) => {
-        setMessages((prev) => [...prev, { role: "model", text }]);
+      onStatusChange: (status) => {
+        if (session !== voiceSessionRef.current) return;
+        setLiveStatus(status);
+        if (status === "disconnected") { voiceTurnRef.current = null; voiceSourcesRef.current = []; }
       },
+      onTextAction: (text) => {
+        if (session !== voiceSessionRef.current) return;
+        const id = voiceTurnRef.current ?? (voiceTurnRef.current = crypto.randomUUID());
+        const sources = voiceSourcesRef.current;
+        setMessages(prev => {
+          const index = prev.findIndex(m => m.id === id);
+          if (index < 0) return [...prev, { id, role: "model", text, sources }];
+          return prev.map((m, i) => i === index ? { ...m, text: m.text + text, sources } : m);
+        });
+      },
+      onSources: (sources) => { if (session === voiceSessionRef.current) voiceSourcesRef.current = sources; },
       onTurnComplete: (aiText, userText) => {
+        if (session !== voiceSessionRef.current) return;
+        voiceTurnRef.current = null;
+        voiceSourcesRef.current = [];
         fetch("/api/log-voice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -244,9 +296,10 @@ export default function ChatWidget() {
         }).catch(() => { });
       },
       onError: (err) => {
+        if (session !== voiceSessionRef.current) return;
         setMessages((prev) => [...prev, { role: "model", text: err }]);
       },
-    }, SYSTEM_PROMPT);
+    }, systemPrompt);
 
     liveChatRef.current = live;
     await live.start();
@@ -260,18 +313,17 @@ export default function ChatWidget() {
     setInput("");
     setIsLoading(true);
 
-    historyRef.current = [...historyRef.current, { role: "user", parts: [{ text }] }];
-
     try {
       const response: ChatResponse = await sendChatMessage(text, historyRef.current);
 
       setMessages((prev) => [
         ...prev,
-        { role: "model", text: response.text, actions: response.actions },
+        { role: "model", text: response.text, actions: response.actions, sources: response.sources },
       ]);
 
       historyRef.current = [
         ...historyRef.current,
+        { role: "user", parts: [{ text }] },
         { role: "model", parts: [{ text: response.text }] },
       ];
     } catch (err: unknown) {

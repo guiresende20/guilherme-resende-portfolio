@@ -1,4 +1,6 @@
 // src/lib/gemini-live.ts
+import { KNOWLEDGE_TOOLS, answerKnowledgeCalls } from "./voice-knowledge";
+import type { ChatSource } from "./chat-grounding";
 
 // Esta biblioteca gerencia a conexão via WebSocket com a Gemini Multimodal Live API.
 // Ela lida com a captura do microfone, envio de áudio e reprodução da resposta do modelo.
@@ -10,6 +12,7 @@ export interface LiveChatCallbacks {
   onTextAction?: (text: string) => void;
   onTurnComplete?: (aiText: string, userText: string) => void;
   onError?: (error: string) => void;
+  onSources?: (sources: ChatSource[]) => void;
 }
 
 export class GeminiLiveChat {
@@ -65,13 +68,17 @@ export class GeminiLiveChat {
             },
             systemInstruction: {
               parts: [{ text: this.systemInstruction }]
-            }
+            },
+            tools: KNOWLEDGE_TOOLS,
+            inputAudioTranscription: {},
+            outputAudioTranscription: {},
           }
         };
         this.ws?.send(JSON.stringify(setup));
       };
 
       this.ws.onmessage = async (event) => {
+        const connection = this.ws;
         let msg;
         try {
           if (event.data instanceof Blob) {
@@ -85,6 +92,7 @@ export class GeminiLiveChat {
           return;
         }
 
+        if (!connection || this.ws !== connection || connection.readyState !== WebSocket.OPEN) return;
         if (msg.error) {
           this.callbacks.onError?.(`API Error: ${msg.error.message || JSON.stringify(msg.error)}`);
           this.stop();
@@ -97,9 +105,24 @@ export class GeminiLiveChat {
           return;
         }
 
+        if (msg.toolCall?.functionCalls) {
+          const functionResponses = await answerKnowledgeCalls(msg.toolCall.functionCalls);
+          if (connection && this.ws === connection && connection.readyState === WebSocket.OPEN) {
+            this.callbacks.onSources?.(functionResponses.flatMap(r => r.response.sources.map(s => ({ id: s.id, title: s.title, url: s.url }))));
+            connection.send(JSON.stringify({ toolResponse: { functionResponses } }));
+          }
+          return;
+        }
+
         // Transcrição do áudio do usuário
         if (msg.serverContent?.inputTranscription?.text) {
           this.currentUserText += msg.serverContent.inputTranscription.text;
+        }
+
+        if (msg.serverContent?.outputTranscription?.text) {
+          const text = msg.serverContent.outputTranscription.text;
+          this.currentAiText += text;
+          this.callbacks.onTextAction?.(text);
         }
 
         if (msg.serverContent?.interrupted) {
@@ -113,7 +136,7 @@ export class GeminiLiveChat {
           const parts = msg.serverContent.modelTurn.parts;
           for (const part of parts) {
             // Pode retornar texto (transcrição) e áudio
-            if (part.text && this.callbacks.onTextAction) {
+            if (part.text && !msg.serverContent?.outputTranscription && this.callbacks.onTextAction) {
               this.callbacks.onTextAction(part.text);
               this.currentAiText += part.text;
             }

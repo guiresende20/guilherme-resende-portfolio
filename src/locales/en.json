@@ -226,6 +226,7 @@
     "rights": "Guilherme Resende Muniz – All rights reserved."
   },
   "chat": {
+    "sources": "References",
     "welcome": "Hello! I am Guilherme's AI assistant. How can I help you today?",
     "header_name": "Guilherme",
     "header_suffix": "A.I",

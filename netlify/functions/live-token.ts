@@ -1,6 +1,7 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
 import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_lib/security";
 import { checkRateLimits } from "./_lib/ratelimit";
+import { SYSTEM_PROMPT } from "../../src/lib/system-prompt";
 
 // Endpoint que emite token efêmero da Gemini Live API.
 // O token é single-use, vive 30min, e funciona APENAS com Live API v1alpha.
@@ -82,7 +83,7 @@ const handler: Handler = async (event: HandlerEvent) => {
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ token: data.name, expiresAt: expireTime }),
+      body: JSON.stringify({ token: data.name, expiresAt: expireTime, systemPrompt: SYSTEM_PROMPT }),
     };
   } catch (error: unknown) {
     console.error("live-token error:", error);

@@ -28,10 +28,12 @@ export interface SearchOptions {
   k?: number;
   threshold?: number;
   maxPerPost?: number;
+  strict?: boolean;
 }
 
 export interface Hit {
   slug: string;
+  chunkIdx: number;
   text: string;
   headingPath: string;
   sourceTitle: string;
@@ -39,6 +41,8 @@ export interface Hit {
 }
 
 let memCache: IndexFile | null = null;
+let memCacheAt = 0;
+const CACHE_TTL_MS = 60_000;
 
 function safeStore() {
   try {
@@ -51,6 +55,7 @@ function safeStore() {
 
 export function __resetCacheForTests(): void {
   memCache = null;
+  memCacheAt = 0;
 }
 
 export function cosineSimilarity(a: number[], b: number[]): number {
@@ -65,31 +70,34 @@ export function cosineSimilarity(a: number[], b: number[]): number {
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 
-export async function loadIndex(): Promise<IndexFile> {
-  if (memCache) return memCache;
+export async function loadIndex(options: { strict?: boolean } = {}): Promise<IndexFile> {
+  if (memCache && Date.now() - memCacheAt < CACHE_TTL_MS) return memCache;
   const s = safeStore();
   if (!s) {
-    memCache = { chunks: [] };
-    return memCache;
+    if (options.strict) throw new Error("knowledge_store_unavailable");
+    return { chunks: [] };
   }
   let raw: unknown = null;
   try {
     raw = await s.get(INDEX_KEY, { type: "json" });
   } catch (err) {
-    console.error("vector-store.loadIndex: blob read failed", err);
+    if (options.strict) throw new Error("knowledge_store_unavailable");
+    console.error("vector-store.loadIndex: blob read failed");
     return { chunks: [] }; // do NOT cache on failure (avoid poisoning)
   }
-  if (!raw || typeof raw !== "object") {
+  if (raw === null) {
     memCache = { chunks: [] };
+    memCacheAt = Date.now();
     return memCache;
   }
   const candidate = raw as IndexFile;
-  if (!Array.isArray(candidate.chunks)) {
+  if (!raw || typeof raw !== "object" || !Array.isArray(candidate.chunks)) {
+    if (options.strict) throw new Error("knowledge_index_invalid");
     console.error("vector-store.loadIndex: malformed index, ignoring");
-    memCache = { chunks: [] };
-    return memCache;
+    return { chunks: [] };
   }
   memCache = candidate;
+  memCacheAt = Date.now();
   return memCache;
 }
 
@@ -104,6 +112,7 @@ async function saveIndex(index: IndexFile, meta: Partial<MetaFile> = {}): Promis
   };
   await s.setJSON(META_KEY, fullMeta);
   memCache = index;
+  memCacheAt = Date.now();
 }
 
 export async function replacePostChunks(slug: string, chunks: StoredChunk[]): Promise<void> {
@@ -123,12 +132,13 @@ export async function searchSimilar(queryVec: number[], opts: SearchOptions = {}
   const k = opts.k ?? 5;
   const threshold = opts.threshold ?? 0.6;
   const maxPerPost = opts.maxPerPost ?? 2;
-  const idx = await loadIndex();
+  const idx = await loadIndex({ strict: opts.strict });
   if (idx.chunks.length === 0) return [];
   const scored = idx.chunks
     .filter((c) => c.vector.length === queryVec.length)
     .map((c) => ({
       slug: c.slug,
+      chunkIdx: c.chunkIdx,
       text: c.text,
       headingPath: c.headingPath,
       sourceTitle: c.sourceTitle,
