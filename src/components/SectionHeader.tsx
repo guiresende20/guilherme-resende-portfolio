@@ -30,7 +30,7 @@ export default function SectionHeader({ label, title, titleOutline, subtitle, id
     <div
       ref={ref}
       id={id}
-      className="mb-16"
+      className="mb-10 md:mb-12"
       style={{
         opacity: visible ? 1 : 0,
         transform: visible ? "none" : "translateY(40px)",

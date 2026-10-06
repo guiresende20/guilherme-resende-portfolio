@@ -17,7 +17,7 @@ export default function Education() {
   const items = t('education.items', { returnObjects: true }) as EduItem[];
 
   return (
-    <section className="relative py-24 md:py-32 bg-card/30">
+    <section className="relative py-16 md:py-20 bg-card/30">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-30" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader id="formacao" label={t('education.header_label')} title={t('education.header_title')} titleOutline={t('education.header_outline')} />

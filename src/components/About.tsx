@@ -8,7 +8,7 @@ export default function About() {
   const areas = t('about.areas', { returnObjects: true }) as {icon: string, title: string, desc: string, color: string}[];
 
   return (
-    <section className="relative py-24 md:py-32">
+    <section className="relative py-16 md:py-20">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-50" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader id="sobre" label={t('about.header_label')} title={t('about.header_title')} titleOutline={t('about.header_outline')} />

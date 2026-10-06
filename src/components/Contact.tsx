@@ -6,7 +6,7 @@ export default function Contact() {
   const { t } = useTranslation();
 
   return (
-    <section className="relative py-24 md:py-32 bg-card/30">
+    <section className="relative py-16 md:py-20 bg-card/30">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-30" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader

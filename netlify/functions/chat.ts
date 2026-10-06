@@ -333,6 +333,14 @@ Desenvolvimento da interface de configuração em Python e Flask
 Resultados: aplicação capaz de executar comandos como passar slides, controlar volume, fechar programas, tirar prints e acionar atalhos do sistema apenas com gestos das mãos.
 Download para testes (.exe Windows): https://drive.google.com/file/d/1rpL0BNna9_d-OzknEKFjlttSoOtAZL5I/view?usp=sharing
 
+PORTOBELLO: APLICATIVO DE IA PARA ARQUITETURA
+Desenvolvi com IA um aplicativo para uma palestra a pedido da Portobello.
+O aplicativo entrevista potenciais clientes de arquitetos para entender seus gostos pessoais e suas preferências para uma reforma.
+Fluxo: o usuário tira uma foto do ambiente que quer reformar e responde a uma série de perguntas sobre seus gostos pessoais. A IA cruza essas respostas com o estilo do arquiteto e cria imagens de como o ambiente poderia ficar.
+O projeto conecta entrevista com clientes, arquitetura e geração de imagens com inteligência artificial.
+Aplicativo: https://portobello-20260718.web.app/
+Para perguntas sobre este projeto, ofereça uma action do tipo "link" para abrir o aplicativo quando for pertinente.
+
 ## FORMAÇÃO ACADÊMICA
 
 TCC de graduação — Comunicação Social / Publicidade e Propaganda

@@ -50,7 +50,7 @@ export default function Skills() {
   const languages = t('skills.languages', { returnObjects: true }) as Language[];
 
   return (
-    <section className="relative py-24 md:py-32">
+    <section className="relative py-16 md:py-20">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-50" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader label={t('skills.header_label')} title={t('skills.header_title')} titleOutline={t('skills.header_outline')} />

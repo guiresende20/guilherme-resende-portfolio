@@ -33,6 +33,8 @@ interface Project {
   tags: string[];
   link: string | null;
   linkType: "youtube" | "vimeo" | "iframe" | "none";
+  image?: string;
+  imageAlt?: string;
 }
 
 
@@ -89,7 +91,7 @@ export default function Projects() {
   const videos = t('projects.videos', { returnObjects: true }) as {id: string, title: string, desc: string}[];
 
   return (
-    <section className="relative py-24 md:py-32">
+    <section className="relative py-16 md:py-20">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-50" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader id="projetos" label={t('projects.header_label')} title={t('projects.header_title')} titleOutline={t('projects.header_outline')} subtitle={t('projects.header_subtitle')} />
@@ -98,6 +100,9 @@ export default function Projects() {
           {items.map((p, i) => (
             <Reveal key={p.title} delay={i * 0.07}>
               <div className="project-card group bg-card border border-border rounded-md p-6 h-full flex flex-col overflow-hidden hover:border-neon/30 transition-all duration-300">
+                {p.image && (
+                  <img src={p.image} alt={p.imageAlt ?? p.title} width="1440" height="1000" loading="lazy" decoding="async" className="relative z-10 w-full aspect-video object-contain bg-[#fafaf9] rounded-sm border border-border mb-4" />
+                )}
                 <div className="relative z-10 flex items-center justify-between mb-3">
                   <span className="font-mono text-[10px] text-neon uppercase tracking-[0.1em] border border-neon/25 px-2.5 py-1">{p.type}</span>
                 </div>

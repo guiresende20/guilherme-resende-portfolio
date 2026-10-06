@@ -42,7 +42,7 @@ export default function Experience() {
   const allJobs: Job[] = aerolitoJob ? [aerolitoJob, ...jobs] : jobs;
 
   return (
-    <section className="relative py-24 md:py-32 bg-card/30">
+    <section className="relative py-16 md:py-20 bg-card/30">
       <div className="absolute inset-0 bg-grid pointer-events-none opacity-30" />
       <div className="relative z-10 max-w-[1400px] mx-auto px-6 md:px-12">
         <SectionHeader id="experiencia" label={t("experience.header_label")} title={t("experience.header_title")} titleOutline={t("experience.header_outline")} />
