@@ -62,9 +62,9 @@
 ## Tarefa 4: revisão, publicação e smoke
 
 - [x] Executar suíte completa, build e revisão independente; corrigir falhas relevantes com regressão.
-- [ ] Testar a interface com respostas controladas e registrar um pequeno smoke real em produção após publicação.
-- [ ] Commit, push de `main`, acompanhar Netlify e confirmar o SHA publicado.
-- [ ] Conferir Portobello, cargo atual, limite de evidência e busca web; a amostra confirma funcionamento, não uma certificação universal.
+- [x] Testar a interface com respostas controladas e registrar um pequeno smoke real em produção após publicação.
+- [x] Commit, push de `main`, acompanhar Netlify e confirmar o SHA publicado.
+- [x] Conferir Portobello, cargo atual, limite de evidência e busca web; a amostra confirma funcionamento, não uma certificação universal.
 
 ## Registro de execução
 
@@ -80,3 +80,13 @@ Pre-flight: fontes e contratos são compartilhados entre tarefas 1/2/3; manter n
 - A pesquisa externa não exige JSON do provedor: o servidor monta o envelope e valida o texto. A resposta é bloqueada se o Gemini não retornar fontes nos metadados; isso ocorreu na amostra real, inclusive com resposta simples, e os resultados não foram entregues como verificados. Não há segunda geração automática.
 - Segunda revisão independente: consultas explícitas ao blog/projetos continuam usando a evidência local; o roteamento externo preserva pedidos explícitos de web. A guarda de contrato distingue lacunas de informação de negações sobre o contrato em si. Controles positivos e negativos adicionados antes da correção. As guardas de conteúdo são restritas e heurísticas, não verificação semântica universal.
 - Validação final antes do último deploy: 37 arquivos / 266 testes aprovados; build aprovado. A voz já concluiu duas consultas reais ao blog, com ferramenta, áudio e transcrição.
+
+## Confirmação em produção
+
+- Código publicado: `05b74f4b0b71d631355702e47c5e9c4622436acd`; deploy Netlify `6ac5216f64990900082b3312`, estado ready, publicado em 06/10/2026 às 16:28:14 UTC.
+- Site: https://guiresende20.netlify.app/.
+- Amostra real final: Portobello, continuidade, cargo atual, doutorado e preço/contrato retornaram HTTP 200 com referências válidas. Continuidade reconheceu que a data exata da palestra não estava confirmada; preço/contrato reconheceu a lacuna sem afirmar inexistência.
+- Pesquisa externa: HTTP 502, sem expor resposta do modelo; o provedor não retornou fontes verificáveis. Esse bloqueio é esperado e a disponibilidade de pesquisas externas com metadados permanece uma limitação operacional observada.
+- Consulta ao blog: HTTP 200, status ok, cinco fontes. Voz: setup aceito, uma chamada buscar_conhecimento respondida, 71 blocos de áudio e transcrição concluída, sem usar microfone real no smoke de protocolo.
+- Interface validada em desktop e celular; regressão de nova sessão de voz cobre isolamento de texto/fontes e descarte de callbacks antigos.
+- Resultado: 266 testes aprovados em 37 arquivos; build aprovado. A amostra demonstra funcionamento e barreiras específicas; não certifica a veracidade universal das respostas. Verificador generativo experimental não ativado.
