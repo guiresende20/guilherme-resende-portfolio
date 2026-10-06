@@ -5,7 +5,7 @@ import { corsHeaders, getClientIp, getRequestOrigin, isOriginAllowed } from "./_
 import { checkRateLimits } from "./_lib/ratelimit";
 import { ensureBlobsContext } from "./_lib/blobs-context";
 import { retrieveChatKnowledge } from "./_lib/chat-knowledge";
-import { buildPortfolioPrompt } from "../../src/lib/chat-prompt";
+import { buildPortfolioPrompt, buildWebSearchPrompt } from "../../src/lib/chat-prompt";
 import { PORTFOLIO_SOURCES, PORTFOLIO_KNOWLEDGE_VERSION } from "../../src/lib/portfolio-knowledge";
 import { normalizeHistory, buildRetrievalQuery, shouldSearchWeb, parseGroundedAnswer, InvalidChatAnswer, type ChatSource } from "../../src/lib/chat-grounding";
 
@@ -51,9 +51,9 @@ const handler: Handler = async (event: HandlerEvent) => {
     const search = shouldSearchWeb(message);
     const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
       model: "gemini-3.1-flash-lite",
-      systemInstruction: buildPortfolioPrompt("text", knowledge),
+      systemInstruction: search ? buildWebSearchPrompt() : buildPortfolioPrompt("text", knowledge),
       ...(search ? { tools: [{ googleSearch: {} } as unknown as Tool] } : {}),
-      generationConfig: { temperature: .2, maxOutputTokens: 3500, responseMimeType: "application/json", responseSchema: RESPONSE_SCHEMA },
+      generationConfig: { temperature: .2, maxOutputTokens: 3500, ...(!search ? { responseMimeType: "application/json", responseSchema: RESPONSE_SCHEMA } : {}) },
     });
     const chat = model.startChat({ history });
     const result = await chat.sendMessage(message, { timeout: 15_000 });
@@ -65,7 +65,8 @@ const handler: Handler = async (event: HandlerEvent) => {
       return [{ id: `web:${i}`, title: (web.title || new URL(web.uri).hostname).slice(0, 250), url: web.uri }];
     }).slice(0, 5) : [];
     if (search && !webSources.length) throw new InvalidChatAnswer();
-    const response = parseGroundedAnswer(result.response.text(), candidate?.finishReason, [...PORTFOLIO_SOURCES, ...knowledge.sources], webSources.map(s => s.url));
+    const raw = search ? JSON.stringify({ text: result.response.text(), actions: [], references: [] }) : result.response.text();
+    const response = parseGroundedAnswer(raw, candidate?.finishReason, [...PORTFOLIO_SOURCES, ...knowledge.sources], webSources.map(s => s.url));
     response.sources = [...response.sources, ...webSources].slice(0, 8);
     console.info("chat: response", { knowledge: knowledge.status, sources: knowledge.sources.length, search, elapsedMs: Date.now() - started });
     const supabaseUrl = process.env.SUPABASE_URL;

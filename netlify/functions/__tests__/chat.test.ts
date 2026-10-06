@@ -46,9 +46,11 @@ describe("barreiras de entrega do chat", () => {
     expect((await call({ message: "Pesquise as notícias mais recentes sobre IA" }))?.statusCode).toBe(502);
   });
   it("associa à busca externa somente os metadados retornados pelo Google", async () => {
-    mocks.send.mockResolvedValue({ response: { text: () => JSON.stringify({ text: "Resultado da pesquisa.", actions: [], references: [] }), candidates: [{ finishReason: "STOP", groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.com/noticia", title: "Notícia consultada" } }] } }] } });
+    mocks.send.mockResolvedValue({ response: { text: () => "Resultado da pesquisa.", candidates: [{ finishReason: "STOP", groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.com/noticia", title: "Notícia consultada" } }] } }] } });
     const result = await call({ message: "Pesquise as notícias mais recentes sobre IA" });
     expect(result?.statusCode).toBe(200);
+    expect(JSON.parse(result!.body!).text).toBe("Resultado da pesquisa.");
     expect(JSON.parse(result!.body!).sources).toEqual([{ id: "web:0", title: "Notícia consultada", url: "https://example.com/noticia" }]);
+    expect(mocks.model.mock.calls[0][0].generationConfig.responseMimeType).toBeUndefined();
   });
 });
