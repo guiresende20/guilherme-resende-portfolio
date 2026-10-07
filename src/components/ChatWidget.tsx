@@ -140,17 +140,6 @@ function ChatBubble({ msg, isLast, onVideo }: { msg: Message; isLast: boolean; o
       </div>
 
       {/* Action cards */}
-      {!isUser && !!msg.sources?.length && (
-        <div className="max-w-[78%] ml-9 mt-1.5 text-[10px] leading-relaxed text-muted-foreground/80">
-          <span>{t('chat.sources')}: </span>
-          {msg.sources.map((source, i) => (
-            <span key={source.id}>
-              {i > 0 && <span> · </span>}
-              <a href={source.url} target={source.url.startsWith('https:') ? '_blank' : undefined} rel="noopener noreferrer" className="underline underline-offset-2 hover:text-neon break-words">{source.title}</a>
-            </span>
-          ))}
-        </div>
-      )}
       {!isUser && msg.actions && msg.actions.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2 ml-9">
           {msg.actions.map((action, i) => (

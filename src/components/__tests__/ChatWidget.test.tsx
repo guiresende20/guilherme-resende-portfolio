@@ -24,5 +24,4 @@ it("nova sessão de voz cria outro balão e ignora callbacks da sessão anterior
   expect(screen.getByText("Nova resposta.", { exact: true })).toBeInTheDocument();
   expect(screen.getByText("Resposta antiga.", { exact: true })).toBeInTheDocument();
   expect(screen.queryByText(/Texto atrasado/)).not.toBeInTheDocument();
-  expect(screen.getAllByRole("link", { name: "Fonte antiga" })).toHaveLength(1);
 });
