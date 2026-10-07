@@ -118,7 +118,6 @@ async function actionConsolidate(supabaseUrl: string, supabaseKey: string): Prom
   const model = genAI.getGenerativeModel({
     model: "gemini-3.1-flash-lite",
     generationConfig: {
-      temperature: 0.3,
       maxOutputTokens: 1200,
       responseMimeType: "application/json",
     },

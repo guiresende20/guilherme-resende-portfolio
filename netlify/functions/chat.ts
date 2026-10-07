@@ -53,7 +53,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       model: "gemini-3.1-flash-lite",
       systemInstruction: search ? buildWebSearchPrompt() : buildPortfolioPrompt("text", knowledge),
       ...(search ? { tools: [{ googleSearch: {} } as unknown as Tool] } : {}),
-      generationConfig: { temperature: .2, maxOutputTokens: 3500, ...(!search ? { responseMimeType: "application/json", responseSchema: RESPONSE_SCHEMA } : {}) },
+      generationConfig: { maxOutputTokens: 3500, ...(!search ? { responseMimeType: "application/json", responseSchema: RESPONSE_SCHEMA } : {}) },
     });
     const chat = model.startChat({ history });
     const result = await chat.sendMessage(message, { timeout: 15_000 });

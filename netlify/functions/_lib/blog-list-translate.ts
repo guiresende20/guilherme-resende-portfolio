@@ -42,7 +42,6 @@ export async function translateTitles(
     const model = genAI.getGenerativeModel({
       model: "gemini-3.1-flash-lite",
       generationConfig: {
-        temperature: 0.3,
         responseMimeType: "application/json",
       },
     });
