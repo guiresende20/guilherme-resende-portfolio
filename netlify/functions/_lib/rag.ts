@@ -1,6 +1,7 @@
 import { chunk as chunkMarkdown } from "./chunker";
 import { embedBatch, embedText } from "./embeddings";
 import type { KnowledgeResult } from "../../../src/lib/chat-grounding";
+import { blogKnowledgeText } from "../../../src/lib/blog/knowledge-text";
 import {
   removePost,
   replacePostChunks,
@@ -22,7 +23,7 @@ export async function indexPost(
   sourceTitle: string,
 ): Promise<{ chunks: number }> {
   const start = Date.now();
-  const trimmed = (body ?? "").trim();
+  const trimmed = blogKnowledgeText(body ?? "");
   if (!trimmed) {
     await removePost(slug);
     return { chunks: 0 };
@@ -87,8 +88,8 @@ export async function retrieveKnowledge(query: string, signal?: AbortSignal): Pr
   const sources = hits.filter(h => typeof h.slug === "string" && /^[a-zA-Z0-9_-]+$/.test(h.slug) && typeof h.text === "string" && h.text.trim()).map((h, i) => ({
     id: `blog:${h.slug}:${h.chunkIdx ?? i}`,
     title: `${h.sourceTitle}${h.headingPath ? ` — ${h.headingPath}` : ""}`.slice(0, 250),
-    text: h.text.slice(0, 6000), url: `/blog/${h.slug}`,
-  }));
+    text: blogKnowledgeText(h.text).slice(0, 6000), url: `/blog/${h.slug}`,
+  })).filter(source => source.text.trim());
   return { status: sources.length ? "ok" : "no_results", sources };
 }
 

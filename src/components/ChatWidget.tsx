@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { sendChatMessage, WELCOME_MESSAGE, type ChatHistory, type ChatAction, type ChatResponse } from "@/lib/gemini";
+import { sendChatMessage, WELCOME_MESSAGE, ChatRequestError, type ChatHistory, type ChatAction, type ChatResponse } from "@/lib/gemini";
 import type { CVType } from "@/lib/generateCV";
 import { GeminiLiveChat, type LiveChatStatus } from "@/lib/gemini-live";
 import type { ChatSource } from "@/lib/chat-grounding";
@@ -317,7 +317,9 @@ export default function ChatWidget() {
       ];
     } catch (err: unknown) {
       const errText =
-        err instanceof Error && err.message.toLowerCase().includes("quota")
+        err instanceof ChatRequestError
+          ? err.message
+          : err instanceof Error && err.message.toLowerCase().includes("quota")
           ? "Limite de uso atingido no momento. Entre em contato diretamente!"
           : "Ops, algo deu errado. Tente novamente em breve.";
       setMessages((prev) => [

@@ -1,8 +1,8 @@
 import type { Handler } from "@netlify/functions";
 import { deleteCached, deleteByPrefix } from "./_lib/blob-cache";
-import { listFolder, downloadText, type DriveFile } from "./_lib/drive";
+import { listFolder, type DriveFile } from "./_lib/drive";
 import { resolveBlogFolders } from "./_lib/blog-folders";
-import { parsePost } from "../../src/lib/blog/frontmatter";
+import { fetchAndParse, isBlogPostSource } from "./_lib/blog-source";
 import { indexPost, removePost as ragRemovePost } from "./_lib/rag";
 import { ensureBlobsContext } from "./_lib/blobs-context";
 
@@ -10,20 +10,16 @@ export function keysToInvalidateForSlug(slug: string): string[] {
   return [
     "posts/list",
     `posts/${slug}`,
-    "posts/prompt-summary", // chatbot summary uses same source
+    "posts/prompt-summary", // invalidate legacy cache too
     "posts/list/translation/en",
     "posts/list/translation/es",
   ];
 }
 
-async function listMdFiles(): Promise<DriveFile[]> {
+async function listPostFiles(): Promise<DriveFile[]> {
   const folders = await resolveBlogFolders();
   const files = await listFolder(folders.rootId);
-  return files.filter((f) => {
-    if (!f.name.endsWith(".md")) return false;
-    if (f.mimeType.startsWith("application/vnd.google-apps.")) return false;
-    return true;
-  });
+  return files.filter(isBlogPostSource);
 }
 
 async function reindexSlug(slug: string): Promise<
@@ -31,10 +27,9 @@ async function reindexSlug(slug: string): Promise<
   | { indexed: false; removed: true }
   | { indexed: false; error: string }
 > {
-  const mdFiles = await listMdFiles();
-  for (const f of mdFiles) {
-    const raw = await downloadText(f.id);
-    const { meta, body } = parsePost(raw, f.name);
+  const files = await listPostFiles();
+  for (const f of files) {
+    const { meta, body } = await fetchAndParse(f, { withImages: false });
     if (meta.slug !== slug) continue;
     if (meta.draft) {
       await ragRemovePost(slug);
@@ -75,12 +70,11 @@ export const handler: Handler = async (event) => {
     let indexed = 0;
     let failed = 0;
     try {
-      const mdFiles = await listMdFiles();
-      for (const f of mdFiles) {
+      const files = await listPostFiles();
+      for (const f of files) {
         try {
-          const raw = await downloadText(f.id);
-          const { meta, body } = parsePost(raw, f.name);
-          if (meta.draft) continue;
+          const { meta, body } = await fetchAndParse(f, { withImages: false });
+          if (meta.draft) { await ragRemovePost(meta.slug); continue; }
           await indexPost(meta.slug, body, meta.title);
           indexed += 1;
         } catch (err) {

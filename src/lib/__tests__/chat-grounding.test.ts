@@ -6,6 +6,28 @@ const source = { id: "blog:aula:0", title: "Aula 360", text: "O protótipo foi a
 const answer = (overrides = {}) => JSON.stringify({ text: "O protótipo foi apresentado em 2015.", actions: [], references: [{ sourceId: source.id, quote: source.text }], ...overrides });
 
 describe("contexto e evidência do chat", () => {
+  it.each(["Sim, a publicação alimenta automaticamente o RAG.", "Não. A publicação no blog não alimenta automaticamente o RAG.", "A atualização automática do RAG está ativa.", "A automação do índice está ativa."])("não transforma automação não confirmada em certeza: %s", text => {
+    const runtime = { id: "chat:runtime", title: "Funcionamento atual", url: "#blog", text: "Não tenho confirmação de que o agendamento esteja ativo." };
+    const raw = JSON.stringify({ text, actions: [], references: [{ sourceId: runtime.id, quote: runtime.text }] });
+    expect(() => parseGroundedAnswer(raw, "STOP", [runtime])).toThrow();
+  });
+  it("preserva a incerteza sobre atualização automática", () => {
+    const runtime = { id: "chat:runtime", title: "Funcionamento atual", url: "#blog", text: "Não tenho confirmação de que o agendamento esteja ativo." };
+    const text = "Não tenho confirmação de que a publicação atualize automaticamente o RAG.";
+    expect(parseGroundedAnswer(JSON.stringify({ text, actions: [], references: [{ sourceId: runtime.id, quote: runtime.text }] }), "STOP", [runtime]).text).toBe(text);
+  });
+  it.each(["Sim, consigo consultar os posts. Não tenho confirmação de que publicar atualize automaticamente o RAG.", "I can't verify whether posting automatically updates the RAG."])("aceita incerteza sem confundir o assunto de outra afirmação: %s", text => {
+    const runtime = { id: "chat:runtime", title: "Funcionamento atual", url: "#blog", text: "Não tenho confirmação de que o agendamento esteja ativo." };
+    expect(parseGroundedAnswer(JSON.stringify({ text, actions: [], references: [{ sourceId: runtime.id, quote: runtime.text }] }), "STOP", [runtime]).text).toBe(text);
+  });
+  it.each(["your latest post", "último artigo", "tu última publicación"])("mantém recência do blog na consulta local: %s", message => {
+    expect(shouldSearchWeb(message)).toBe(false);
+  });
+  it("identifica o motivo de rejeição de uma citação", () => {
+    try { parseGroundedAnswer(answer({ references: [{ sourceId: source.id, quote: "Foi em 2014." }] }), "STOP", [source]); }
+    catch (error) { expect(error).toMatchObject({ code: "quote_mismatch" }); return; }
+    throw new Error("A citação inválida deveria ter sido rejeitada");
+  });
   it.each(["Procure no blog o que escrevi sobre IA", "Pesquise sobre meu projeto Portobello"])("preserva as fontes locais para %s", message => {
     expect(shouldSearchWeb(message)).toBe(false);
   });

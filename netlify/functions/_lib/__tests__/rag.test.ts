@@ -27,6 +27,14 @@ beforeEach(() => {
 });
 
 describe("indexPost", () => {
+  it("exclui imagens base64 dos embeddings e do índice", async () => {
+    const { indexPost } = await import("../rag");
+    embedBatchMock.mockImplementation(async (texts: string[]) => texts.map(() => [1, 0]));
+    await indexPost("image", "Texto publicado.\n\n![][image1]\n\n[image1]: <data:image/jpeg;base64,/9j/" + "AAAA".repeat(3000) + ">", "Imagem");
+    expect(embedBatchMock.mock.calls[0][0].join(" ")).not.toContain("data:image");
+    expect(replacePostChunksMock.mock.calls[0][1].map((c: { text: string }) => c.text).join(" ")).toContain("Texto publicado.");
+    expect(replacePostChunksMock.mock.calls[0][1].map((c: { text: string }) => c.text).join(" ")).not.toContain("base64");
+  });
   it("chunks, embeds, and stores", async () => {
     const { indexPost } = await import("../rag");
     // Return one 8-dim vector per input text (matches chunker output length)
@@ -100,6 +108,14 @@ describe("retrieveRelevantChunks", () => {
 });
 
 describe("retrieveKnowledge", () => {
+  it("limpa imagens de índices antigos antes de limitar o contexto", async () => {
+    const { retrieveKnowledge } = await import("../rag");
+    embedTextMock.mockResolvedValue([1, 0]);
+    searchSimilarMock.mockResolvedValue([{ slug: "a", chunkIdx: 0, text: "[image1]: <data:image/jpeg;base64,/9j/" + "AAAA".repeat(3000) + ">\n\nTexto depois da imagem.", sourceTitle: "A", headingPath: "", score: .9 }]);
+    const result = await retrieveKnowledge("post");
+    expect(result.sources[0].text).toContain("Texto depois da imagem.");
+    expect(result.sources[0].text).not.toContain("data:image");
+  });
   it("distingue falha de embedding de nenhum resultado", async () => {
     const { retrieveKnowledge } = await import("../rag");
     embedTextMock.mockRejectedValue(new Error("api down"));

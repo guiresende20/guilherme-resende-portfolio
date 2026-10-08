@@ -35,6 +35,10 @@ export interface ChatResponse {
   sources?: ChatSource[];
 }
 
+export class ChatRequestError extends Error {
+  constructor(message: string, public readonly status: number) { super(message); }
+}
+
 /**
  * Envia uma mensagem para a Netlify Function que faz proxy seguro da Gemini API.
  */
@@ -51,7 +55,9 @@ export async function sendChatMessage(
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
-    throw new Error(err.error || `Erro ${response.status}`);
+    const message = typeof err.error === "string" && err.error.trim() && err.error.length <= 500
+      ? err.error : "Chat temporariamente indisponível. Tente novamente em instantes.";
+    throw new ChatRequestError(message, response.status);
   }
 
   const data = await response.json();

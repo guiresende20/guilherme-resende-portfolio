@@ -60,45 +60,98 @@ export function buildRetrievalQuery(history: readonly ChatHistory[], message: st
   return query;
 }
 
+export function isLatestBlogQuery(message: string): boolean {
+  const normalized = message.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  return /\b(?:posts?|blog|artigos?|articulos?|articles?|publicacao|publicacion|publication)\b/.test(normalized) &&
+    /\b(?:ultim[oa]s?|mais\s+recente|latest|most\s+recent|newest|mas\s+reciente)\b/.test(normalized);
+}
+
+export function isChatRuntimeQuery(message: string): boolean {
+  const normalized = message.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  // A title can contain "prompt", "memória" or "RAG". Explicit requests
+  // about an article must still retrieve its content and historical account.
+  const article = /\b(?:posts?|artigos?|articulos?|articles?)\b/.test(normalized);
+  if (article && (/\b(?:resum\w*|summari[sz]\w*)\b/.test(normalized) ||
+      /\b(?:post|artigo|articulo|article)\s+(?:sobre\b|about\b|da\b|do\b|de\b|["'“‘])/.test(normalized) ||
+      /\b(?:no|nesse|neste|naquele|in|en)\s+(?:(?:seu|teu|your|tu)\s+)?(?:post|artigo|articulo|article)\b/.test(normalized))) return false;
+  return /\b(?:vc|voce|seu|sua|teu|tua|your|you|tu|tus|usted)\b|\b(?:este|esse|this)\s+(?:chat|assistente|assistant)\b/.test(normalized) &&
+    /\b(?:rag|blog|posts?|chat|assistente|assistant|memoria|memory)\b/.test(normalized) &&
+    /\b(?:acess\w*|access\w*|acced\w*|acceso|aliment\w*|automat\w*|atualiz\w*|updat\w*|index\w*|memoria|memory|prompt)\b/.test(normalized);
+}
+
 export function shouldSearchWeb(message: string): boolean {
   const requested = /\b(not[ií]cias?|news|latest|atualidades)\b|(?:novidades|informa[cç][oõ]es|dados|acontecimentos)\s+(?:mais\s+)?recentes|(?:busque|pesquise|procure|search|look up)\b/i.test(message);
   if (!requested) return false;
   if (/\b(web|google|online)\b|(?:na|pela|on the|en la)\s+internet|fontes\s+(?:externas|oficiais)/i.test(message)) return true;
+  if (isLatestBlogQuery(message)) return false;
   if (/\b(blog|portobello|museuvr)\b|aula\s*360|(?:meu|minha|seu|sua|my|your|mi|tu)\s+(?:projeto|trajet[oó]ria|cargo|curr[ií]culo|project|career)/i.test(message)) return false;
   return true;
 }
 
-export class InvalidChatAnswer extends Error { constructor() { super("invalid_chat_answer"); } }
-function fail(): never { throw new InvalidChatAnswer(); }
+export class InvalidChatAnswer extends Error {
+  constructor(public readonly code = "invalid_answer") { super("invalid_chat_answer"); }
+}
+function fail(code: string): never { throw new InvalidChatAnswer(code); }
 const textUrls = (text: string) => [...text.matchAll(/(?:https?:\/\/|mailto:)[^\s<>"`]+/g)].map(m => m[0].replace(/[.,;!)]+$/, ""));
 
 // Negrito editorial não altera o conteúdo; números e pontuação continuam literais.
 export const plainEvidenceText = (text: string): string => text.replace(/\*\*([^*\n]+)\*\*/g, "$1").replace(/\s+/g, " ").trim();
+
+export function buildEvidenceQuotes(sources: readonly EvidenceSource[]): { id: string; sourceId: string; quote: string }[] {
+  const evidence = sources.flatMap(source => source.text.split(/\n+/).flatMap(paragraph => {
+    const fragments: string[] = [];
+    for (let sentence of plainEvidenceText(paragraph).split(/(?<=[.!?])\s+/)) {
+      while (sentence.length > 1000) {
+        const space = sentence.lastIndexOf(" ", 1000);
+        const end = space > 0 ? space : 1000;
+        fragments.push(sentence.slice(0, end));
+        sentence = sentence.slice(end).trimStart();
+      }
+      if (sentence) fragments.push(sentence);
+    }
+    return fragments.map(quote => ({ sourceId: source.id, quote }));
+  }));
+  return evidence.map((entry, i) => ({ ...entry, id: `e${i}` }));
+}
 const unsupportedAbsence = /\b(?:não (?:existe[m]?|houve)|nunca (?:houve|existiu)|there (?:is|are) no|no (?:existe|hubo))\s+(?:(?:um|uma|nenhum|nenhuma|qualquer|a|an|un|una|ning[uú]n|ninguna|commercial|comercial|official|oficial)\s+){0,3}(?:contrac?t\w*|implanta[cç][aã]o|implementation|despliegue)\b/i;
 const withoutUrls = (text: string) => text.replace(/https?:\/\/[^\s]+/g, "");
 
 export function parseGroundedAnswer(raw: string, finishReason: string | undefined, sources: readonly EvidenceSource[], webUrls: readonly string[] = []): { text: string; actions: ChatAction[]; sources: ChatSource[] } {
-  if (finishReason !== "STOP") fail();
+  if (finishReason !== "STOP") fail("finish_reason");
   let parsed: unknown;
-  try { parsed = JSON.parse(raw); } catch { fail(); }
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) fail();
+  try { parsed = JSON.parse(raw); } catch { fail("invalid_json"); }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) fail("invalid_shape");
   const value = parsed as Record<string, unknown>;
-  if (typeof value.text !== "string" || !value.text.trim() || value.text.length > MAX_ANSWER_CHARS || !Array.isArray(value.actions) || value.actions.length > 3 || !Array.isArray(value.references) || value.references.length > 6) fail();
+  if (typeof value.text !== "string" || !value.text.trim() || value.text.length > MAX_ANSWER_CHARS || !Array.isArray(value.actions) || value.actions.length > 3 || !Array.isArray(value.references) || value.references.length > 6) fail("invalid_shape");
   const allowedUrls = new Set([...CHAT_URLS, ...webUrls, ...sources.flatMap(s => [s.url, ...textUrls(s.text)])]);
-  if (textUrls(value.text).some(url => !allowedUrls.has(url))) fail();
+  if (textUrls(value.text).some(url => !allowedUrls.has(url))) fail("unsupported_url");
   const cited = new Map<string, ChatSource>();
   const quotes: string[] = [];
-  for (const ref of value.references) {
-    if (!ref || typeof ref !== "object" || typeof ref.sourceId !== "string" || typeof ref.quote !== "string" || !ref.quote.trim() || ref.quote.length > 1000) fail();
+  const evidence = buildEvidenceQuotes(sources);
+  for (const reference of value.references) {
+    let ref = reference;
+    if (reference && typeof reference === "object" && "evidenceId" in reference) {
+      ref = evidence.find(entry => entry.id === reference.evidenceId);
+      if (!ref) fail("unknown_evidence");
+    }
+    if (!ref || typeof ref !== "object" || typeof ref.sourceId !== "string" || typeof ref.quote !== "string" || !ref.quote.trim() || ref.quote.length > 1000) fail("invalid_reference");
     const source = sources.find(s => s.id === ref.sourceId);
-    if (!source || !plainEvidenceText(source.text).includes(plainEvidenceText(ref.quote))) fail();
+    if (!source) fail("unknown_source");
+    if (!plainEvidenceText(source.text).includes(plainEvidenceText(ref.quote))) fail("quote_mismatch");
     quotes.push(plainEvidenceText(ref.quote));
     cited.set(source.id, { id: source.id, title: source.title, url: source.url });
   }
-  if (unsupportedAbsence.test(value.text) && !quotes.some(quote => unsupportedAbsence.test(quote))) fail();
+  if (unsupportedAbsence.test(value.text) && !quotes.some(quote => unsupportedAbsence.test(quote))) fail("unsupported_absence");
+  const normalized = value.text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  if (cited.has("chat:runtime") && /\b(?:automat\w*|automacao)\b/.test(normalized)) {
+    const uncertainty = /\b(?:nao|not|cannot|can't|sin|sem|no)\b[^.!?]{0,180}\b(?:confirm\w*|verif\w*|garanti\w*|guarante\w*|certeza)\b/.test(normalized);
+    const firstStatement = normalized.trim().split(/[.!?;]/)[0];
+    const categoricalAutomation = /^(?:sim|yes|si)\b/.test(firstStatement) && /\b(?:automat\w*|automacao)\b/.test(firstStatement) && !/\b(?:nao|not|cannot|can't|no)\b/.test(firstStatement);
+    if (!uncertainty || categoricalAutomation) fail("unconfirmed_automation");
+  }
   if (cited.size && !webUrls.length) {
     const supportedYears = new Set(withoutUrls(quotes.join(" ")).match(/\b(?:19|20)\d{2}\b/g) ?? []);
-    if ((withoutUrls(value.text).match(/\b(?:19|20)\d{2}\b/g) ?? []).some(year => !supportedYears.has(year))) fail();
+    if ((withoutUrls(value.text).match(/\b(?:19|20)\d{2}\b/g) ?? []).some(year => !supportedYears.has(year))) fail("unsupported_year");
   }
   const actions = validateChatActions(value.actions).filter(action => {
     if (action.type === "scroll") return CHAT_SECTION_IDS.has(action.section!);

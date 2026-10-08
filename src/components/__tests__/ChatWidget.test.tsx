@@ -9,6 +9,15 @@ vi.mock("../../lib/gemini-live", () => ({ GeminiLiveChat: class {
 } }));
 import ChatWidget from "../ChatWidget";
 afterEach(() => { vi.unstubAllGlobals(); state.callbacks = []; });
+it("mostra a mensagem útil do servidor quando a resposta é indisponível", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 502, json: async () => ({ error: "Não consegui responder com segurança agora. Tente novamente em instantes." }) }));
+  Element.prototype.scrollIntoView = vi.fn();
+  render(<ChatWidget />);
+  act(() => window.dispatchEvent(new Event("open-chat")));
+  fireEvent.change(screen.getByPlaceholderText("chat.placeholder"), { target: { value: "Último post?" } });
+  fireEvent.keyDown(screen.getByPlaceholderText("chat.placeholder"), { key: "Enter" });
+  await waitFor(() => expect(screen.getByText("Não consegui responder com segurança agora. Tente novamente em instantes.")).toBeInTheDocument());
+});
 it("nova sessão de voz cria outro balão e ignora callbacks da sessão anterior", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: "test", systemPrompt: "prompt" }) }));
   Element.prototype.scrollIntoView = vi.fn();

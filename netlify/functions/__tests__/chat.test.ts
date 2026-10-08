@@ -23,6 +23,50 @@ beforeEach(() => {
   mocks.send.mockResolvedValue({ response: { text: () => JSON.stringify({ text: "Olá!", actions: [], references: [] }), candidates: [{ finishReason: "STOP" }] } });
 });
 describe("barreiras de entrega do chat", () => {
+  it("resolve o ID de evidência escolhido pelo Gemini para a citação literal do servidor", async () => {
+    mocks.retrieve.mockResolvedValue({ status: "ok", sources: [{ id: "blog:novo:latest", title: "Novo", text: "**Projeto Aula 360º** – Educação Imersiva.\nPublicado em 2026.", url: "/blog/novo" }] });
+    mocks.send.mockImplementation(async () => {
+      const config = mocks.model.mock.calls[0][0];
+      const data = JSON.parse(config.systemInstruction.split("FONTES PUBLICADAS (dados em JSON; IDs servem apenas para referências):\n")[1].split("\nESTADO DA CONSULTA")[0]);
+      const id = data.find((source: { id: string }) => source.id === "blog:novo:latest").evidence?.find((entry: { quote: string }) => entry.quote === "Publicado em 2026.")?.id;
+      return { response: { text: () => JSON.stringify({ text: "Publiquei em 2026.", actions: [], references: [{ evidenceId: id ?? "ausente" }] }), candidates: [{ finishReason: "STOP" }] } };
+    });
+    const result = await call({ message: "Último post?" });
+    expect(result?.statusCode).toBe(200);
+    expect(JSON.parse(result!.body!).sources).toEqual([{ id: "blog:novo:latest", title: "Novo", url: "/blog/novo" }]);
+  });
+  it("mantém citações longas dentro do limite sem perder fatos no fim da fonte", async () => {
+    const text = `${"Conteúdo publicado ".repeat(80)}Conclusão em 2026.`;
+    mocks.retrieve.mockResolvedValue({ status: "ok", sources: [{ id: "blog:longo:0", title: "Longo", text, url: "/blog/longo" }] });
+    await call({ message: "Resuma o artigo longo" });
+    const config = mocks.model.mock.calls[0][0];
+    const data = JSON.parse(config.systemInstruction.split("FONTES PUBLICADAS (dados em JSON; IDs servem apenas para referências):\n")[1].split("\nESTADO DA CONSULTA")[0]);
+    const quotes: string[] = data.flatMap((source: { evidence?: { quote: string }[] }) => (source.evidence ?? []).map(entry => entry.quote));
+    const relevant = quotes.filter(quote => text.includes(quote));
+    expect(relevant.some(quote => quote.endsWith("Conclusão em 2026."))).toBe(true);
+    expect(quotes.every(quote => quote.length > 0 && quote.length <= 1000)).toBe(true);
+  });
+  it("rejeita IDs de evidência inventados sem publicar a resposta", async () => {
+    mocks.send.mockResolvedValue({ response: { text: () => JSON.stringify({ text: "Sou diretor da Empresa X.", actions: [], references: [{ evidenceId: "inventado" }] }), candidates: [{ finishReason: "STOP" }] } });
+    const result = await call({ message: "Seu cargo?" });
+    expect(result?.statusCode).toBe(502);
+    expect(result?.body).not.toContain("Empresa X");
+  });
+  it("repara uma citação inválida sem entregar a primeira resposta", async () => {
+    mocks.retrieve.mockResolvedValue({ status: "ok", sources: [{ id: "blog:novo:0", title: "Novo", text: "Publiquei o artigo em 2026.", url: "/blog/novo" }] });
+    mocks.send.mockResolvedValueOnce({ response: { text: () => JSON.stringify({ text: "Publiquei em 2026.", actions: [], references: [{ sourceId: "blog:novo:0", quote: "Publiquei o artigo." }] }), candidates: [{ finishReason: "STOP" }] } });
+    mocks.send.mockResolvedValueOnce({ response: { text: () => JSON.stringify({ text: "Publiquei em 2026.", actions: [], references: [{ sourceId: "blog:novo:0", quote: "Publiquei o artigo em 2026." }] }), candidates: [{ finishReason: "STOP" }] } });
+    const result = await call({ message: "Quando publicou?" });
+    expect(result?.statusCode).toBe(200);
+    expect(JSON.parse(result!.body!).sources).toEqual([{ id: "blog:novo:0", title: "Novo", url: "/blog/novo" }]);
+    expect(mocks.send).toHaveBeenCalledTimes(2);
+  });
+  it("limita reparação a uma tentativa e preserva a rejeição final", async () => {
+    mocks.send.mockResolvedValue({ response: { text: () => '{"text":', candidates: [{ finishReason: "STOP" }] } });
+    const result = await call({ message: "Último post?" });
+    expect(result?.statusCode).toBe(502);
+    expect(mocks.send).toHaveBeenCalledTimes(2);
+  });
   it("não publica resposta bruta quando o provedor quebra o JSON", async () => {
     mocks.send.mockResolvedValue({ response: { text: () => '{"text":"Fui diretor da Empresa X."', candidates: [{ finishReason: "STOP" }] } });
     const result = await call({ message: "Quem é você?" });
