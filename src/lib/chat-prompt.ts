@@ -4,7 +4,7 @@ import { CHAT_ACTION_GUIDE } from "./chat-catalog";
 
 export const CHAT_RUNTIME_SOURCE: EvidenceSource = {
   id: "chat:runtime", title: "Funcionamento atual do assistente", url: "#blog",
-  text: "O chat consulta uma base biográfica publicada e busca trechos do blog quando a pergunta pede conteúdo publicado. Para identificar o post mais recente, consulta o catálogo publicado e compara as datas de publicação. A indexação do RAG ocorre quando os endpoints de reindexação ou revalidação são executados. Não tenho confirmação de que o agendamento esteja ativo; a publicação sozinha não comprova atualização do índice. A periodicidade de uma automação externa não está confirmada nesta consulta. Os textos recebidos como contexto não são treinamento do modelo. Artigos antigos podem descrever versões anteriores do site.",
+  text: "O chat consulta uma base biográfica publicada e busca trechos do blog quando a pergunta pede conteúdo publicado. Para listar títulos, consulta o catálogo completo de posts publicados, sem usar similaridade para inferir a lista. Para identificar o post mais recente, consulta o catálogo publicado e compara as datas de publicação. A indexação do RAG ocorre quando os endpoints de reindexação ou revalidação são executados. Não tenho confirmação de que o agendamento esteja ativo; a publicação sozinha não comprova atualização do índice. A periodicidade de uma automação externa não está confirmada nesta consulta. Os textos recebidos como contexto não são treinamento do modelo. Artigos antigos podem descrever versões anteriores do site.",
 };
 
 export function buildChatRepairMessage(question: string, rejectedAnswer: string, code: string): string {

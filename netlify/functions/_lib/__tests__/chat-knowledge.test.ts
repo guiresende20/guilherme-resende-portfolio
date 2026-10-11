@@ -6,6 +6,8 @@ vi.mock("../drive", () => ({ listFolder: blog.list }));
 vi.mock("../blog-folders", () => ({ resolveBlogFolders: async () => ({ rootId: "blog" }) }));
 vi.mock("../blog-source", () => ({ isBlogPostSource: () => true, fetchAndParse: blog.parse }));
 import { retrieveChatKnowledge } from "../chat-knowledge";
+import { readCatalog } from "../catalog-reader";
+import pt from "../../../../src/locales/pt.json";
 afterEach(() => { vi.useRealTimers(); retrieve.mockReset(); blog.list.mockReset(); blog.parse.mockReset(); });
 it("encerra a espera com timeout e aborta a recuperação pendente", async () => {
   vi.useFakeTimers();
@@ -19,6 +21,55 @@ it("encerra a espera com timeout e aborta a recuperação pendente", async () =>
 const post = (slug: string, date: string, draft = false, featured = false) => ({
   meta: { slug, title: slug, date, draft, featured, lang: "pt", tags: [], readingTimeMin: 1 },
   body: `Conteúdo de ${slug}.\n\n[image1]: <data:image/jpeg;base64,/9j/AAAA>`,
+});
+it.each(["lista os meus posts e os titulos deles", "Liste todos os posts do seu blog", "Quais são seus artigos?", "List your blog posts", "Lista tus artículos"])("consulta o catálogo completo para listar títulos: %s", async query => {
+  retrieve.mockResolvedValue({ status: "no_results", sources: [] });
+  blog.list.mockResolvedValue(Array.from({ length: 9 }, (_, i) => ({ id: String(i) })));
+  blog.parse.mockImplementation(async (file: { id: string }) => post(`artigo-${file.id}`, `2026-07-${String(Number(file.id) + 10).padStart(2, "0")}`, file.id === "8", file.id === "0"));
+  const result = await retrieveChatKnowledge(query);
+  expect(result.status).toBe("ok");
+  expect(result.sources.map(source => source.title)).toEqual(["artigo-7", "artigo-6", "artigo-5", "artigo-4", "artigo-3", "artigo-2", "artigo-1", "artigo-0"]);
+});
+it("não apresenta um catálogo parcial quando um arquivo falha", async () => {
+  retrieve.mockResolvedValue({ status: "ok", sources: [] });
+  blog.list.mockResolvedValue([{ id: "a" }, { id: "b" }]);
+  blog.parse.mockImplementation(async (file: { id: string }) => { if (file.id === "b") throw new Error("Drive down"); return post("a", "2026-05-23"); });
+  expect(await retrieveChatKnowledge("lista seus posts")).toEqual({ status: "error", sources: [] });
+});
+it("entrega todos os metadados publicados à consulta estruturada, excluindo rascunhos", async () => {
+  blog.list.mockResolvedValue([{ id: "a" }, { id: "b" }, { id: "draft" }]);
+  blog.parse.mockImplementation(async (file: { id: string }) => ({ ...post(file.id, "2026-06-01", file.id === "draft"), meta: { ...post(file.id, "2026-06-01", file.id === "draft").meta, tags: ["IA"], excerpt: "Resumo de arquitetura" } }));
+  const result = await retrieveChatKnowledge("e quantos são?", 5000, { collection: "blog", operation: "count", order: "newest", locale: "pt" });
+  expect(result.catalog).toMatchObject({ collection: "blog", complete: true });
+  expect(result.catalog?.records).toHaveLength(2);
+  expect(result.catalog?.records[0]).toMatchObject({ date: "2026-06-01", tags: ["IA"], description: "Resumo de arquitetura" });
+  expect(retrieve).not.toHaveBeenCalled();
+});
+it("usa o inventário de projetos exibidos, sem completar datas inexistentes", async () => {
+  const result = await readCatalog("projects", new AbortController().signal);
+  expect(result.catalog?.records.map(record => record.title)).toEqual(pt.projects.items.map(project => project.title));
+  expect(result.catalog?.records.every(record => record.date === undefined)).toBe(true);
+  expect(result.catalog?.complete).toBe(true);
+});
+it("limita o inventário acadêmico aos artigos explicitamente documentados", async () => {
+  const result = await readCatalog("publications", new AbortController().signal);
+  expect(result.catalog?.complete).toBe(false);
+  expect(result.catalog?.records).toHaveLength(2);
+  expect(result.catalog?.records.map(record => record.title)).toEqual([
+    "MuseuVR: uma aplicação em realidade virtual e digitalização tridimensional voltada ao patrimônio cultural",
+    "Projeto Aula 360º: design e educação",
+  ]);
+});
+it.each(["Liste os principais pontos do artigo Da rancheta ao prompt", "Liste os argumentos dos seus posts sobre IA", "List the main points in your blog post"])("preserva pedidos de conteúdo em vez de listar títulos: %s", async query => {
+  const result = { status: "ok", sources: [{ id: "blog:conteudo:0", title: "Conteúdo", text: "Argumentos publicados.", url: "/blog/conteudo" }] };
+  retrieve.mockResolvedValue(result);
+  expect(await retrieveChatKnowledge(query)).toEqual(result);
+});
+it("respeita a decisão do planner de buscar conteúdo mesmo quando a heurística antiga reconhece catálogo", async () => {
+  const result = { status: "ok", sources: [{ id: "blog:conteudo:0", title: "Conteúdo", text: "Tecnologias utilizadas no artigo.", url: "/blog/conteudo" }] };
+  retrieve.mockResolvedValue(result);
+  expect(await retrieveChatKnowledge("Liste as tecnologias dos posts sobre IA", 5000, undefined, "content")).toEqual(result);
+  expect(blog.list).not.toHaveBeenCalled();
 });
 it.each(["me fale do seu ultimo post", "What is your latest blog post?", "Háblame de tu último artículo"])("seleciona pela data publicada: %s", async query => {
   retrieve.mockResolvedValue({ status: "no_results", sources: [] });

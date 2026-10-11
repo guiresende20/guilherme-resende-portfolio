@@ -21,6 +21,14 @@ describe("validateChatActions", () => {
       { type: "link", label: "LinkedIn", url: "https://www.linkedin.com/in/guilhermeresende/" },
     ]);
   });
+  it("permite abrir o catálogo do blog e seus posts sem aceitar outros caminhos relativos", () => {
+    expect(validateChatActions([
+      { type: "link", label: "Blog", url: "/blog" },
+      { type: "link", label: "Post", url: "/blog/post-publicado" },
+      { type: "link", label: "Outro caminho", url: "/admin" },
+      { type: "link", label: "Outro host", url: "//evil.example" },
+    ])).toEqual([{ type: "link", label: "Blog", url: "/blog" }, { type: "link", label: "Post", url: "/blog/post-publicado" }]);
+  });
 
   it("drops link with non-https protocol", () => {
     const result = validateChatActions([

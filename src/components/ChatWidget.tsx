@@ -322,6 +322,12 @@ export default function ChatWidget() {
           : err instanceof Error && err.message.toLowerCase().includes("quota")
           ? "Limite de uso atingido no momento. Entre em contato diretamente!"
           : "Ops, algo deu errado. Tente novamente em breve.";
+      // Keep the failed request as dialogue context. It is never factual evidence.
+      historyRef.current = [
+        ...historyRef.current,
+        { role: "user", parts: [{ text: text.slice(0, 2000) }] },
+        { role: "model", parts: [{ text: errText }] },
+      ];
       setMessages((prev) => [
         ...prev,
         {

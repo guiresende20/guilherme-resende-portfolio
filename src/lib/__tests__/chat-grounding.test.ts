@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { buildRetrievalQuery, normalizeHistory, parseGroundedAnswer, shouldSearchWeb } from "../chat-grounding";
+import { buildRetrievalQuery, normalizeHistory, parseGroundedAnswer, shouldSearchWeb, validateChatSources } from "../chat-grounding";
 import { PORTFOLIO_SOURCES } from "../portfolio-knowledge";
 
 const source = { id: "blog:aula:0", title: "Aula 360", text: "O protótipo foi apresentado em 2015.", url: "/blog/aula" };
 const answer = (overrides = {}) => JSON.stringify({ text: "O protótipo foi apresentado em 2015.", actions: [], references: [{ sourceId: source.id, quote: source.text }], ...overrides });
 
 describe("contexto e evidência do chat", () => {
+  it("preserva a fonte do catálogo público e recusa caminhos relativos não publicados", () => {
+    const catalog = { id: "catalog:blog:result", title: "Catálogo publicado", url: "/blog" };
+    expect(validateChatSources([catalog, { ...catalog, url: "/admin" }])).toEqual([catalog]);
+  });
   it.each(["Sim, a publicação alimenta automaticamente o RAG.", "Não. A publicação no blog não alimenta automaticamente o RAG.", "A atualização automática do RAG está ativa.", "A automação do índice está ativa."])("não transforma automação não confirmada em certeza: %s", text => {
     const runtime = { id: "chat:runtime", title: "Funcionamento atual", url: "#blog", text: "Não tenho confirmação de que o agendamento esteja ativo." };
     const raw = JSON.stringify({ text, actions: [], references: [{ sourceId: runtime.id, quote: runtime.text }] });
