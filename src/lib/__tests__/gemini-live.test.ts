@@ -44,4 +44,16 @@ describe("sessão Live e ferramenta de conhecimento", () => {
     expect(Socket.all[1].send.mock.calls.map(c => JSON.parse(c[0])).some(c => c.toolResponse)).toBe(false);
     live.stop();
   });
+  it("envia setup compatível com gemini-3.8-live", async () => {
+    vi.stubGlobal("WebSocket", Socket);
+    vi.stubGlobal("AudioContext", class { state = "closed"; close() {} });
+    const live = new GeminiLiveChat("test-token", { onStatusChange: vi.fn() }, "prompt");
+    await live.start();
+    Socket.all[0].onopen?.();
+    const { setup } = JSON.parse(Socket.all[0].send.mock.calls[0][0]);
+    expect(setup.model).toBe("models/gemini-3.8-live");
+    expect(setup.generationConfig.thinkingConfig).toBeUndefined();
+    expect(setup.tools[0].functionDeclarations[0].behavior).toBe("BLOCKING");
+    live.stop();
+  });
 });
