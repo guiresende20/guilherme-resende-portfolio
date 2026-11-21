@@ -15,7 +15,7 @@ const PROMPTS = [
   "Conta sobre o MuseuVR.",
   "Como posso entrar em contato com você?",
 ];
-const MODELS = ["gemini-2.5-flash", "gemini-3.1-flash-lite"];
+const MODELS = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite"];
 const RUNS = 2;
 
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -24,7 +24,7 @@ async function timed(modelId, prompt) {
   const model = genAI.getGenerativeModel({
     model: modelId,
     systemInstruction: SYSTEM,
-    generationConfig: { temperature: 0.5, topP: 0.9, maxOutputTokens: 1500, responseMimeType: "application/json" },
+    generationConfig: { maxOutputTokens: 1500, responseMimeType: "application/json" },
   });
   const t0 = performance.now();
   const result = await model.generateContent(prompt);

@@ -116,7 +116,7 @@ async function actionConsolidate(supabaseUrl: string, supabaseKey: string): Prom
   if (!apiKey) throw new Error("GEMINI_API_KEY missing");
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-3.1-flash-lite",
+    model: "gemini-3.5-flash-lite",
     generationConfig: {
       maxOutputTokens: 1200,
       responseMimeType: "application/json",

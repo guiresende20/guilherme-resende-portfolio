@@ -15,13 +15,45 @@ const TTS_RATE_LIMITS = [
 
 // TTS é caro e lento em textos longos; limita o que é falado.
 const MAX_TTS_CHARS = 1500;
-const TTS_MODEL = "gemini-2.5-flash-preview-tts";
+const TTS_MODEL = "gemini-3.8-flash-tts";
 const TTS_VOICE = "Puck";
 
 // extrai a taxa de amostragem do mime (ex.: "audio/L16;rate=24000"); default 24k
 function sampleRateFromMime(mime: string | undefined): number {
   const m = /rate=(\d+)/.exec(mime || "");
   return m ? parseInt(m[1], 10) : 24000;
+}
+
+// gemini-3.8-flash-tts devolve WAV (com chunks extras após "data"); o deck
+// espera PCM 16-bit mono cru. Extrai só o chunk "data" e a taxa do "fmt ".
+// Modelos que já mandam audio/L16 passam direto.
+export function normalizeTtsAudio(
+  audioBase64: string,
+  mime: string | undefined,
+): { audioBase64: string; sampleRate: number } | null {
+  if (!/wav/i.test(mime || "")) return { audioBase64, sampleRate: sampleRateFromMime(mime) };
+  const buf = Buffer.from(audioBase64, "base64");
+  if (buf.length < 12 || buf.toString("ascii", 0, 4) !== "RIFF" || buf.toString("ascii", 8, 12) !== "WAVE") return null;
+  let sampleRate = 0;
+  for (let off = 12; off + 8 <= buf.length; ) {
+    const id = buf.toString("ascii", off, off + 4);
+    const size = buf.readUInt32LE(off + 4);
+    const start = off + 8;
+    if (start + size > buf.length) return null;
+    if (id === "fmt ") {
+      if (size < 16) return null;
+      const format = buf.readUInt16LE(start);
+      const channels = buf.readUInt16LE(start + 2);
+      const bits = buf.readUInt16LE(start + 14);
+      if (format !== 1 || channels !== 1 || bits !== 16) return null;
+      sampleRate = buf.readUInt32LE(start + 4);
+    } else if (id === "data") {
+      if (!sampleRate) return null;
+      return { audioBase64: buf.subarray(start, start + size).toString("base64"), sampleRate };
+    }
+    off = start + size + (size % 2);
+  }
+  return null;
 }
 
 const handler: Handler = async (event: HandlerEvent) => {
@@ -107,14 +139,13 @@ const handler: Handler = async (event: HandlerEvent) => {
       return { statusCode: 502, headers, body: JSON.stringify({ error: "Sem áudio na resposta" }) };
     }
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({
-        audioBase64,
-        sampleRate: sampleRateFromMime(part?.inlineData?.mimeType),
-      }),
-    };
+    const audio = normalizeTtsAudio(audioBase64, part?.inlineData?.mimeType);
+    if (!audio) {
+      console.error("deck-tts: formato de áudio não suportado", part?.inlineData?.mimeType);
+      return { statusCode: 502, headers, body: JSON.stringify({ error: "Formato de áudio não suportado" }) };
+    }
+
+    return { statusCode: 200, headers, body: JSON.stringify(audio) };
   } catch (error: unknown) {
     console.error("deck-tts error:", error);
     return { statusCode: 500, headers, body: JSON.stringify({ error: "Erro interno" }) };

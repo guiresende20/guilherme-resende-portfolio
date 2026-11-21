@@ -109,7 +109,7 @@ const handler: Handler = async (event: HandlerEvent) => {
       if (!apiKey) return { statusCode: 503, headers, body: JSON.stringify({ error: "Chat temporariamente indisponível" }) };
       const sources = [...PORTFOLIO_SOURCES, CHAT_RUNTIME_SOURCE, ...knowledge.sources];
       const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-        model: "gemini-3.1-flash-lite",
+        model: "gemini-3.5-flash-lite",
         systemInstruction: search ? buildWebSearchPrompt() : buildPortfolioPrompt("text", knowledge),
         ...(search ? { tools: [{ googleSearch: {} } as unknown as Tool] } : {}),
         generationConfig: { maxOutputTokens: 3500, ...(!search ? { responseMimeType: "application/json", responseSchema: buildResponseSchema(sources) } : {}) },
