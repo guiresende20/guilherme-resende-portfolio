@@ -54,10 +54,10 @@ export class GeminiLiveChat {
         // Enviar setup inicial
         const setup = {
           setup: {
-            model: "models/gemini-3.1-flash-live-preview",
+            // gemini-3.8-live rejeita thinkingConfig (close 1007): raciocínio é embutido.
+            model: "models/gemini-3.8-live",
             generationConfig: {
               responseModalities: ["AUDIO"],
-              thinkingConfig: { thinkingLevel: "low" },
               speechConfig: {
                 voiceConfig: {
                   prebuiltVoiceConfig: {

@@ -58,7 +58,7 @@ export class AerolitoLiveChat {
         this.ws.onopen = () => {
           const setup = {
             setup: {
-              model: "models/gemini-3.1-flash-live-preview",
+              model: "models/gemini-3.8-live",
               generationConfig: {
                 responseModalities: ["AUDIO"],
                 speechConfig: {
