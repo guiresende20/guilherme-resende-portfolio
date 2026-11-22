@@ -694,7 +694,7 @@
     return m ? m[1] : "";
   }
 
-  // o iframe nasce sem src (só data-src): syncVideoEmbeds monta o player só no
+  // o iframe nasce sem src (só data-src): syncEmbeds monta o player só no
   // slide atual e no próximo. Com todos montados de uma vez, os 10+ players do
   // YouTube baixavam juntos na abertura e seguiam rodando escondidos, disputando
   // rede/CPU com o vídeo em reprodução.
@@ -712,17 +712,29 @@
       "</div>";
   }
 
-  // monta o player do slide atual (e pré-carrega o do próximo); desmonta os
-  // demais — o que também para o áudio de um vídeo ao sair do slide.
-  function syncVideoEmbeds(cur) {
+  // monta o player/mídia do slide atual (e pré-carrega o do próximo); desmonta
+  // os demais — o que também para o áudio de um vídeo ao sair do slide.
+  // Vale p/ os layouts vídeo (iframe do YouTube) e media (<video>/<img>).
+  function syncEmbeds(cur) {
     els.forEach(function (el, n) {
-      var f = el.querySelector && el.querySelector("iframe.video-embed[data-src]");
+      var f = el.querySelector && el.querySelector(".video-embed[data-src], .media-embed[data-src]");
       if (!f) return;
       var want = f.getAttribute("data-src");
+      var src = f.getAttribute("src");
       if (n === cur || n === cur + 1) {
-        if (f.getAttribute("src") !== want) f.setAttribute("src", want);
-      } else if (f.getAttribute("src") && f.getAttribute("src") !== "about:blank") {
-        f.setAttribute("src", "about:blank");
+        if (src !== want) f.setAttribute("src", want);
+        // MP4: o próximo só pré-carrega; toca ao virar o slide atual
+        if (f.tagName === "VIDEO") {
+          if (n === cur) { var pr = f.play(); if (pr && pr.catch) pr.catch(function () {}); }
+          else { f.preload = "auto"; f.pause(); }
+        }
+      } else if (src && src !== "about:blank") {
+        if (f.tagName === "IFRAME") {
+          f.setAttribute("src", "about:blank");
+        } else {
+          f.removeAttribute("src");
+          if (f.tagName === "VIDEO") f.load();   // libera o download/decoder
+        }
       }
     });
   }
@@ -765,15 +777,18 @@
     return /\.(mp4|m4v|webm|mov)(\?|#|$)/i.test(String(url || "")) ? "video" : "image";
   }
 
+  // como no layout vídeo, a mídia nasce só com data-src: syncEmbeds a carrega
+  // no slide atual/próximo e a descarrega nos demais (senão todos os MP4/GIFs
+  // baixam na abertura e ficam tocando em loop escondidos).
   function mediaEmbedHTML(media) {
     var url = media && media.url;
     if (url) {
       var kind = (media && media.kind) || mediaKind(url);
       if (kind === "video") {
-        return '<video class="media-embed" src="' + esc(url) + '" ' +
-          'autoplay loop muted playsinline></video>';
+        return '<video class="media-embed" data-src="' + esc(url) + '" ' +
+          'loop muted playsinline preload="none"></video>';
       }
-      return '<img class="media-embed" src="' + esc(url) + '" alt="">';
+      return '<img class="media-embed" data-src="' + esc(url) + '" alt="" decoding="async">';
     }
     return '<div class="media-empty">' +
       (fullAccess ? "Envie um GIF/MP4 ou cole uma URL no modo de edição." : "Mídia não configurada.") +
@@ -1167,9 +1182,9 @@
     document.body.classList.toggle("on-gradient", !!slides[i] && slides[i].layout === "background1");
     // shader: mostra o fundo WebGL verde (#shader-bg) na capa/fecho
     document.body.classList.toggle("on-shader", !!slides[i] && slides[i].layout === "shader");
-    // vídeo: o slide é opaco, então o starfield atrás para de desenhar (poupa GPU p/ o player)
-    document.body.classList.toggle("on-video", !!slides[i] && slides[i].layout === "video");
-    syncVideoEmbeds(i);
+    // vídeo/media: o slide é opaco, então o starfield atrás para de desenhar (poupa GPU p/ o player)
+    document.body.classList.toggle("on-video", !!slides[i] && (slides[i].layout === "video" || slides[i].layout === "media"));
+    syncEmbeds(i);
     if (!fromHash) {
       var slug = slugForSlide(slides[i], i);
       try { history.replaceState(null, "", "#" + slug); } catch (e) {}
@@ -2040,7 +2055,7 @@
   function updateVideoPreview(el, s) {
     var frame = el.querySelector(".video-frame");
     if (frame) frame.innerHTML = videoEmbedHTML(pendingVideo, s.title);
-    syncVideoEmbeds(index);
+    syncEmbeds(index);
   }
 
   /* ---------- editor de media (layout media) ---------- */
@@ -2097,6 +2112,7 @@
   function updateMediaPreview(el) {
     var frame = el.querySelector(".media-frame");
     if (frame) frame.innerHTML = mediaEmbedHTML(pendingMedia);
+    syncEmbeds(index);
   }
 
   // lê o arquivo como base64 (sem canvas: preserva o GIF e não quebra o MP4),

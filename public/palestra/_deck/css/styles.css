@@ -936,7 +936,8 @@ button.chip { cursor: pointer; font: inherit; }
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
 }
 /* o fade-up deixaria um transform residual no ancestral do player */
-.slide.is-current.slide--video .panel > .video-frame { animation-name: video-fade-in; }
+.slide.is-current.slide--video .panel > .video-frame,
+.slide.is-current.slide--media .panel > .media-frame { animation-name: video-fade-in; }
 @keyframes video-fade-in { from { opacity: 0; } to { opacity: 1; } }
 .slide--video .video-embed {
   position: absolute; inset: 0;
@@ -1000,7 +1001,8 @@ button.chip { cursor: pointer; font: inherit; }
   background: #000;
   border: 6px solid #fff;
   border-radius: 4px;
-  overflow: hidden;
+  /* sem overflow:hidden (a mídia já cabe via max-width/height): recorte
+     arredondado força composição por máscara, como no layout vídeo */
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
   display: flex; align-items: center; justify-content: center;
 }
