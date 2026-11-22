@@ -694,18 +694,37 @@
     return m ? m[1] : "";
   }
 
+  // o iframe nasce sem src (só data-src): syncVideoEmbeds monta o player só no
+  // slide atual e no próximo. Com todos montados de uma vez, os 10+ players do
+  // YouTube baixavam juntos na abertura e seguiam rodando escondidos, disputando
+  // rede/CPU com o vídeo em reprodução.
   function videoEmbedHTML(video, title) {
     var vid = youtubeId(video);
     if (vid) {
       return '<iframe class="video-embed" ' +
-        'src="https://www.youtube.com/embed/' + esc(vid) + '?rel=0" ' +
+        'data-src="https://www.youtube.com/embed/' + esc(vid) + '?rel=0&playsinline=1" ' +
         'title="' + esc(title || "Vídeo") + '" ' +
         'allow="accelerometer; clipboard-write; encrypted-media; gyroscope; ' +
-        'picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>';
+        'picture-in-picture; web-share" allowfullscreen></iframe>';
     }
     return '<div class="video-empty">' +
       (fullAccess ? "Cole o link do YouTube no modo de edição." : "Vídeo não configurado.") +
       "</div>";
+  }
+
+  // monta o player do slide atual (e pré-carrega o do próximo); desmonta os
+  // demais — o que também para o áudio de um vídeo ao sair do slide.
+  function syncVideoEmbeds(cur) {
+    els.forEach(function (el, n) {
+      var f = el.querySelector && el.querySelector("iframe.video-embed[data-src]");
+      if (!f) return;
+      var want = f.getAttribute("data-src");
+      if (n === cur || n === cur + 1) {
+        if (f.getAttribute("src") !== want) f.setAttribute("src", want);
+      } else if (f.getAttribute("src") && f.getAttribute("src") !== "about:blank") {
+        f.setAttribute("src", "about:blank");
+      }
+    });
   }
 
   function buildVideoSlide(s, i) {
@@ -1148,6 +1167,9 @@
     document.body.classList.toggle("on-gradient", !!slides[i] && slides[i].layout === "background1");
     // shader: mostra o fundo WebGL verde (#shader-bg) na capa/fecho
     document.body.classList.toggle("on-shader", !!slides[i] && slides[i].layout === "shader");
+    // vídeo: o slide é opaco, então o starfield atrás para de desenhar (poupa GPU p/ o player)
+    document.body.classList.toggle("on-video", !!slides[i] && slides[i].layout === "video");
+    syncVideoEmbeds(i);
     if (!fromHash) {
       var slug = slugForSlide(slides[i], i);
       try { history.replaceState(null, "", "#" + slug); } catch (e) {}
@@ -2018,6 +2040,7 @@
   function updateVideoPreview(el, s) {
     var frame = el.querySelector(".video-frame");
     if (frame) frame.innerHTML = videoEmbedHTML(pendingVideo, s.title);
+    syncVideoEmbeds(index);
   }
 
   /* ---------- editor de media (layout media) ---------- */

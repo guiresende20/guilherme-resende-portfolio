@@ -102,6 +102,8 @@ body.on-gradient #index-gradient { opacity: 1; visibility: visible; }
   transition: opacity 0.6s var(--ease-ui), visibility 0.6s var(--ease-ui);
 }
 body.on-shader #starfield { opacity: 0; }
+/* vídeo: slide opaco — tira o starfield da composição p/ não competir com o player */
+body.on-video #starfield { opacity: 0; visibility: hidden; }
 body.on-shader #shader-bg { opacity: 1; visibility: visible; }
 
 /* ============================================================
@@ -929,9 +931,13 @@ button.chip { cursor: pointer; font: inherit; }
   border: 2px solid var(--border-strong, #fff);
   border-radius: var(--radius-base);
   background: #000;
-  overflow: hidden;
+  /* sem overflow:hidden: recortar o iframe com cantos arredondados força o
+     Chrome a compor o vídeo via máscara (mais caro que em tela cheia) */
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
 }
+/* o fade-up deixaria um transform residual no ancestral do player */
+.slide.is-current.slide--video .panel > .video-frame { animation-name: video-fade-in; }
+@keyframes video-fade-in { from { opacity: 0; } to { opacity: 1; } }
 .slide--video .video-embed {
   position: absolute; inset: 0;
   width: 100%; height: 100%;

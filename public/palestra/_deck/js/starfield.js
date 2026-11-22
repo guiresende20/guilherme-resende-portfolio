@@ -54,6 +54,11 @@
     }
 
     function draw(now) {
+      // slide de vídeo é opaco: não redesenha a tela inteira a cada frame atrás do player
+      if (!reduceMotion && document.body.classList.contains("on-video")) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
       ctx.clearRect(0, 0, vw(), vh());
       for (var i = 0; i < field.length; i++) {
         var s = field[i];
